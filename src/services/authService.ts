@@ -1,6 +1,5 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { firebaseAuth, firebaseFirestore } from './firebase';
 
 export interface UserData {
   uid: string;
