@@ -7,10 +7,12 @@ _Application mobile React Native avec Firebase pour la gestion intelligente du r
 
 EcoTri est une application mobile développée en React Native qui permet aux utilisateurs de :
 
-- Scanner des déchets pour identifier leur type
-- Localiser les centres de recyclage
-- Suivre leur impact environnemental
-- Obtenir des conseils de recyclage personnalisés
+- 🔐 **S'authentifier** avec un système de connexion/inscription complet
+- 📱 Scanner des déchets pour identifier leur type
+- 🗺️ Localiser les centres de recyclage
+- 📊 Suivre leur impact environnemental
+- 💡 Recevoir des conseils de recyclage personnalisés
+- 👤 Gérer leur profil utilisateur avec données persistantes
 
 ## 🚀 Statut du Projet
 
@@ -22,35 +24,35 @@ L'application compile et s'installe parfaitement sur Android avec tous les servi
 
 - **Frontend** : React Native 0.81.0
 - **Backend** : Firebase (Auth, Firestore, Storage)
+- **Authentification** : Firebase Authentication avec gestion d'état
+- **Base de Données** : Cloud Firestore pour les profils utilisateur
 - **Navigation** : Navigation personnalisée (sans dépendances externes)
 - **Langage** : TypeScript
 - **Plateforme** : Android (API 24+)
 - **Build** : Gradle 8.14.3
 
-## 📁 Architecture du Projet
+## 🏗️ Architecture du Projet
 
 ```
 EcoTri/
 ├── src/
-│   ├── components/
-│   │   ├── common/          # Composants réutilisables
-│   │   │   ├── Header.tsx   # En-tête des écrans
-│   │   │   ├── CustomButton.tsx # Bouton personnalisé
-│   │   │   └── index.ts
+│   ├── components/          # Composants réutilisables
+│   │   ├── common/          # Composants communs (Header, CustomButton)
 │   │   └── main/            # Composants principaux
-│   │       ├── AppContainer.tsx
-│   │       └── index.ts
 │   ├── navigation/          # Configuration de la navigation
 │   │   ├── RootNavigator.tsx # Navigation principale
 │   │   ├── MainNavigator.tsx # Navigation personnalisée par onglets
-│   │   ├── MainTabNavigator.tsx # Navigation React Navigation (archivé)
 │   │   ├── types.ts         # Types TypeScript
 │   │   └── index.ts
 │   ├── screens/             # Écrans de l'application
 │   │   ├── main/            # Écrans principaux
-│   │   │   ├── SplashScreen.tsx # Écran de démarrage
 │   │   │   ├── HomeScreen.tsx   # Écran d'accueil
 │   │   │   ├── ProfileScreen.tsx # Écran de profil
+│   │   │   └── SplashScreen.tsx # Écran de démarrage
+│   │   ├── auth/            # Écrans d'authentification
+│   │   │   ├── AuthScreen.tsx   # Gestion connexion/inscription
+│   │   │   ├── LoginScreen.tsx  # Écran de connexion
+│   │   │   ├── SignupScreen.tsx # Écran d'inscription
 │   │   │   └── index.ts
 │   │   └── recycling/       # Écrans de recyclage
 │   │       ├── ScanScreen.tsx    # Interface de scan des déchets
@@ -59,16 +61,12 @@ EcoTri/
 │   │       └── index.ts
 │   ├── services/            # Services Firebase
 │   │   ├── firebase.ts      # Configuration Firebase
-│   │   ├── authService.ts   # Service d'authentification
+│   │   ├── authService.ts   # Service d'authentification complet
 │   │   ├── firestoreService.ts # Service Firestore
 │   │   └── index.ts
-│   ├── styles/              # Styles et thème
-│   │   ├── colors.ts        # Palette de couleurs
-│   │   └── index.ts         # Styles globaux
-│   └── utils/               # Utilitaires
-├── android/                 # Configuration Android
-├── ios/                     # Configuration iOS
-└── App.tsx                  # Point d'entrée principal
+│   └── styles/              # Système de design
+│       ├── colors.ts        # Palette de couleurs
+│       └── index.ts
 ```
 
 ## 🔧 Configuration Firebase
@@ -121,6 +119,65 @@ EcoTri/
 - Catégories de conseils par type de matériau
 - Conseils rapides en format liste
 - Suivi de l'impact environnemental personnel
+
+## 🔐 Système d'Authentification Firebase
+
+### Architecture d'Authentification
+
+- **Firebase Auth** : Gestion des comptes utilisateur
+- **Cloud Firestore** : Stockage des profils et données utilisateur
+- **État Persistant** : Connexion maintenue entre les sessions
+- **Gestion d'Erreurs** : Messages d'erreur traduits et clairs
+
+### Fonctionnalités d'Authentification
+
+#### ✅ **Connexion (Login)**
+- Authentification par email/mot de passe
+- Validation des champs en temps réel
+- Gestion des erreurs Firebase (utilisateur non trouvé, mot de passe incorrect)
+- Bouton "Mot de passe oublié" avec réinitialisation par email
+
+#### ✅ **Inscription (Signup)**
+- Création de compte avec validation complète
+- Champs : Prénom, Nom, Email, Mot de passe, Confirmation
+- Validation du format email et force du mot de passe
+- Création automatique du profil dans Firestore
+
+#### ✅ **Gestion de Session**
+- Écoute automatique des changements d'état d'authentification
+- Persistance de la connexion après redémarrage de l'app
+- Déconnexion sécurisée avec nettoyage des données locales
+
+#### ✅ **Profil Utilisateur**
+- Stockage dans Firestore : `uid`, `email`, `firstName`, `lastName`, `createdAt`, `lastLoginAt`
+- Mise à jour automatique de la date de dernière connexion
+- Récupération des données utilisateur au redémarrage
+
+### Structure des Données Firestore
+
+```typescript
+// Collection: users
+// Document ID: uid (généré automatiquement par Firebase Auth)
+{
+  email: string,
+  firstName: string,
+  lastName: string,
+  createdAt: Timestamp,
+  lastLoginAt: Timestamp
+}
+```
+
+### Gestion des Erreurs Firebase
+
+| Code d'Erreur | Message Utilisateur | Description |
+|---------------|---------------------|-------------|
+| `auth/user-not-found` | "Aucun compte trouvé avec cet email" | Email inexistant |
+| `auth/wrong-password` | "Mot de passe incorrect" | Mauvais mot de passe |
+| `auth/invalid-email` | "Format d'email invalide" | Email mal formaté |
+| `auth/weak-password` | "Le mot de passe doit contenir au moins 6 caractères" | Mot de passe trop faible |
+| `auth/email-already-in-use` | "Cet email est déjà utilisé par un autre compte" | Email déjà pris |
+| `auth/too-many-requests` | "Trop de tentatives. Réessayez plus tard" | Limite de tentatives dépassée |
+| `auth/network-request-failed` | "Erreur de connexion réseau" | Problème de connexion |
 
 ## 🧭 Système de Navigation
 
@@ -251,6 +308,18 @@ override val isHermesEnabled: Boolean = true
 - Créé `MainNavigator` avec navigation native React
 - Navigation fluide entre les 4 onglets sans erreurs
 
+### 6. Authentification Firebase (Résolu ✅)
+
+**Problème** : Système d'authentification simulé sans persistance
+
+**Solution** : Intégration complète de Firebase Auth et Firestore
+
+- Implémentation de Firebase Authentication
+- Stockage des profils utilisateur dans Cloud Firestore
+- Gestion d'état d'authentification persistante
+- Gestion complète des erreurs avec messages traduits
+- Fonctionnalité de réinitialisation de mot de passe
+
 ## 📋 Historique de Développement
 
 ### Phase 1 : Configuration de Base ✅
@@ -286,6 +355,16 @@ override val isHermesEnabled: Boolean = true
 - [x] Implémentation de la navigation personnalisée
 - [x] Résolution des erreurs de navigation
 - [x] Interface utilisateur complète et fonctionnelle
+
+### Phase 6 : Authentification Firebase ✅
+
+- [x] Intégration de Firebase Authentication
+- [x] Création des écrans de connexion et inscription
+- [x] Implémentation du service d'authentification
+- [x] Stockage des profils utilisateur dans Firestore
+- [x] Gestion d'état d'authentification persistante
+- [x] Gestion complète des erreurs Firebase
+- [x] Fonctionnalité de réinitialisation de mot de passe
 
 ## 🚀 Installation et Démarrage
 
@@ -376,13 +455,17 @@ npm test
 - **SplashScreen animé** avec logo EcoTri
 - **Écrans de recyclage** avec interfaces complètes
 - **Composants réutilisables** (Header, CustomButton, etc.)
+- **Système d'authentification complet** avec Firebase
+- **Gestion des profils utilisateur** persistants
+- **Validation des formulaires** en temps réel
+- **Gestion d'erreurs** avec messages traduits
 
 ### 🚧 **En Développement**
 
 - **Scan réel** avec caméra et reconnaissance d'objets
 - **Géolocalisation** des centres de recyclage
 - **Base de données** des déchets et conseils
-- **Authentification** utilisateur
+- **Fonctionnalités avancées** d'authentification (OAuth, biométrie)
 
 ## 👥 Équipe
 
@@ -397,5 +480,5 @@ Ce projet est développé dans le cadre d'un Master 2 à YNOV.
 ---
 
 **Dernière mise à jour** : Décembre 2024  
-**Version** : 2.0.0  
-**Statut** : ✅ FONCTIONNEL AVEC NAVIGATION COMPLÈTE
+**Version** : 3.0.0  
+**Statut** : ✅ FONCTIONNEL AVEC AUTHENTIFICATION FIREBASE COMPLÈTE
