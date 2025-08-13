@@ -4,14 +4,11 @@ import MainNavigator from './MainNavigator';
 
 const RootNavigator = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Simulation du chargement initial
+    // Simulation du chargement des ressources
     const timer = setTimeout(() => {
       setIsLoading(false);
-      // Ici on pourrait vérifier l'état d'authentification
-      setIsAuthenticated(true);
     }, 3000);
 
     return () => clearTimeout(timer);

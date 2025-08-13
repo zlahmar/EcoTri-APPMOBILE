@@ -1,13 +1,12 @@
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { firebaseAuth, firebaseFirestore } from './firebase';
 
-export interface UserProfile {
+export interface UserData {
   uid: string;
   email: string;
-  displayName?: string;
-  level: number;
-  points: number;
-  totalWasteScanned: number;
-  recyclingRate: number;
+  firstName: string;
+  lastName: string;
   createdAt: Date;
   lastLoginAt: Date;
 }
@@ -15,80 +14,67 @@ export interface UserProfile {
 export interface AuthError {
   code: string;
   message: string;
+  userFriendlyMessage: string;
 }
 
 class AuthService {
-  // Inscription d'un nouvel utilisateur
-  async signUp(email: string, password: string, displayName?: string): Promise<UserProfile> {
+  // Écouter les changements d'état d'authentification
+  onAuthStateChanged(callback: (user: FirebaseAuthTypes.User | null) => void) {
+    return auth().onAuthStateChanged(callback);
+  }
+
+  // Obtenir l'utilisateur actuel
+  getCurrentUser(): FirebaseAuthTypes.User | null {
+    return auth().currentUser;
+  }
+
+  // Connexion avec email et mot de passe
+  async signInWithEmailAndPassword(email: string, password: string): Promise<UserData> {
     try {
-      const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
       
-      if (user) {
-        // Mise à jour du nom d'affichage
-        if (displayName) {
-          await user.updateProfile({ displayName });
-        }
-        
-        // Création du profil utilisateur dans Firestore
-        const userProfile: Omit<UserProfile, 'uid'> = {
-          email: user.email || email,
-          displayName: displayName || '',
-          level: 1,
-          points: 0,
-          totalWasteScanned: 0,
-          recyclingRate: 0,
-          createdAt: new Date(),
-          lastLoginAt: new Date(),
-        };
-        
-        await firebaseFirestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userProfile);
-        
-        return {
-          uid: user.uid,
-          ...userProfile,
-        };
-      }
+      // Mettre à jour la date de dernière connexion
+      await this.updateLastLogin(user.uid);
       
-      throw new Error('Erreur lors de la création du compte');
+      // Récupérer les données utilisateur depuis Firestore
+      const userData = await this.getUserData(user.uid);
+      
+      return userData;
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
   }
 
-  // Connexion d'un utilisateur
-  async signIn(email: string, password: string): Promise<UserProfile> {
+  // Inscription avec email et mot de passe
+  async createUserWithEmailAndPassword(
+    email: string, 
+    password: string, 
+    firstName: string, 
+    lastName: string
+  ): Promise<UserData> {
     try {
-      const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
       
-      if (user) {
-        // Mise à jour de la dernière connexion
-        await firebaseFirestore
-          .collection('users')
-          .doc(user.uid)
-          .update({ lastLoginAt: new Date() });
-        
-        // Récupération du profil utilisateur
-        const userDoc = await firebaseFirestore
-          .collection('users')
-          .doc(user.uid)
-          .get();
-        
-        if (userDoc.exists) {
-          return {
-            uid: user.uid,
-            ...userDoc.data(),
-          } as UserProfile;
-        }
-        
-        throw new Error('Profil utilisateur non trouvé');
-      }
+      // Créer le profil utilisateur dans Firestore
+      const userData: Omit<UserData, 'uid'> = {
+        email,
+        firstName,
+        lastName,
+        createdAt: new Date(),
+        lastLoginAt: new Date(),
+      };
       
-      throw new Error('Erreur lors de la connexion');
+      await firestore()
+        .collection('users')
+        .doc(user.uid)
+        .set(userData);
+      
+      return {
+        uid: user.uid,
+        ...userData,
+      };
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
@@ -97,93 +83,114 @@ class AuthService {
   // Déconnexion
   async signOut(): Promise<void> {
     try {
-      await firebaseAuth.signOut();
+      await auth().signOut();
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
+  }
+
+  // Récupérer les données utilisateur depuis Firestore
+  async getUserData(uid: string): Promise<UserData> {
+    try {
+      const userDoc = await firestore()
+        .collection('users')
+        .doc(uid)
+        .get();
+      
+      if (!userDoc.exists) {
+        throw new Error('Profil utilisateur non trouvé');
+      }
+      
+      const data = userDoc.data();
+      return {
+        uid,
+        email: data?.email || '',
+        firstName: data?.firstName || '',
+        lastName: data?.lastName || '',
+        createdAt: data?.createdAt?.toDate() || new Date(),
+        lastLoginAt: data?.lastLoginAt?.toDate() || new Date(),
+      };
+    } catch (error: any) {
+      throw new Error('Erreur lors de la récupération du profil: ' + error.message);
+    }
+  }
+
+  // Mettre à jour la date de dernière connexion
+  private async updateLastLogin(uid: string): Promise<void> {
+    try {
+      await firestore()
+        .collection('users')
+        .doc(uid)
+        .update({
+          lastLoginAt: firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (error) {
+      console.warn('Erreur lors de la mise à jour de la dernière connexion:', error);
+    }
+  }
+
+  // Gestion des erreurs Firebase avec messages utilisateur
+  private handleAuthError(error: any): AuthError {
+    let userFriendlyMessage = 'Une erreur est survenue';
+    
+    switch (error.code) {
+      case 'auth/user-not-found':
+        userFriendlyMessage = 'Aucun compte trouvé avec cet email';
+        break;
+      case 'auth/wrong-password':
+        userFriendlyMessage = 'Mot de passe incorrect';
+        break;
+      case 'auth/invalid-email':
+        userFriendlyMessage = 'Format d\'email invalide';
+        break;
+      case 'auth/weak-password':
+        userFriendlyMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+        break;
+      case 'auth/email-already-in-use':
+        userFriendlyMessage = 'Cet email est déjà utilisé par un autre compte';
+        break;
+      case 'auth/too-many-requests':
+        userFriendlyMessage = 'Trop de tentatives. Réessayez plus tard';
+        break;
+      case 'auth/network-request-failed':
+        userFriendlyMessage = 'Erreur de connexion réseau';
+        break;
+      default:
+        userFriendlyMessage = error.message || 'Une erreur inattendue est survenue';
+    }
+    
+    return {
+      code: error.code || 'unknown',
+      message: error.message || 'Unknown error',
+      userFriendlyMessage,
+    };
   }
 
   // Réinitialisation du mot de passe
   async resetPassword(email: string): Promise<void> {
     try {
-      await firebaseAuth.sendPasswordResetEmail(email);
+      await auth().sendPasswordResetEmail(email);
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
   }
 
-  // Mise à jour du profil utilisateur
-  async updateProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
-    try {
-      await firebaseFirestore
-        .collection('users')
-        .doc(uid)
-        .update(updates);
-    } catch (error: any) {
-      throw this.handleAuthError(error);
-    }
+  // Vérifier si l'email est vérifié
+  isEmailVerified(): boolean {
+    const user = auth().currentUser;
+    return user ? user.emailVerified : false;
   }
 
-  // Récupération du profil utilisateur actuel
-  async getCurrentUserProfile(): Promise<UserProfile | null> {
+  // Envoyer l'email de vérification
+  async sendEmailVerification(): Promise<void> {
     try {
-      const user = firebaseAuth.currentUser;
-      if (!user) return null;
-      
-      const userDoc = await firebaseFirestore
-        .collection('users')
-        .doc(user.uid)
-        .get();
-      
-      if (userDoc.exists) {
-        return {
-          uid: user.uid,
-          ...userDoc.data(),
-        } as UserProfile;
+      const user = auth().currentUser;
+      if (user) {
+        await user.sendEmailVerification();
       }
-      
-      return null;
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
-  }
-
-  // Écouteur de l'état d'authentification
-  onAuthStateChanged(callback: (user: any) => void) {
-    return firebaseAuth.onAuthStateChanged(callback);
-  }
-
-  // Gestion des erreurs d'authentification
-  private handleAuthError(error: any): AuthError {
-    let message = 'Une erreur est survenue';
-    
-    switch (error.code) {
-      case 'auth/user-not-found':
-        message = 'Aucun utilisateur trouvé avec cet email';
-        break;
-      case 'auth/wrong-password':
-        message = 'Mot de passe incorrect';
-        break;
-      case 'auth/email-already-in-use':
-        message = 'Cet email est déjà utilisé';
-        break;
-      case 'auth/weak-password':
-        message = 'Le mot de passe est trop faible';
-        break;
-      case 'auth/invalid-email':
-        message = 'Email invalide';
-        break;
-      case 'auth/too-many-requests':
-        message = 'Trop de tentatives. Réessayez plus tard';
-        break;
-      default:
-        message = error.message || message;
-    }
-    
-    return {
-      code: error.code || 'unknown',
-      message,
-    };
   }
 }
 
