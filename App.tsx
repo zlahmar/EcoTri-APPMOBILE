@@ -1,37 +1,23 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import SplashScreen from './src/screens/main/SplashScreen';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const handleFinish = () => {
+    setIsLoading(false);
+  };
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+  if (isLoading) {
+    return <SplashScreen onFinish={handleFinish} />;
+  }
 
   return (
     <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+      <Text style={styles.title}>🌱 EcoTri</Text>
+      <Text style={styles.subtitle}>Application de Recyclage Intelligent</Text>
+      <Text style={styles.status}>✅ SplashScreen fonctionne !</Text>
     </View>
   );
 }
@@ -39,7 +25,28 @@ function AppContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#7CB593',
+    padding: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  status: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    backgroundColor: '#28A745',
+    padding: 10,
+    borderRadius: 8,
   },
 });
-
-export default App;

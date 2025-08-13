@@ -1,4 +1,4 @@
-package com.ecotri
+package com.ecotri.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

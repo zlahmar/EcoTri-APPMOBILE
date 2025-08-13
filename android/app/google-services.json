@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "103696690890",
+    "project_id": "recycle-app-9f5cd",
+    "storage_bucket": "recycle-app-9f5cd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103696690890:android:cf6f7b1704277981394e33",
+        "android_client_info": {
+          "package_name": "com.ecotri.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "103696690890-p1069e3v6f2g5dpihd672v4e0puqnm7d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJZ7wnsPescnMlsmWkKVgogqp8rKtJmEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "103696690890-p1069e3v6f2g5dpihd672v4e0puqnm7d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
