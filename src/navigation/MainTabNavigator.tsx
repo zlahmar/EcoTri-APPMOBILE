@@ -4,24 +4,25 @@ import { Text } from 'react-native';
 import { colors } from '../styles';
 import HomeScreen from '../screens/main/HomeScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
+import { ScanScreen, CollecteScreen, ConseilsScreen } from '../screens/recycling';
 
 const Tab = createBottomTabNavigator();
 
-// Composants d'icônes extraits pour éviter les warnings
-const HomeIcon = ({ color, size }: { color: string; size: number }) => (
-  <Text style={{ fontSize: size, color }}>🏠</Text>
-);
-
-const ScannerIcon = ({ color, size }: { color: string; size: number }) => (
+// Composants d'icônes avec des emojis appropriés
+const ScanIcon = ({ color, size }: { color: string; size: number }) => (
   <Text style={{ fontSize: size, color }}>📱</Text>
 );
 
-const MapIcon = ({ color, size }: { color: string; size: number }) => (
-  <Text style={{ fontSize: size, color }}>🗺️</Text>
+const CollecteIcon = ({ color, size }: { color: string; size: number }) => (
+  <Text style={{ fontSize: size, color }}>♻️</Text>
 );
 
 const ProfileIcon = ({ color, size }: { color: string; size: number }) => (
   <Text style={{ fontSize: size, color }}>👤</Text>
+);
+
+const ConseilsIcon = ({ color, size }: { color: string; size: number }) => (
+  <Text style={{ fontSize: size, color }}>💡</Text>
 );
 
 const MainTabNavigator = () => {
@@ -42,35 +43,35 @@ const MainTabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Scan"
+        component={ScanScreen}
         options={{
-          tabBarLabel: 'Accueil',
-          tabBarIcon: HomeIcon,
+          tabBarLabel: 'Scan',
+          tabBarIcon: ScanIcon,
         }}
       />
       <Tab.Screen
-        name="Scanner"
-        component={HomeScreen} // Placeholder pour l'instant
+        name="Collecte"
+        component={CollecteScreen}
         options={{
-          tabBarLabel: 'Scanner',
-          tabBarIcon: ScannerIcon,
-        }}
-      />
-      <Tab.Screen
-        name="Map"
-        component={HomeScreen} // Placeholder pour l'instant
-        options={{
-          tabBarLabel: 'Carte',
-          tabBarIcon: MapIcon,
+          tabBarLabel: 'Collecte',
+          tabBarIcon: CollecteIcon,
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Profil',
+          tabBarLabel: 'Profile',
           tabBarIcon: ProfileIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Conseils"
+        component={ConseilsScreen}
+        options={{
+          tabBarLabel: 'Conseils',
+          tabBarIcon: ConseilsIcon,
         }}
       />
     </Tab.Navigator>

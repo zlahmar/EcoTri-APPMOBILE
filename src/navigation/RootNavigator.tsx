@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from '../screens/main/SplashScreen';
-import MainTabNavigator from './MainTabNavigator';
-
-const Stack = createStackNavigator();
+import MainNavigator from './MainNavigator';
 
 const RootNavigator = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -25,17 +21,7 @@ const RootNavigator = () => {
     return <SplashScreen onFinish={() => setIsLoading(false)} />;
   }
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainTabNavigator} />
-        ) : (
-          <Stack.Screen name="Auth" component={MainTabNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+  return <MainNavigator />;
 };
 
 export default RootNavigator;
