@@ -2,6 +2,21 @@
     package="com.ecotri.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Permissions pour la caméra et ML Kit -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <!-- Permissions pour react-native-image-picker -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    
+    <!-- Fonctionnalités de la caméra -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
     <application
       android:name=".MainApplication"
@@ -11,6 +26,11 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
+      
+      <!-- Configuration ML Kit pour le téléchargement automatique des modèles -->
+      <meta-data
+          android:name="com.google.mlkit.vision.DEPENDENCIES"
+          android:value="ocr,ica,barcode,image_labeling,face_detection" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
