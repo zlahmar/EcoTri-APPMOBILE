@@ -1,12 +1,15 @@
-import { Platform } from 'react-native';
+// Désactiver les avertissements de dépréciation Firebase v22
+(globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+
+import { Platform, NativeModules } from 'react-native';
 
 // Types pour ML Kit
 export interface DetectedObject {
   id: string;
   boundingBox: {
     left: number;
-    top: number;
     right: number;
+    top: number;
     bottom: number;
   };
   labels: Array<{
@@ -22,8 +25,8 @@ export interface DetectedBarcode {
   format: string;
   boundingBox: {
     left: number;
-    top: number;
     right: number;
+    top: number;
     bottom: number;
   };
 }
@@ -32,22 +35,36 @@ export interface DetectedText {
   text: string;
   boundingBox: {
     left: number;
-    top: number;
     right: number;
+    top: number;
     bottom: number;
   };
   confidence: number;
+}
+
+export interface DetectedFace {
+  id: number;
+  confidence: number;
+  boundingBox: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
 }
 
 export interface ScanResult {
   objects: DetectedObject[];
   barcodes: DetectedBarcode[];
   text: DetectedText[];
+  faces: DetectedFace[];
   timestamp: number;
 }
 
 class MLKitService {
   private isInitialized = false;
+  private useRealMLKit = true; // 🚀 VRAI ML Kit natif Android ACTIVÉ !
+  private mlKitModule = NativeModules.MLKitModule;
 
   // Initialiser ML Kit
   async initialize(): Promise<void> {
@@ -59,72 +76,212 @@ class MLKitService {
         throw new Error('ML Kit n\'est supporté que sur Android');
       }
       
-      // Ici on pourrait initialiser des modèles spécifiques
+      // Vérifier que le module natif est disponible
+      if (!this.mlKitModule) {
+        throw new Error('Module ML Kit natif non disponible');
+      }
+      
+      // ✅ ML Kit natif Android activé !
       this.isInitialized = true;
-      console.log('ML Kit initialisé avec succès');
+      console.log('🚀 ML Kit natif Android initialisé avec succès !');
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de ML Kit:', error);
+      console.error('❌ Erreur lors de l\'initialisation de ML Kit natif:', error);
       throw error;
     }
   }
 
-  // Analyser une image pour détecter les objets
+  // Analyser une image pour détecter les objets avec ML Kit natif
   async detectObjects(imageUri: string): Promise<DetectedObject[]> {
     try {
       await this.initialize();
       
-      // Simulation de détection d'objets pour l'instant
-      // Plus tard, on utilisera l'API native ML Kit
-      return this.simulateObjectDetection(imageUri);
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('🔍 Détection d\'objets avec ML Kit natif Android...');
+        
+        try {
+          // Utiliser le module natif ML Kit Android
+          const result = await this.mlKitModule.detectObjects(imageUri);
+          
+          console.log('✅ Objets détectés par ML Kit natif:', result);
+          
+          return result.map((label: any, _index: number) => ({
+            id: `obj_${_index}`,
+            boundingBox: {
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0
+            },
+            labels: [{
+              text: label.text,
+              confidence: label.confidence
+            }]
+          }));
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
     } catch (error) {
-      console.error('Erreur lors de la détection d\'objets:', error);
+      console.error('❌ Erreur lors de la détection d\'objets:', error);
       throw error;
     }
   }
 
-  // Analyser une image pour détecter les codes-barres
+  // Analyser une image pour détecter les codes-barres avec ML Kit natif
   async detectBarcodes(imageUri: string): Promise<DetectedBarcode[]> {
     try {
       await this.initialize();
       
-      // Simulation de détection de codes-barres
-      return this.simulateBarcodeDetection(imageUri);
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('📱 Détection de codes-barres avec ML Kit natif Android...');
+        
+        try {
+          // Utiliser le module natif ML Kit Android
+          const result = await this.mlKitModule.detectBarcodes(imageUri);
+          
+          console.log('✅ Codes-barres détectés par ML Kit natif:', result);
+          
+          return result.map((barcode: any, _index: number) => ({
+            rawValue: barcode.rawValue,
+            displayValue: barcode.displayValue,
+            format: barcode.format,
+            boundingBox: {
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0
+            }
+          }));
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
     } catch (error) {
-      console.error('Erreur lors de la détection de codes-barres:', error);
+      console.error('❌ Erreur lors de la détection de codes-barres:', error);
       throw error;
     }
   }
 
-  // Analyser une image pour détecter le texte
+  // Analyser une image pour détecter le texte avec ML Kit natif
   async detectText(imageUri: string): Promise<DetectedText[]> {
     try {
       await this.initialize();
       
-      // Simulation de détection de texte
-      return this.simulateTextDetection(imageUri);
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('📝 Détection de texte avec ML Kit natif Android...');
+        
+        try {
+          // Utiliser le module natif ML Kit Android
+          const result = await this.mlKitModule.detectText(imageUri);
+          
+          console.log('✅ Texte détecté par ML Kit natif:', result);
+          
+          return result.map((textItem: any, _index: number) => ({
+            text: textItem.text,
+            confidence: textItem.confidence || 0.8,
+            boundingBox: {
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0
+            }
+          }));
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
     } catch (error) {
-      console.error('Erreur lors de la détection de texte:', error);
+      console.error('❌ Erreur lors de la détection de texte:', error);
       throw error;
     }
   }
 
-  // Analyser complète d'une image
+  // Analyser une image pour détecter les visages avec ML Kit natif
+  async detectFaces(imageUri: string): Promise<DetectedFace[]> {
+    try {
+      await this.initialize();
+      
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('👤 Détection de visages avec ML Kit natif Android...');
+        
+        try {
+          // Utiliser le module natif ML Kit Android
+          const result = await this.mlKitModule.detectFaces(imageUri);
+          
+          console.log('✅ Visages détectés par ML Kit natif:', result);
+          
+          return result.map((face: any, _index: number) => ({
+            id: face.id || _index,
+            confidence: face.confidence || 0.9,
+            boundingBox: {
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0
+            }
+          }));
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la détection de visages:', error);
+      throw error;
+    }
+  }
+
+  // Analyser complète d'une image avec ML Kit natif
   async analyzeImage(imageUri: string): Promise<ScanResult> {
     try {
-      const [objects, barcodes, text] = await Promise.all([
-        this.detectObjects(imageUri),
-        this.detectBarcodes(imageUri),
-        this.detectText(imageUri)
-      ]);
+      console.log('🚀 Début de l\'analyse ML Kit natif Android...');
+      
+      if (this.useRealMLKit && this.mlKitModule) {
+        // Utiliser la méthode d'analyse complète du module natif
+        const result = await this.mlKitModule.analyzeImage(imageUri);
+        
+        console.log('✅ Analyse ML Kit natif réussie:', result);
+        
+        return {
+          objects: result.objects || [],
+          barcodes: result.barcodes || [],
+          text: result.text || [],
+          faces: result.faces || [],
+          timestamp: Date.now()
+        };
+      } else {
+        // Fallback vers l'analyse séquentielle
+        const [objects, barcodes, text, faces] = await Promise.all([
+          this.detectObjects(imageUri),
+          this.detectBarcodes(imageUri),
+          this.detectText(imageUri),
+          this.detectFaces(imageUri)
+        ]);
 
-      return {
-        objects,
-        barcodes,
-        text,
-        timestamp: Date.now()
-      };
+        const scanResult = {
+          objects,
+          barcodes,
+          text,
+          faces,
+          timestamp: Date.now()
+        };
+
+        console.log('✅ Analyse ML Kit natif réussie (séquentielle):', scanResult);
+        return scanResult;
+      }
     } catch (error) {
-      console.error('Erreur lors de l\'analyse de l\'image:', error);
+      console.error('❌ Erreur lors de l\'analyse ML Kit natif:', error);
       throw error;
     }
   }
@@ -210,6 +367,22 @@ class MLKitService {
     return simulatedText;
   }
 
+  // Simulation de détection de visages
+  private simulateFaceDetection(imageUri: string): DetectedFace[] {
+    const simulatedFaces: DetectedFace[] = [];
+    
+    // Simuler la détection de visages
+    if (imageUri.includes('person') || imageUri.includes('face')) {
+      simulatedFaces.push({
+        id: 1,
+        confidence: 0.9,
+        boundingBox: { left: 100, top: 100, right: 300, bottom: 400 }
+      });
+    }
+
+    return simulatedFaces;
+  }
+
   // Classifier un déchet basé sur les détections
   async classifyWaste(scanResult: ScanResult): Promise<{
     type: 'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronic' | 'unknown';
@@ -221,23 +394,70 @@ class MLKitService {
     tips: string[];
   }> {
     try {
-      // Analyser les objets détectés pour classifier le déchet
-      const objectLabels = scanResult.objects.flatMap(obj => obj.labels);
-      const textDetected = scanResult.text.map(t => t.text.toLowerCase());
-      const barcodeData = scanResult.barcodes.map(b => b.displayValue);
+      console.log('🔍 Début de la classification des déchets...');
+      console.log('📊 Structure du scanResult:', JSON.stringify(scanResult, null, 2));
       
-      // Logique de classification améliorée basée sur les labels, texte et codes-barres
+      // Vérification de sécurité pour éviter les erreurs undefined
+      const objects = scanResult.objects || [];
+      const textDetected = scanResult.text || [];
+      const barcodeData = scanResult.barcodes || [];
+      
+      console.log('🎯 Objets détectés:', objects.length);
+      console.log('📝 Texte détecté:', textDetected.length);
+      console.log('📱 Codes-barres:', barcodeData.length);
+      
+      // Extraction sécurisée des labels d'objets
+      const objectLabels: string[] = [];
+      objects.forEach((obj, index) => {
+        if (obj && obj.labels && Array.isArray(obj.labels)) {
+          obj.labels.forEach((label: any) => {
+            if (label && label.text) {
+              objectLabels.push(label.text.toLowerCase());
+            }
+          });
+        } else if (obj && typeof obj === 'object') {
+          // Fallback pour la structure native ML Kit
+          console.log(`🔧 Objet ${index} (structure native):`, obj);
+          // Vérification flexible pour la structure native
+          const nativeObj = obj as any;
+          if (nativeObj.text) {
+            objectLabels.push(nativeObj.text.toLowerCase());
+          }
+        }
+      });
+      
+      // Extraction sécurisée du texte détecté
+      const textLabels: string[] = [];
+      textDetected.forEach((textItem: any) => {
+        if (textItem && textItem.text) {
+          textLabels.push(textItem.text.toLowerCase());
+        }
+      });
+      
+      // Extraction sécurisée des codes-barres
+      const barcodeLabels: string[] = [];
+      barcodeData.forEach((barcode: any) => {
+        if (barcode && barcode.displayValue) {
+          barcodeLabels.push(barcode.displayValue.toLowerCase());
+        }
+      });
+      
+      // Combinaison de tous les textes détectés
       const allText = [
-        ...objectLabels.map(l => l.text.toLowerCase()),
-        ...textDetected,
-        ...barcodeData
+        ...objectLabels,
+        ...textLabels,
+        ...barcodeLabels
       ].join(' ');
-
+      
+      console.log('🔤 Texte combiné pour classification:', allText);
+      
       // Classification PLASTIQUE
       if (allText.includes('plastique') || allText.includes('bouteille') || 
           allText.includes('pet') || allText.includes('hdpe') || allText.includes('pp') ||
           allText.includes('ps') || allText.includes('pvc') || allText.includes('ldpe') ||
-          allText.includes('bouteille') || allText.includes('flacon') || allText.includes('emballage')) {
+          allText.includes('bouteille') || allText.includes('flacon') || allText.includes('emballage') ||
+          allText.includes('plastic') || allText.includes('bottle') || allText.includes('container')) {
+        console.log('🥤 Classification: PLASTIQUE');
         return {
           type: 'plastic',
           confidence: 0.92,
@@ -258,7 +478,9 @@ class MLKitService {
       if (allText.includes('papier') || allText.includes('carton') || 
           allText.includes('journal') || allText.includes('magazine') ||
           allText.includes('emballage') || allText.includes('boîte') ||
-          allText.includes('caisse') || allText.includes('enveloppe')) {
+          allText.includes('caisse') || allText.includes('enveloppe') ||
+          allText.includes('paper') || allText.includes('cardboard') || allText.includes('box')) {
+        console.log('📦 Classification: PAPIER/CARTON');
         return {
           type: 'paper',
           confidence: 0.89,
@@ -278,7 +500,9 @@ class MLKitService {
       // Classification VERRE
       if (allText.includes('verre') || allText.includes('bouteille') || 
           allText.includes('pot') || allText.includes('conserve') ||
-          allText.includes('bocal') || allText.includes('flacon')) {
+          allText.includes('bocal') || allText.includes('flacon') ||
+          allText.includes('glass') || allText.includes('jar') || allText.includes('bottle')) {
+        console.log('🍾 Classification: VERRE');
         return {
           type: 'glass',
           confidence: 0.91,
@@ -299,7 +523,10 @@ class MLKitService {
       if (allText.includes('métal') || allText.includes('canette') || 
           allText.includes('aluminium') || allText.includes('fer') ||
           allText.includes('acier') || allText.includes('boîte') ||
-          allText.includes('conserve') || allText.includes('dose')) {
+          allText.includes('conserve') || allText.includes('dose') ||
+          allText.includes('metal') || allText.includes('can') || allText.includes('aluminum') ||
+          allText.includes('steel') || allText.includes('tin')) {
+        console.log('🥫 Classification: MÉTAL');
         return {
           type: 'metal',
           confidence: 0.94,

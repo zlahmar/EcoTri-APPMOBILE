@@ -149,6 +149,16 @@ const ScanScreen = () => {
       const result = await mlKitService.analyzeImage(imageUri);
       setScanResult(result);
       console.log('Analyse ML Kit réussie:', result);
+      
+      // 🚀 Classification automatique immédiate après l'analyse
+      try {
+        const classification = await mlKitService.classifyWaste(result);
+        setWasteClassification(classification);
+        console.log('✅ Classification automatique réussie:', classification);
+      } catch (classificationError) {
+        console.warn('⚠️ Erreur lors de la classification automatique:', classificationError);
+        setWasteClassification(null);
+      }
     } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
       Alert.alert('Erreur', 'Impossible d\'analyser l\'image');
@@ -157,85 +167,48 @@ const ScanScreen = () => {
     }
   };
 
-  // Classifier le déchet
-  const classifyWaste = async () => {
-    if (!scanResult) return;
-    
-    try {
-      const classification = await mlKitService.classifyWaste(scanResult);
-      
-      // Afficher une alerte plus détaillée
-      Alert.alert(
-        `${classification.icon} Déchet identifié: ${classification.type.toUpperCase()}`,
-        `${classification.recyclingInfo}\n\n${classification.environmentalImpact}`,
-        [
-          { text: 'Voir les conseils', onPress: () => showDetailedResults(classification) },
-          { text: 'Nouveau scan', onPress: () => resetScan() }
-        ]
-      );
-    } catch (error) {
-      console.error('Erreur lors de la classification:', error);
-      Alert.alert('Erreur', 'Impossible de classifier le déchet');
-    }
-  };
-
-  // Afficher les résultats détaillés
-  const showDetailedResults = (classification: any) => {
-    Alert.alert(
-      `${classification.icon} Conseils de recyclage`,
-      `Type: ${classification.type.toUpperCase()}\nConfiance: ${Math.round(classification.confidence * 100)}%\n\n${classification.recyclingInfo}\n\n${classification.environmentalImpact}`,
-      [
-        { text: 'Conseils pratiques', onPress: () => showTips(classification) },
-        { text: 'Fermer', style: 'cancel' }
-      ]
-    );
-  };
-
-  // Afficher les conseils pratiques
-  const showTips = (classification: any) => {
-    const tipsText = classification.tips.map((tip: string, index: number) => `${index + 1}. ${tip}`).join('\n');
-    Alert.alert(
-      '💡 Conseils pratiques',
-      tipsText,
-      [
-        { text: 'OK', style: 'default' },
-        { text: 'Nouveau scan', onPress: () => resetScan() }
-      ]
-    );
-  };
+  // État pour la classification automatique
+  const [wasteClassification, setWasteClassification] = useState<any>(null);
 
   // Réinitialiser le scan
   const resetScan = () => {
     setScanResult(null);
     setSelectedImage(null);
+    setWasteClassification(null);
   };
 
-  // Afficher les résultats du scan avec une interface améliorée
+  // Rendu des résultats du scan
   const renderScanResults = () => {
     if (!scanResult) return null;
 
+    // Vérification de sécurité pour éviter les erreurs undefined
+    const objects = scanResult.objects || [];
+    const barcodes = scanResult.barcodes || [];
+    const text = scanResult.text || [];
+    const faces = scanResult.faces || [];
+
     return (
       <View style={styles.resultsContainer}>
-        <Text style={styles.resultsTitle}>🔍 Résultats de l'analyse</Text>
+        <Text style={styles.resultsTitle}>🔍 Résultats de l'analyse ML Kit</Text>
         
-        {scanResult.objects.length > 0 && (
+        {objects.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>🎯 Objets détectés:</Text>
-            {scanResult.objects.map((obj) => (
-              <View key={obj.id} style={styles.resultItem}>
+            {objects.map((obj, index) => (
+              <View key={obj?.id || `obj_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultLabel}>
-                    {obj.labels[0]?.text || 'Objet non identifié'}
+                    {obj?.labels?.[0]?.text || 'Objet non identifié'}
                   </Text>
-                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(obj.labels[0]?.confidence || 0) }]}>
+                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(obj?.labels?.[0]?.confidence || 0) }]}>
                     <Text style={styles.confidenceText}>
-                      {Math.round((obj.labels[0]?.confidence || 0) * 100)}%
+                      {Math.round((obj?.labels?.[0]?.confidence || 0) * 100)}%
                     </Text>
                   </View>
                 </View>
-                {obj.labels.length > 1 && (
+                {obj?.labels && obj.labels.length > 1 && (
                   <Text style={styles.resultSubtext}>
-                    Autres détections: {obj.labels.slice(1).map(l => l.text).join(', ')}
+                    Autres détections: {obj.labels.slice(1).map(l => l?.text || 'N/A').join(', ')}
                   </Text>
                 )}
               </View>
@@ -243,15 +216,15 @@ const ScanScreen = () => {
           </View>
         )}
 
-        {scanResult.barcodes.length > 0 && (
+        {barcodes.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>📊 Codes-barres:</Text>
-            {scanResult.barcodes.map((barcode) => (
-              <View key={barcode.rawValue} style={styles.resultItem}>
+            {barcodes.map((barcode, index) => (
+              <View key={barcode?.rawValue || `barcode_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>{barcode.displayValue}</Text>
+                  <Text style={styles.resultLabel}>{barcode?.displayValue || 'Code non lisible'}</Text>
                   <View style={styles.formatBadge}>
-                    <Text style={styles.formatText}>{barcode.format}</Text>
+                    <Text style={styles.formatText}>{barcode?.format || 'Inconnu'}</Text>
                   </View>
                 </View>
               </View>
@@ -259,16 +232,16 @@ const ScanScreen = () => {
           </View>
         )}
 
-        {scanResult.text.length > 0 && (
+        {text.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>📝 Texte détecté:</Text>
-            {scanResult.text.map((text) => (
-              <View key={text.text} style={styles.resultItem}>
+            {text.map((textItem, index) => (
+              <View key={textItem?.text || `text_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>{text.text}</Text>
-                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(text.confidence) }]}>
+                  <Text style={styles.resultLabel}>{textItem?.text || 'Texte non lisible'}</Text>
+                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(textItem?.confidence || 0) }]}>
                     <Text style={styles.confidenceText}>
-                      {Math.round(text.confidence * 100)}%
+                      {Math.round((textItem?.confidence || 0) * 100)}%
                     </Text>
                   </View>
                 </View>
@@ -277,11 +250,71 @@ const ScanScreen = () => {
           </View>
         )}
 
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.classifyButton} onPress={classifyWaste}>
-            <Text style={styles.classifyButtonText}>🔍 Classifier le déchet</Text>
-          </TouchableOpacity>
+        {faces.length > 0 && (
+          <View style={styles.resultSection}>
+            <Text style={styles.resultSectionTitle}>👤 Visages détectés:</Text>
+            {faces.map((face, index) => (
+              <View key={face?.id || `face_${index}`} style={styles.resultItem}>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultLabel}>Visage #{face?.id || index + 1}</Text>
+                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(face?.confidence || 0) }]}>
+                    <Text style={styles.confidenceText}>
+                      {Math.round((face?.confidence || 0) * 100)}%
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
+        {/* Affichage des données brutes pour debug */}
+        <View style={styles.debugSection}>
+          <Text style={styles.debugTitle}>🐛 Debug - Structure des données:</Text>
+          <Text style={styles.debugText}>
+            Objets: {JSON.stringify(objects.length)} | 
+            Codes: {JSON.stringify(barcodes.length)} | 
+            Texte: {JSON.stringify(text.length)} | 
+            Visages: {JSON.stringify(faces.length)}
+          </Text>
+          <Text style={styles.debugText}>
+            Timestamp: {scanResult.timestamp ? new Date(scanResult.timestamp).toLocaleTimeString() : 'N/A'}
+          </Text>
+        </View>
+
+        {/* 🚀 Classification automatique des déchets */}
+        {wasteClassification && (
+          <View style={styles.classificationSection}>
+            <Text style={styles.classificationTitle}>
+              {wasteClassification.icon} Classification Automatique du Déchet
+            </Text>
+            
+            <View style={[styles.classificationCard, { borderColor: wasteClassification.color }]}>
+              <View style={styles.classificationHeader}>
+                <Text style={[styles.classificationType, { color: wasteClassification.color }]}>
+                  {wasteClassification.type.toUpperCase()}
+                </Text>
+                <View style={[styles.confidenceBadge, { backgroundColor: wasteClassification.color }]}>
+                  <Text style={styles.confidenceText}>
+                    {Math.round(wasteClassification.confidence * 100)}%
+                  </Text>
+                </View>
+              </View>
+              
+              <Text style={styles.recyclingInfo}>{wasteClassification.recyclingInfo}</Text>
+              <Text style={styles.environmentalImpact}>{wasteClassification.environmentalImpact}</Text>
+              
+              <View style={styles.tipsContainer}>
+                <Text style={styles.tipsTitle}>💡 Conseils pratiques :</Text>
+                {wasteClassification.tips.map((tip: string, index: number) => (
+                  <Text key={index} style={styles.tipText}>• {tip}</Text>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.resetButton} onPress={resetScan}>
             <Text style={styles.resetButtonText}>🔄 Nouveau scan</Text>
           </TouchableOpacity>
@@ -635,6 +668,87 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textLight,
     flex: 1,
+  },
+  debugSection: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  debugTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: colors.textLight,
+    marginBottom: 4,
+  },
+  classificationSection: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  classificationTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  classificationCard: {
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: colors.primary,
+  },
+  classificationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  classificationType: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  recyclingInfo: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 8,
+  },
+  environmentalImpact: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 15,
+  },
+  tipsContainer: {
+    marginTop: 10,
+  },
+  tipsTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  tipText: {
+    fontSize: 13,
+    color: colors.textLight,
+    marginBottom: 4,
   },
 });
 
