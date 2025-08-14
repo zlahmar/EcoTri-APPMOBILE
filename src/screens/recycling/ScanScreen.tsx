@@ -12,30 +12,48 @@ import {
   PermissionsAndroid,
   Platform
 } from 'react-native';
-import { launchImageLibrary, launchCamera, ImagePickerResponse } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import mlKitService, { ScanResult } from '../../services/mlKitService';
-import IconService from '../../services/iconService';
+import statsService from '../../services/localStatsService';
+// import IconService from '../../services/iconService';
 
-const ScanScreen = () => {
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+const ScanScreen = ({ 
+  isAuthenticated = false, 
+  onProfilePress, 
+  userInfo: _userInfo 
+}: { 
+  isAuthenticated?: boolean; 
+  onProfilePress?: () => void; 
+  userInfo?: any; 
+}) => {
+  // État pour l'image sélectionnée
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState(false);
-  const [hasStoragePermission, setHasStoragePermission] = useState(false);
+  
+  // État pour le résultat de l'analyse
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  
+  // État pour le chargement
+  const [isScanning, setIsScanning] = useState(false);
+  
+  // État pour la classification automatique
+  const [wasteClassification, setWasteClassification] = useState<any>(null);
+
+  // 🎯 État pour les points gagnés et motivation
+  const [pointsEarned, setPointsEarned] = useState<number | null>(null);
+  const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null);
 
   // Demander les permissions au démarrage
   useEffect(() => {
     requestPermissions();
   }, []);
 
-  // Demander les permissions nécessaires
+  // Demander les permissions
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       try {
-        // Permission caméra
         const cameraPermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.CAMERA,
           {
@@ -46,102 +64,74 @@ const ScanScreen = () => {
             buttonPositive: 'OK',
           }
         );
-        setHasCameraPermission(cameraPermission === PermissionsAndroid.RESULTS.GRANTED);
 
-        // Permission stockage (pour Android < 13)
-        if (Platform.Version < 33) {
-          const storagePermission = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-            {
-              title: 'Permission Stockage',
-              message: 'L\'application a besoin d\'accéder à votre stockage pour sélectionner des images',
-              buttonNeutral: 'Demander plus tard',
-              buttonNegative: 'Annuler',
-              buttonPositive: 'OK',
-            }
-          );
-          setHasStoragePermission(storagePermission === PermissionsAndroid.RESULTS.GRANTED);
+        const storagePermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: 'Permission Stockage',
+            message: 'L\'application a besoin d\'accéder à votre galerie pour sélectionner des images',
+            buttonNeutral: 'Demander plus tard',
+            buttonNegative: 'Annuler',
+            buttonPositive: 'OK',
+          }
+        );
+
+        if (cameraPermission === PermissionsAndroid.RESULTS.GRANTED && 
+            storagePermission === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('✅ Permissions accordées');
         } else {
-          // Android 13+ utilise READ_MEDIA_IMAGES qui est automatiquement accordé
-          setHasStoragePermission(true);
+          console.log('❌ Permissions refusées');
         }
       } catch (err) {
         console.warn('Erreur lors de la demande de permissions:', err);
       }
-    } else {
-      // Sur iOS, les permissions sont gérées automatiquement
-      setHasCameraPermission(true);
-      setHasStoragePermission(true);
     }
   };
 
-  // Options pour le sélecteur d'images
-  const imagePickerOptions = {
-    mediaType: 'photo' as const,
-    quality: 0.8 as const,
-    includeBase64: false,
-    maxWidth: 1024,
-    maxHeight: 1024,
-  };
+  // Prendre une photo avec la caméra
+  const takePhoto = async () => {
+    try {
+      const result = await launchCamera({
+        mediaType: 'photo',
+        quality: 0.8 as const,
+        includeBase64: false,
+      });
 
-  // Lancer la caméra
-  const handleCameraLaunch = async () => {
-    if (!hasCameraPermission) {
-      Alert.alert(
-        'Permission requise',
-        'L\'accès à la caméra est nécessaire pour prendre des photos. Veuillez accorder la permission dans les paramètres.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Paramètres', onPress: () => requestPermissions() }
-        ]
-      );
-      return;
-    }
-
-    launchCamera(imagePickerOptions, (response: ImagePickerResponse) => {
-      if (response.didCancel) {
-        console.log('Utilisateur a annulé la prise de photo');
-      } else if (response.errorCode) {
-        console.error('Erreur caméra:', response.errorMessage);
-        Alert.alert('Erreur', `Impossible d'accéder à la caméra: ${response.errorMessage}`);
-      } else if (response.assets && response.assets[0]) {
-        const imageUri = response.assets[0].uri;
-        if (imageUri) {
-          setSelectedImage(imageUri);
-          analyzeImage(imageUri);
-        }
+      if (result.assets && result.assets[0]?.uri) {
+        setSelectedImage(result.assets[0].uri);
+        setScanResult(null);
+        setWasteClassification(null);
+        setPointsEarned(null);
+        setMotivationalMessage(null);
+        await analyzeImage(result.assets[0].uri);
       }
-    });
+    } catch (error) {
+      console.error('Erreur lors de la prise de photo:', error);
+      Alert.alert('Erreur', 'Impossible de prendre une photo');
+    }
   };
 
-  // Lancer la galerie
-  const handleGalleryLaunch = async () => {
-    if (!hasStoragePermission) {
-      Alert.alert(
-        'Permission requise',
-        'L\'accès au stockage est nécessaire pour sélectionner des images. Veuillez accorder la permission dans les paramètres.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Paramètres', onPress: () => requestPermissions() }
-        ]
-      );
-      return;
-    }
+  // Sélectionner une image depuis la galerie
+  const selectImage = async () => {
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.8 as const,
+        includeBase64: false,
+      });
 
-    launchImageLibrary(imagePickerOptions, (response: ImagePickerResponse) => {
-      if (response.didCancel) {
-        console.log('Utilisateur a annulé la sélection');
-      } else if (response.errorCode) {
-        console.error('Erreur galerie:', response.errorMessage);
-        Alert.alert('Erreur', `Impossible d'accéder à la galerie: ${response.errorMessage}`);
-      } else if (response.assets && response.assets[0]) {
-        const imageUri = response.assets[0].uri;
-        if (imageUri) {
-          setSelectedImage(imageUri);
-          analyzeImage(imageUri);
-        }
+      if (result.assets && result.assets[0]?.uri) {
+        setSelectedImage(result.assets[0].uri);
+        setScanResult(null);
+        setWasteClassification(null);
+        setPointsEarned(null);
+        setMotivationalMessage(null);
+        await analyzeImage(result.assets[0].uri);
       }
-    });
+    } catch (error) {
+      console.error('Erreur lors de la sélection d\'image:', error);
+      Alert.alert('Erreur', 'Impossible de sélectionner une image');
+    }
   };
 
   // Analyser l'image avec ML Kit
@@ -157,6 +147,33 @@ const ScanScreen = () => {
         const classification = await mlKitService.classifyWaste(result);
         setWasteClassification(classification);
         console.log('✅ Classification automatique réussie:', classification);
+
+        // 🎯 Ajouter les statistiques et points (si connecté)
+        if (classification && classification.type) {
+          try {
+            const confidence = classification.confidence || 0.5;
+            const statsResult = await statsService.addScan(
+              classification.type,
+              confidence
+            );
+            
+            if (statsResult) {
+              // Utilisateur connecté - Stats enregistrées
+              setPointsEarned(statsResult.pointsEarned);
+              setMotivationalMessage(statsResult.message);
+              console.log('🎉 Points gagnés:', statsResult.pointsEarned);
+            } else {
+              // Utilisateur non connecté - Pas de stats
+              setPointsEarned(0); // 0 pour indiquer "non connecté"
+              setMotivationalMessage('⚠️ Connectez-vous pour enregistrer vos statistiques et gagner des points !');
+              console.log('⚠️ Utilisateur non connecté - Stats non enregistrées');
+            }
+          } catch (statsError) {
+            console.warn('⚠️ Erreur lors de l\'ajout des statistiques:', statsError);
+            setPointsEarned(0);
+            setMotivationalMessage('⚠️ Erreur lors de l\'enregistrement des statistiques');
+          }
+        }
       } catch (classificationError) {
         console.warn('⚠️ Erreur lors de la classification automatique:', classificationError);
         setWasteClassification(null);
@@ -168,9 +185,6 @@ const ScanScreen = () => {
       setIsScanning(false);
     }
   };
-
-  // État pour la classification automatique
-  const [wasteClassification, setWasteClassification] = useState<any>(null);
 
   // Réinitialiser le scan
   const resetScan = () => {
@@ -192,21 +206,15 @@ const ScanScreen = () => {
     return (
       <View style={styles.resultsContainer}>
         <Text style={styles.resultsTitle}>
-          <MaterialIcons 
-            name={IconService.getMLKitIconName('ai')} 
-            size={20} 
-            color={colors.primary} 
-          /> Résultats de l'analyse ML Kit
+          <MaterialIcons name="search" size={20} color={colors.primary} style={styles.resultIcon} />
+          Résultats de l'analyse ML Kit
         </Text>
         
         {objects.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons 
-                name={IconService.getMLKitIconName('object-detection')} 
-                size={18} 
-                color={colors.primary} 
-              /> Objets détectés:
+              <MaterialIcons name="target" size={18} color={colors.primary} style={styles.resultIcon} />
+              Objets détectés:
             </Text>
             {objects.map((obj, index) => (
               <View key={obj?.id || `obj_${index}`} style={styles.resultItem}>
@@ -233,11 +241,8 @@ const ScanScreen = () => {
         {barcodes.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons 
-                name={IconService.getMLKitIconName('barcode')} 
-                size={18} 
-                color={colors.primary} 
-              /> Codes-barres:
+              <MaterialIcons name="bar-chart" size={18} color={colors.primary} style={styles.resultIcon} />
+              Codes-barres:
             </Text>
             {barcodes.map((barcode, index) => (
               <View key={barcode?.rawValue || `barcode_${index}`} style={styles.resultItem}>
@@ -255,11 +260,8 @@ const ScanScreen = () => {
         {text.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons 
-                name={IconService.getMLKitIconName('text-recognition')} 
-                size={18} 
-                color={colors.primary} 
-              /> Texte détecté:
+              <MaterialIcons name="file-text" size={18} color={colors.primary} style={styles.resultIcon} />
+              Texte détecté:
             </Text>
             {text.map((textItem, index) => (
               <View key={textItem?.text || `text_${index}`} style={styles.resultItem}>
@@ -279,11 +281,8 @@ const ScanScreen = () => {
         {faces.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons 
-                name={IconService.getMLKitIconName('face-detection')} 
-                size={18} 
-                color={colors.primary} 
-              /> Visages détectés:
+              <MaterialIcons name="face" size={18} color={colors.primary} style={styles.resultIcon} />
+              Visages détectés:
             </Text>
             {faces.map((face, index) => (
               <View key={face?.id || `face_${index}`} style={styles.resultItem}>
@@ -303,11 +302,8 @@ const ScanScreen = () => {
         {/* Affichage des données brutes pour debug */}
         <View style={styles.debugSection}>
           <Text style={styles.debugTitle}>
-            <MaterialIcons 
-              name={IconService.getStatusIconName('info')} 
-              size={18} 
-              color={colors.warning} 
-            /> Debug - Structure des données:
+            <MaterialIcons name="info" size={18} color={colors.warning} style={styles.resultIcon} />
+            Debug - Structure des données:
           </Text>
           <Text style={styles.debugText}>
             Objets: {JSON.stringify(objects.length)} | 
@@ -324,7 +320,8 @@ const ScanScreen = () => {
         {wasteClassification && (
           <View style={styles.classificationSection}>
             <Text style={styles.classificationTitle}>
-              {wasteClassification.icon} Classification Automatique du Déchet
+              <MaterialIcons name="auto-awesome" size={20} color={colors.primary} style={styles.resultIcon} />
+              Classification Automatique du Déchet
             </Text>
             
             <View style={[styles.classificationCard, { borderColor: wasteClassification.color }]}>
@@ -343,23 +340,50 @@ const ScanScreen = () => {
               <Text style={styles.environmentalImpact}>{wasteClassification.environmentalImpact}</Text>
               
               <View style={styles.tipsContainer}>
-                <Text style={styles.tipsTitle}>💡 Conseils pratiques :</Text>
+                <Text style={styles.tipsTitle}>
+                  <MaterialIcons name="lightbulb" size={16} color={colors.warning} style={styles.resultIcon} />
+                  Conseils pratiques :
+                </Text>
                 {wasteClassification.tips.map((tip: string, index: number) => (
                   <Text key={index} style={styles.tipText}>• {tip}</Text>
                 ))}
               </View>
             </View>
+
+            {/* 🎯 Points gagnés et message de motivation */}
+            {pointsEarned !== null && (
+              <View style={styles.pointsSection}>
+                {pointsEarned > 0 ? (
+                  // Utilisateur connecté - Points gagnés
+                  <View style={styles.pointsCard}>
+                    <MaterialIcons name="stars" size={24} color={colors.warning} style={styles.pointsIcon} />
+                    <Text style={styles.pointsText}>
+                      +{pointsEarned} points gagnés !
+                    </Text>
+                  </View>
+                ) : (
+                  // Utilisateur non connecté - Message d'information
+                  <View style={[styles.pointsCard, { borderColor: colors.primary, backgroundColor: colors.surface }]}>
+                    <MaterialIcons name="info" size={24} color={colors.primary} style={styles.pointsIcon} />
+                    <Text style={[styles.pointsText, { color: colors.primary }]}>
+                      Connectez-vous pour gagner des points !
+                    </Text>
+                  </View>
+                )}
+                
+                {motivationalMessage && (
+                  <Text style={styles.motivationalText}>
+                    {motivationalMessage}
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         )}
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.resetButton} onPress={resetScan}>
-            <MaterialIcons 
-              name={IconService.getActionIconName('refresh')} 
-              size={20} 
-              color={colors.textInverse} 
-              style={styles.resetButtonIcon}
-            />
+            <MaterialIcons name="refresh" size={20} color={colors.textInverse} style={styles.resetButtonIcon} />
             <Text style={styles.resetButtonText}>Nouveau scan</Text>
           </TouchableOpacity>
         </View>
@@ -376,19 +400,25 @@ const ScanScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Scanner de Déchets" />
+      <Header 
+        title="Scanner de Déchets" 
+        showProfileIcon={true}
+        isAuthenticated={isAuthenticated} 
+        onProfilePress={onProfilePress}
+      />
       
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        bounces={true}
+        overScrollMode="always"
+      >
         {!selectedImage ? (
           <>
             <View style={styles.scanArea}>
               <View style={styles.scanFrame}>
-                <MaterialIcons 
-                  name={IconService.getUIIconName('scan')} 
-                  size={60} 
-                  color={colors.primary} 
-                  style={styles.scanIcon}
-                />
+                <MaterialIcons name="smartphone" size={60} color={colors.primary} style={styles.scanIcon} />
                 <Text style={styles.scanText}>Scanner un déchet</Text>
                 <Text style={styles.scanSubtext}>
                   Pointez votre caméra vers le code-barres ou l'objet
@@ -397,13 +427,13 @@ const ScanScreen = () => {
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.scanButton} onPress={handleCameraLaunch}>
-                <Text style={styles.buttonIcon}>📷</Text>
+              <TouchableOpacity style={styles.scanButton} onPress={takePhoto}>
+                <MaterialIcons name="camera-alt" size={24} color={colors.textInverse} style={styles.buttonIcon} />
                 <Text style={styles.scanButtonText}>Prendre une photo</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.galleryButton} onPress={handleGalleryLaunch}>
-                <Text style={styles.buttonIcon}>🖼️</Text>
+              <TouchableOpacity style={styles.galleryButton} onPress={selectImage}>
+                <MaterialIcons name="photo-library" size={24} color={colors.primary} style={styles.buttonIcon} />
                 <Text style={styles.galleryButtonText}>Choisir une image</Text>
               </TouchableOpacity>
             </View>
@@ -423,33 +453,21 @@ const ScanScreen = () => {
         {renderScanResults()}
 
         <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Comment ça marche ?</Text>
-          <View style={styles.infoItem}>
-            <MaterialIcons 
-              name={IconService.getUIIconName('camera')} 
-              size={20} 
-              color={colors.primary} 
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>Prenez une photo ou sélectionnez une image</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <MaterialIcons 
-              name={IconService.getMLKitIconName('ai')} 
-              size={20} 
-              color={colors.primary} 
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>L'IA identifie automatiquement le type</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <MaterialIcons 
-              name={IconService.getEnvironmentalIconName('recycle')} 
-              size={20} 
-              color={colors.primary} 
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>Recevez des conseils de recyclage</Text>
+          <Text style={styles.infoTitle}>Instructions de Scan</Text>
+          <Text style={styles.instructionsText}>
+            1. Appuyez sur le bouton caméra{'\n'}
+            2. Prenez une photo de votre déchet{'\n'}
+            3. Notre IA analysera et classera automatiquement{'\n'}
+            4. Suivez les instructions de recyclage
+          </Text>
+          
+          {/* 🔐 Message d'authentification */}
+          <View style={styles.authInfo}>
+            <MaterialIcons name="info" size={16} color={colors.textLight} style={styles.authIcon} />
+            <Text style={styles.authText}>
+              <MaterialIcons name="lightbulb" size={14} color={colors.primary} style={styles.resultIcon} />
+              Connectez-vous pour enregistrer vos statistiques et gagner des points !
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -465,6 +483,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+  },
+  scrollContent: {
+    paddingBottom: 120, // Espace suffisant pour éviter que le contenu soit caché par la navigation
   },
   scanArea: {
     alignItems: 'center',
@@ -724,6 +745,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  instructionsText: {
+    fontSize: 14,
+    color: colors.textLight,
+    textAlign: 'left',
+    lineHeight: 22,
+    paddingHorizontal: 10,
+  },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -820,7 +848,69 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   buttonIcon: {
+    fontSize: 24,
     marginBottom: 8,
+  },
+  pointsSection: {
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  pointsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.warning,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  pointsIcon: {
+    marginRight: 10,
+  },
+  pointsText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.warning,
+  },
+  motivationalText: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginTop: 10,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  authInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+    backgroundColor: colors.surface,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  authIcon: {
+    marginRight: 8,
+  },
+  authText: {
+    fontSize: 13,
+    color: colors.textLight,
+    flex: 1,
+  },
+  resultIcon: {
+    marginRight: 8,
   },
 });
 

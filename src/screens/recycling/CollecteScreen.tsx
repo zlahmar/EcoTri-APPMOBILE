@@ -3,10 +3,23 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } fr
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 
-const CollecteScreen = () => {
+const CollecteScreen = ({ 
+  isAuthenticated = false, 
+  onProfilePress, 
+  userInfo: _userInfo 
+}: { 
+  isAuthenticated?: boolean; 
+  onProfilePress?: () => void; 
+  userInfo?: any; 
+}) => {
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Collecte & Recyclage" />
+      <Header 
+        title="Collecte & Recyclage" 
+        showProfileIcon={true}
+        isAuthenticated={isAuthenticated} 
+        onProfilePress={onProfilePress}
+      />
       
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Statistiques de collecte */}

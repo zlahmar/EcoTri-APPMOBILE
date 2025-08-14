@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
-import { colors } from '../../styles';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { colors } from '../../styles/colors';
 
 interface HeaderProps {
   title: string;
@@ -16,6 +17,10 @@ interface HeaderProps {
   onRightPress?: () => void;
   showBackButton?: boolean;
   onBackPress?: () => void;
+  // Nouvelles props pour le profil
+  showProfileIcon?: boolean;
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -26,6 +31,9 @@ const Header: React.FC<HeaderProps> = ({
   onRightPress,
   showBackButton = false,
   onBackPress,
+  showProfileIcon = false,
+  isAuthenticated = false,
+  onProfilePress,
 }) => {
   return (
     <View style={styles.container}>
@@ -69,6 +77,19 @@ const Header: React.FC<HeaderProps> = ({
               {rightIcon}
             </TouchableOpacity>
           )}
+          {showProfileIcon && (
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={onProfilePress}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={isAuthenticated ? "account-circle" : "person-add"} 
+                size={28} 
+                color="white" 
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -78,15 +99,15 @@ const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.primaryDark,
-    paddingTop: 44, // Pour les appareils avec notch
-    paddingBottom: 16,
+    paddingTop: 32, // Réduit de 44 à 32 pour économiser l'espace
+    paddingBottom: 12, // Réduit de 16 à 12
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    minHeight: 44,
+    minHeight: 36, // Réduit de 44 à 36
   },
   leftSection: {
     flexDirection: 'row',
@@ -121,6 +142,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileButton: {
     width: 40,
     height: 40,
     borderRadius: 20,

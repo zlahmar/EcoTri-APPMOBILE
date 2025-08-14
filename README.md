@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
-**Version** : 5.2.0  
-**Statut** : ✅ INTERFACE MODERNISÉE + DÉTECTION AVANCÉE ML KIT + AUTHENTIFICATION COMPLÈTE
+**Version** : 5.4.0  
+**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -1782,4 +1782,67 @@ import IconService from '../../services/iconService';
 
 ---
 
-## 🚀 **Prochaines Étapes ML Kit**
+## 🎨 **Interface Utilisateur et Navigation - Version 5.4.0**
+
+### **🚀 Navigation Modernisée**
+
+#### **📱 Barre de Navigation Principale**
+- **3 onglets principaux** : Scan, Collecte, Conseils
+- **Icons MaterialIcons** : Remplacement des emojis par des icônes vectorielles
+- **Design cohérent** : Interface harmonieuse et professionnelle
+- **Suppression de l'onglet Profile** : Accès via icône en haut à droite
+
+#### **👤 Accès au Profil**
+- **Icône du profil** : Affichée en haut à droite de chaque écran
+- **Modal plein écran** : Ouverture du profil en overlay
+- **État d'authentification** : Icône différente selon la connexion
+  - `account-circle` : Utilisateur connecté (vert)
+  - `person-add` : Utilisateur non connecté (gris)
+
+### **🌟 Améliorations Visuelles**
+
+#### **🎨 Icons MaterialIcons**
+- **Remplacement des emojis** : Icons vectoriels professionnels
+- **Cohérence visuelle** : Même style sur tous les écrans
+- **Performance optimisée** : Icons natifs Android
+
+#### **📱 Interface Responsive**
+- **Header adaptatif** : Hauteur optimisée pour l'espace
+- **Navigation intuitive** : Accès rapide au profil
+- **Design moderne** : Ombres, bordures arrondies, couleurs harmonieuses
+
+### **🔧 Architecture Technique**
+
+#### **📦 Props d'Authentification**
+```typescript
+// Props passées à chaque écran
+interface ScreenProps {
+  isAuthenticated: boolean;
+  onProfilePress: () => void;
+  userInfo?: UserData;
+}
+```
+
+#### **🔄 Gestion d'État**
+- **État centralisé** : Authentification gérée dans MainNavigator
+- **Props drilling** : Transmission des données d'authentification
+- **Modals synchronisées** : Profil et authentification cohérents
+
+### **✅ Avantages de la Nouvelle Interface**
+
+#### **🎯 Expérience Utilisateur**
+- **Navigation intuitive** : 3 onglets clairs et logiques
+- **Accès rapide** : Profil accessible depuis n'importe quel écran
+- **Interface cohérente** : Design uniforme sur tous les écrans
+
+#### **🚀 Performance**
+- **Icons vectoriels** : Chargement rapide et qualité optimale
+- **Navigation fluide** : Transitions entre écrans optimisées
+- **État synchronisé** : Données d'authentification cohérentes
+
+#### **🔧 Maintenance**
+- **Code centralisé** : Logique d'authentification dans MainNavigator
+- **Composants réutilisables** : Header avec icône du profil
+- **Props typées** : Interface TypeScript claire et maintenable
+
+## 🎯 **Système de Statistiques et Gamification - Intelligence Artificielle + Engagement**

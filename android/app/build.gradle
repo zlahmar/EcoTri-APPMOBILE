@@ -153,3 +153,6 @@ dependencies {
 
 // Apply Google Services plugin
 apply plugin: 'com.google.gms.google-services'
+
+// 🎨 Configuration des polices pour React Native Vector Icons
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

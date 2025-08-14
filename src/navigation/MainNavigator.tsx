@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, SafeAreaView, Alert } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../styles';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import { ScanScreen, CollecteScreen, ConseilsScreen } from '../screens/recycling';
@@ -10,6 +11,7 @@ const MainNavigator = () => {
   const [currentScreen, setCurrentScreen] = useState('scan');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserData | null>(null);
 
   // Écouter les changements d'état d'authentification Firebase
@@ -57,25 +59,44 @@ const MainNavigator = () => {
     setShowAuthModal(true);
   };
 
+  const handleProfilePress = () => {
+    setShowProfileModal(true);
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'scan':
-        return <ScanScreen />;
-      case 'collecte':
-        return <CollecteScreen />;
-      case 'profile':
         return (
-          <ProfileScreen
+          <ScanScreen 
             isAuthenticated={isAuthenticated}
-            onLoginPress={handleLoginPress}
-            onLogout={handleLogout}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
+      case 'collecte':
+        return (
+          <CollecteScreen 
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
             userInfo={userInfo || undefined}
           />
         );
       case 'conseils':
-        return <ConseilsScreen />;
+        return (
+          <ConseilsScreen 
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
       default:
-        return <ScanScreen />;
+        return (
+          <ScanScreen 
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
     }
   };
 
@@ -92,8 +113,13 @@ const MainNavigator = () => {
           style={[styles.tab, currentScreen === 'scan' && styles.activeTab]}
           onPress={() => setCurrentScreen('scan')}
         >
+          <MaterialIcons 
+            name="camera-alt" 
+            size={24} 
+            color={currentScreen === 'scan' ? colors.primary : colors.textLight} 
+          />
           <Text style={[styles.tabText, currentScreen === 'scan' && styles.activeTabText]}>
-            📱 Scan
+            Scan
           </Text>
         </TouchableOpacity>
 
@@ -101,17 +127,13 @@ const MainNavigator = () => {
           style={[styles.tab, currentScreen === 'collecte' && styles.activeTab]}
           onPress={() => setCurrentScreen('collecte')}
         >
+          <MaterialIcons 
+            name="recycling" 
+            size={24} 
+            color={currentScreen === 'collecte' ? colors.primary : colors.textLight} 
+          />
           <Text style={[styles.tabText, currentScreen === 'collecte' && styles.activeTabText]}>
-            ♻️ Collecte
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, currentScreen === 'profile' && styles.activeTab]}
-          onPress={() => setCurrentScreen('profile')}
-        >
-          <Text style={[styles.tabText, currentScreen === 'profile' && styles.activeTabText]}>
-            👤 Profile
+            Collecte
           </Text>
         </TouchableOpacity>
 
@@ -119,8 +141,13 @@ const MainNavigator = () => {
           style={[styles.tab, currentScreen === 'conseils' && styles.activeTab]}
           onPress={() => setCurrentScreen('conseils')}
         >
+          <MaterialIcons 
+            name="lightbulb" 
+            size={24} 
+            color={currentScreen === 'conseils' ? colors.primary : colors.textLight} 
+          />
           <Text style={[styles.tabText, currentScreen === 'conseils' && styles.activeTabText]}>
-            💡 Conseils
+            Conseils
           </Text>
         </TouchableOpacity>
       </View>
@@ -142,6 +169,29 @@ const MainNavigator = () => {
           <AuthScreen onAuthSuccess={handleAuthSuccess} />
         </SafeAreaView>
       </Modal>
+
+      {/* Modal du profil */}
+      <Modal
+        visible={showProfileModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        statusBarTranslucent={true}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={() => setShowProfileModal(false)}
+          >
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+          <ProfileScreen
+            isAuthenticated={isAuthenticated}
+            onLoginPress={handleLoginPress}
+            onLogout={handleLogout}
+            userInfo={userInfo || undefined}
+          />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 };
@@ -161,7 +211,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     paddingBottom: 8,
     paddingTop: 8,
-    height: 60,
+    height: 70,
   },
   tab: {
     flex: 1,
@@ -171,14 +221,16 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: colors.secondary,
-    borderRadius: 8,
+    borderRadius: 12,
     marginHorizontal: 4,
+    paddingVertical: 8,
   },
   tabText: {
     fontSize: 12,
     color: colors.textLight,
     fontWeight: '500',
     textAlign: 'center',
+    marginTop: 4,
   },
   activeTabText: {
     color: colors.primary,
