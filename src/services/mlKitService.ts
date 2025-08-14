@@ -19,6 +19,60 @@ export interface DetectedObject {
   trackingId?: number;
 }
 
+// 🚀 NOUVEAU : Interface pour la détection d'objets avancée
+export interface AdvancedDetectedObject {
+  id: string;
+  boundingBox: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
+  labels: Array<{
+    text: string;
+    confidence: number;
+    index: number;
+  }>;
+  confidence: number;
+  area: number;
+  center: {
+    x: number;
+    y: number;
+  };
+}
+
+// 🌿 NOUVEAU : Interface pour la segmentation d'images
+export interface SegmentedObject {
+  boundingBox: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
+  pixelCount: number;
+  area: number;
+  center: {
+    x: number;
+    y: number;
+  };
+}
+
+export interface SegmentationResult {
+  width: number;
+  height: number;
+  totalPixels: number;
+  segmentationMask: string;
+  objectZones: SegmentedObject[];
+}
+
+// 👤 NOUVEAU : Interface pour la détection de pose
+export interface DetectedPose {
+  id: string;
+  confidence: number;
+  landmarks: number;
+  isRecyclingAction: boolean;
+}
+
 export interface DetectedBarcode {
   rawValue: string;
   displayValue: string;
@@ -58,6 +112,16 @@ export interface ScanResult {
   barcodes: DetectedBarcode[];
   text: DetectedText[];
   faces: DetectedFace[];
+  // 🚀 NOUVEAU : Données de précision élevée
+  advancedObjects?: AdvancedDetectedObject[];
+  segmentedObjects?: SegmentedObject[];
+  segmentationInfo?: {
+    width: number;
+    height: number;
+    totalPixels: number;
+    objectZones: number;
+  };
+  poses?: DetectedPose[];
   timestamp: number;
 }
 
@@ -90,7 +154,7 @@ class MLKitService {
     }
   }
 
-  // Analyser une image pour détecter les objets avec ML Kit natif
+  // Détection d'objets avec ML Kit natif
   async detectObjects(imageUri: string): Promise<DetectedObject[]> {
     try {
       await this.initialize();
@@ -99,27 +163,27 @@ class MLKitService {
         console.log('🔍 Détection d\'objets avec ML Kit natif Android...');
         
         try {
-          // Utiliser le module natif ML Kit Android
-          const result = await this.mlKitModule.detectObjects(imageUri);
+          // 🚀 NOUVEAU : Utiliser la détection avancée pour plus de précision !
+          const result = await this.mlKitModule.detectObjectsAdvanced(imageUri);
+          console.log('✅ Objets détectés par ML Kit natif AVANCÉ:', result);
           
-          console.log('✅ Objets détectés par ML Kit natif:', result);
-          
-          return result.map((label: any, _index: number) => ({
-            id: `obj_${_index}`,
-            boundingBox: {
-              left: 0,
-              top: 0,
-              right: 0,
-              bottom: 0
-            },
-            labels: [{
-              text: label.text,
-              confidence: label.confidence
-            }]
+          // Convertir le format avancé vers le format standard pour compatibilité
+          return result.map((obj: any, index: number) => ({
+            id: obj.id || `obj_${index}`,
+            boundingBox: obj.boundingBox || { left: 0, top: 0, right: 0, bottom: 0 },
+            labels: obj.labels || [{ text: obj.text || 'Objet détecté', confidence: obj.confidence || 0.8 }]
           }));
         } catch (mlError) {
-          console.warn('⚠️ Erreur ML Kit natif:', mlError);
-          throw mlError;
+          console.warn('⚠️ Erreur ML Kit natif avancé, fallback vers standard:', mlError);
+          
+          // Fallback vers la détection standard si l'avancée échoue
+          const fallbackResult = await this.mlKitModule.detectObjects(imageUri);
+          console.log('✅ Fallback vers détection standard:', fallbackResult);
+          return fallbackResult.map((label: any, _index: number) => ({
+            id: `obj_${_index}`,
+            boundingBox: { left: 0, top: 0, right: 0, bottom: 0 },
+            labels: [{ text: label.text, confidence: label.confidence }]
+          }));
         }
       } else {
         throw new Error('ML Kit natif non activé');
@@ -258,6 +322,11 @@ class MLKitService {
           barcodes: result.barcodes || [],
           text: result.text || [],
           faces: result.faces || [],
+          // 🚀 NOUVEAU : Données de précision élevée
+          advancedObjects: result.advancedObjects || [],
+          segmentedObjects: result.segmentedObjects || [],
+          segmentationInfo: result.segmentationInfo,
+          poses: result.poses || [],
           timestamp: Date.now()
         };
       } else {
@@ -282,6 +351,56 @@ class MLKitService {
       }
     } catch (error) {
       console.error('❌ Erreur lors de l\'analyse ML Kit natif:', error);
+      throw error;
+    }
+  }
+
+  // 🚀 NOUVEAU : Méthode de détection d'objets avancée
+  async detectObjectsAdvanced(imageUri: string): Promise<AdvancedDetectedObject[]> {
+    try {
+      await this.initialize();
+      
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('🔍 Détection d\'objets avancée avec ML Kit natif Android...');
+        
+        try {
+          const result = await this.mlKitModule.detectObjectsAdvanced(imageUri);
+          console.log('✅ Objets avancés détectés par ML Kit natif:', result);
+          return result;
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif avancé:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la détection d\'objets avancés:', error);
+      throw error;
+    }
+  }
+
+  // 🌿 NOUVEAU : Méthode de segmentation d'images
+  async segmentImage(imageUri: string): Promise<SegmentationResult> {
+    try {
+      await this.initialize();
+      
+      if (this.useRealMLKit && this.mlKitModule) {
+        console.log('🌿 Segmentation d\'image avec ML Kit natif Android...');
+        
+        try {
+          const result = await this.mlKitModule.segmentImage(imageUri);
+          console.log('✅ Image segmentée par ML Kit natif:', result);
+          return result;
+        } catch (mlError) {
+          console.warn('⚠️ Erreur ML Kit natif segmentation:', mlError);
+          throw mlError;
+        }
+      } else {
+        throw new Error('ML Kit natif non activé');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la segmentation d\'image:', error);
       throw error;
     }
   }

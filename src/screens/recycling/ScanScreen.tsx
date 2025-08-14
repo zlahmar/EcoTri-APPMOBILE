@@ -13,9 +13,11 @@ import {
   Platform
 } from 'react-native';
 import { launchImageLibrary, launchCamera, ImagePickerResponse } from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import mlKitService, { ScanResult } from '../../services/mlKitService';
+import IconService from '../../services/iconService';
 
 const ScanScreen = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -189,11 +191,23 @@ const ScanScreen = () => {
 
     return (
       <View style={styles.resultsContainer}>
-        <Text style={styles.resultsTitle}>🔍 Résultats de l'analyse ML Kit</Text>
+        <Text style={styles.resultsTitle}>
+          <MaterialIcons 
+            name={IconService.getMLKitIconName('ai')} 
+            size={20} 
+            color={colors.primary} 
+          /> Résultats de l'analyse ML Kit
+        </Text>
         
         {objects.length > 0 && (
           <View style={styles.resultSection}>
-            <Text style={styles.resultSectionTitle}>🎯 Objets détectés:</Text>
+            <Text style={styles.resultSectionTitle}>
+              <MaterialIcons 
+                name={IconService.getMLKitIconName('object-detection')} 
+                size={18} 
+                color={colors.primary} 
+              /> Objets détectés:
+            </Text>
             {objects.map((obj, index) => (
               <View key={obj?.id || `obj_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
@@ -218,7 +232,13 @@ const ScanScreen = () => {
 
         {barcodes.length > 0 && (
           <View style={styles.resultSection}>
-            <Text style={styles.resultSectionTitle}>📊 Codes-barres:</Text>
+            <Text style={styles.resultSectionTitle}>
+              <MaterialIcons 
+                name={IconService.getMLKitIconName('barcode')} 
+                size={18} 
+                color={colors.primary} 
+              /> Codes-barres:
+            </Text>
             {barcodes.map((barcode, index) => (
               <View key={barcode?.rawValue || `barcode_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
@@ -234,7 +254,13 @@ const ScanScreen = () => {
 
         {text.length > 0 && (
           <View style={styles.resultSection}>
-            <Text style={styles.resultSectionTitle}>📝 Texte détecté:</Text>
+            <Text style={styles.resultSectionTitle}>
+              <MaterialIcons 
+                name={IconService.getMLKitIconName('text-recognition')} 
+                size={18} 
+                color={colors.primary} 
+              /> Texte détecté:
+            </Text>
             {text.map((textItem, index) => (
               <View key={textItem?.text || `text_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
@@ -252,7 +278,13 @@ const ScanScreen = () => {
 
         {faces.length > 0 && (
           <View style={styles.resultSection}>
-            <Text style={styles.resultSectionTitle}>👤 Visages détectés:</Text>
+            <Text style={styles.resultSectionTitle}>
+              <MaterialIcons 
+                name={IconService.getMLKitIconName('face-detection')} 
+                size={18} 
+                color={colors.primary} 
+              /> Visages détectés:
+            </Text>
             {faces.map((face, index) => (
               <View key={face?.id || `face_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
@@ -270,7 +302,13 @@ const ScanScreen = () => {
 
         {/* Affichage des données brutes pour debug */}
         <View style={styles.debugSection}>
-          <Text style={styles.debugTitle}>🐛 Debug - Structure des données:</Text>
+          <Text style={styles.debugTitle}>
+            <MaterialIcons 
+              name={IconService.getStatusIconName('info')} 
+              size={18} 
+              color={colors.warning} 
+            /> Debug - Structure des données:
+          </Text>
           <Text style={styles.debugText}>
             Objets: {JSON.stringify(objects.length)} | 
             Codes: {JSON.stringify(barcodes.length)} | 
@@ -316,7 +354,13 @@ const ScanScreen = () => {
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.resetButton} onPress={resetScan}>
-            <Text style={styles.resetButtonText}>🔄 Nouveau scan</Text>
+            <MaterialIcons 
+              name={IconService.getActionIconName('refresh')} 
+              size={20} 
+              color={colors.textInverse} 
+              style={styles.resetButtonIcon}
+            />
+            <Text style={styles.resetButtonText}>Nouveau scan</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -339,7 +383,12 @@ const ScanScreen = () => {
           <>
             <View style={styles.scanArea}>
               <View style={styles.scanFrame}>
-                <Text style={styles.scanIcon}>📱</Text>
+                <MaterialIcons 
+                  name={IconService.getUIIconName('scan')} 
+                  size={60} 
+                  color={colors.primary} 
+                  style={styles.scanIcon}
+                />
                 <Text style={styles.scanText}>Scanner un déchet</Text>
                 <Text style={styles.scanSubtext}>
                   Pointez votre caméra vers le code-barres ou l'objet
@@ -349,11 +398,13 @@ const ScanScreen = () => {
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.scanButton} onPress={handleCameraLaunch}>
-                <Text style={styles.scanButtonText}>📷 Prendre une photo</Text>
+                <Text style={styles.buttonIcon}>📷</Text>
+                <Text style={styles.scanButtonText}>Prendre une photo</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.galleryButton} onPress={handleGalleryLaunch}>
-                <Text style={styles.galleryButtonText}>🖼️ Choisir une image</Text>
+                <Text style={styles.buttonIcon}>🖼️</Text>
+                <Text style={styles.galleryButtonText}>Choisir une image</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -374,15 +425,30 @@ const ScanScreen = () => {
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Comment ça marche ?</Text>
           <View style={styles.infoItem}>
-            <Text style={styles.infoIcon}>1️⃣</Text>
+            <MaterialIcons 
+              name={IconService.getUIIconName('camera')} 
+              size={20} 
+              color={colors.primary} 
+              style={styles.infoIcon}
+            />
             <Text style={styles.infoText}>Prenez une photo ou sélectionnez une image</Text>
           </View>
           <View style={styles.infoItem}>
-            <Text style={styles.infoIcon}>2️⃣</Text>
+            <MaterialIcons 
+              name={IconService.getMLKitIconName('ai')} 
+              size={20} 
+              color={colors.primary} 
+              style={styles.infoIcon}
+            />
             <Text style={styles.infoText}>L'IA identifie automatiquement le type</Text>
           </View>
           <View style={styles.infoItem}>
-            <Text style={styles.infoIcon}>3️⃣</Text>
+            <MaterialIcons 
+              name={IconService.getEnvironmentalIconName('recycle')} 
+              size={20} 
+              color={colors.primary} 
+              style={styles.infoIcon}
+            />
             <Text style={styles.infoText}>Recevez des conseils de recyclage</Text>
           </View>
         </View>
@@ -638,6 +704,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  resetButtonIcon: {
+    marginBottom: 8,
+  },
   infoSection: {
     backgroundColor: colors.surface,
     padding: 20,
@@ -749,6 +818,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textLight,
     marginBottom: 4,
+  },
+  buttonIcon: {
+    marginBottom: 8,
   },
 });
 
