@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
-**Version** : 5.4.0  
-**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET
+**Version** : 6.0.0  
+**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET + PAGE D'ACCUEIL AVEC GÉOLOCALISATION + NAVIGATION INTELLIGENTE
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_

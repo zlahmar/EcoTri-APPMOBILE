@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   PermissionsAndroid,
+  Linking,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -514,16 +515,148 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   // Ouvrir la navigation vers un point
-  const openNavigation = (point: RecyclingPoint) => {
-    const url = `https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lon}#map=18/${point.lat}/${point.lon}`;
+  const openNavigation = async (point: RecyclingPoint) => {
+    const latitude = parseFloat(point.lat);
+    const longitude = parseFloat(point.lon);
+    
+    // Détecter les apps de navigation disponibles
+    const availableApps = await detectAvailableNavigationApps(latitude, longitude);
+    
+    if (availableApps.length === 0) {
+      // Aucune app de navigation trouvée, ouvrir directement dans le navigateur
+      const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+      await Linking.openURL(webUrl);
+      return;
+    }
+    
+    // Créer les options pour l'alerte
+    const alertOptions = [
+      { text: 'Annuler', style: 'cancel' as const },
+      ...availableApps.map(app => ({
+        text: app.name,
+        onPress: () => openApp(app.url, app.name, latitude, longitude)
+      }))
+    ];
+    
     Alert.alert(
-      'Navigation',
-      `Voulez-vous ouvrir la navigation vers ${point.display_name} ?`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Ouvrir', onPress: () => console.log('Ouvrir navigation vers:', url) }
-      ]
+      'Navigation vers le point de recyclage',
+      `Voulez-vous naviguer vers ${point.display_name} ?`,
+      alertOptions
     );
+  };
+
+  // Détecter les apps de navigation disponibles
+  const detectAvailableNavigationApps = async (latitude: number, longitude: number) => {
+    const apps = [];
+    
+    // Liste des apps de navigation populaires avec leurs URLs
+    const navigationApps = [
+      {
+        name: 'Google Maps',
+        url: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`,
+        scheme: 'comgooglemaps://'
+      },
+      {
+        name: 'Waze',
+        url: `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`,
+        scheme: 'waze://'
+      },
+      {
+        name: 'Apple Maps (iOS)',
+        url: `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`,
+        scheme: 'maps://'
+      },
+      {
+        name: 'HERE WeGo',
+        url: `here-route://mylocation/${latitude},${longitude}`,
+        scheme: 'here-route://'
+      },
+      {
+        name: 'Sygic',
+        url: `sygic://navigate?lat=${latitude}&lon=${longitude}`,
+        scheme: 'sygic://'
+      },
+      {
+        name: 'TomTom GO',
+        url: `tomtomgo://x-callback-url/navigate?lat=${latitude}&lon=${longitude}`,
+        scheme: 'tomtomgo://'
+      },
+      {
+        name: 'Maps.me',
+        url: `mapsme://route?ll=${latitude},${longitude}`,
+        scheme: 'mapsme://'
+      },
+      {
+        name: 'OsmAnd',
+        url: `osmand://navigate?lat=${latitude}&lon=${longitude}`,
+        scheme: 'osmand://'
+      },
+      {
+        name: 'Bing Maps',
+        url: `bingmaps://?cp=${latitude}~${longitude}&lvl=16`,
+        scheme: 'bingmaps://'
+      },
+      {
+        name: 'Yandex Maps',
+        url: `yandexmaps://maps.yandex.com/?pt=${longitude},${latitude}&z=16`,
+        scheme: 'yandexmaps://'
+      }
+    ];
+    
+    // Vérifier quelles apps sont installées
+    for (const app of navigationApps) {
+      try {
+        const canOpen = await Linking.canOpenURL(app.scheme);
+        if (canOpen) {
+          apps.push(app);
+          console.log(`App détectée: ${app.name}`);
+        }
+      } catch (error) {
+        console.log(`Erreur lors de la vérification de ${app.name}:`, error);
+      }
+    }
+    
+    // Ajouter l'app de navigation par défaut du système
+    const defaultMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+    try {
+      const canOpenDefault = await Linking.canOpenURL(defaultMapsUrl);
+      if (canOpenDefault) {
+        apps.push({
+          name: 'App de navigation par défaut',
+          url: defaultMapsUrl,
+          scheme: 'geo:'
+        });
+        console.log('App de navigation par défaut détectée');
+      }
+    } catch (error) {
+      console.log('Erreur lors de la vérification de l\'app par défaut:', error);
+    }
+    
+    console.log(`${apps.length} apps de navigation disponibles`);
+    return apps;
+  };
+
+  // Ouvrir une application ou URL
+  const openApp = async (url: string, appName: string, latitude: number, longitude: number) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      
+      if (supported) {
+        await Linking.openURL(url);
+        console.log(`Navigation ouverte dans ${appName}`);
+      } else {
+        // Si l'URL n'est pas supportée, essayer d'ouvrir dans le navigateur
+        const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+        await Linking.openURL(webUrl);
+        console.log('Navigation ouverte dans le navigateur web');
+      }
+    } catch (error) {
+      console.error(`Erreur lors de l'ouverture de ${appName}:`, error);
+      Alert.alert(
+        'Erreur de navigation',
+        `Impossible d'ouvrir ${appName}. Vérifiez que l'application est installée.`
+      );
+    }
   };
 
   return (
