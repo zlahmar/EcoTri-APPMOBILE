@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, SafeAreaView, Alert } 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../styles';
 import ProfileScreen from '../screens/main/ProfileScreen';
+import HomeScreen from '../screens/main/HomeScreen';
 import { ScanScreen, CollecteScreen, ConseilsScreen } from '../screens/recycling';
 import AuthScreen from '../screens/auth/AuthScreen';
 import authService, { UserData } from '../services/authService';
 
 const MainNavigator = () => {
-  const [currentScreen, setCurrentScreen] = useState('scan');
+  const [currentScreen, setCurrentScreen] = useState('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -65,6 +66,14 @@ const MainNavigator = () => {
 
   const renderScreen = () => {
     switch (currentScreen) {
+      case 'home':
+        return (
+          <HomeScreen 
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
       case 'scan':
         return (
           <ScanScreen 
@@ -91,7 +100,7 @@ const MainNavigator = () => {
         );
       default:
         return (
-          <ScanScreen 
+          <HomeScreen 
             isAuthenticated={isAuthenticated}
             onProfilePress={handleProfilePress}
             userInfo={userInfo || undefined}
@@ -109,6 +118,20 @@ const MainNavigator = () => {
 
       {/* Barre de navigation personnalisée */}
       <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === 'home' && styles.activeTab]}
+          onPress={() => setCurrentScreen('home')}
+        >
+          <MaterialIcons 
+            name="home" 
+            size={24} 
+            color={currentScreen === 'home' ? colors.primary : colors.textLight} 
+          />
+          <Text style={[styles.tabText, currentScreen === 'home' && styles.activeTabText]}>
+            Accueil
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.tab, currentScreen === 'scan' && styles.activeTab]}
           onPress={() => setCurrentScreen('scan')}
