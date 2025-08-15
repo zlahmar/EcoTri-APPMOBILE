@@ -5,6 +5,9 @@ export { default as IconService } from './iconService';
 export { default as firebaseApp } from './firebase';
 export { default as locationService } from './locationService';
 export { useLocation } from './useLocation';
+export { default as collecteService } from './collecteService';
+
 export * from './authService';
 export * from './firestoreService';
 export * from './locationService';
+export * from './collecteService';

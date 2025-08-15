@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
 **Version** : 7.0.0  
-**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET + PAGE D'ACCUEIL AVEC GÉOLOCALISATION + NAVIGATION INTELLIGENTE + SYSTÈME DE FILTRAGE AVANCÉ + SÉLECTION DE RAYON DYNAMIQUE
+**Statut** : ✅ PAGE DE COLLECTE INTELLIGENTE + DONNÉES BORDEAUX MÉTROPOLE + CALENDRIER HEBDOMADAIRE + SERVICES CENTRALISÉS + GÉOLOCALISATION UNIFIÉE + INTERFACE MODERNISÉE + COMPOSANTS RÉUTILISABLES
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -36,6 +36,50 @@ L'application compile et s'installe parfaitement sur Android avec tous les servi
 - **Build** : Gradle 8.14.3
 
 ## 🏗️ **Architecture du Projet**
+
+### **Architecture des Services (Versions 6.0.0+)**
+
+#### **🌍 LocationService - Géolocalisation Centralisée**
+```typescript
+// Service singleton pour la gestion de la géolocalisation
+class LocationService {
+  private static instance: LocationService;
+  
+  // Méthodes principales
+  async getCurrentLocation(): Promise<LocationData>
+  async checkAndRequestPermissions(): Promise<boolean>
+  async reverseGeocode(lat: number, lon: number): Promise<string>
+  async refreshLocation(): Promise<LocationData>
+}
+
+// Hook React personnalisé
+export const useLocation = (options: UseLocationOptions) => {
+  // Retourne : city, location, isLoading, hasLocation, getCurrentLocation, refreshLocation
+}
+```
+
+#### **🗑️ CollecteService - Gestion des Données de Collecte**
+```typescript
+// Service singleton pour la gestion des données de collecte
+class CollecteService {
+  private static instance: CollecteService;
+  private zones: CollecteZone[] = [];
+  
+  // Méthodes principales
+  findNearestZone(lat: number, lon: number): CollecteZone | null
+  getCollecteInfo(commune: string): CollecteInfo | null
+  getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null
+  getAvailableCommunes(): string[]
+  formatCollecteDays(jours: string[]): string
+  getNextCollecteDay(jours: string[]): string | null
+}
+```
+
+#### **📊 Composants Réutilisables**
+- **`CollecteInfo`** : Affichage détaillé des informations de collecte
+- **`CommuneSelector`** : Modal de sélection de commune avec recherche
+- **`WeeklyCalendar`** : Calendrier hebdomadaire visuel avec badges colorés
+- **`LocationDisplay`** : Affichage standardisé de la localisation
 
 ### **Structure des Dossiers**
 
@@ -113,10 +157,14 @@ EcoTri/
 
 ### 4. CollecteScreen ♻️
 
-- Statistiques de collecte (déchets scannés, recyclés, en attente)
-- Types de déchets avec icônes colorées (plastique, papier, verre, métal)
-- Centres de recyclage proches avec distances
-- Boutons d'action pour chaque type de déchet
+- **Intégration des données Bordeaux Métropole** : Fichier `en_frcol_s.json` avec fréquences de collecte
+- **Service de collecte intelligent** : `CollecteService` singleton pour la gestion des données
+- **Géolocalisation automatique** : Détection de la ville et affichage des informations de collecte
+- **Sélecteur de commune** : Choix parmi les villes disponibles dans le dataset
+- **Calendrier hebdomadaire visuel** : Vue d'ensemble de la semaine avec types de collecte
+- **Composants réutilisables** : `CollecteInfo`, `CommuneSelector`, `WeeklyCalendar`
+- **Types de collecte** : Ordures Ménagères (OM) et Tri/Recyclage (TRI)
+- **Informations détaillées** : Jours de collecte, passage, prochaine collecte
 
 ### 4. ProfileScreen 👤
 
@@ -1230,6 +1278,48 @@ override val isHermesEnabled: Boolean = true
 - [x] Gestion complète des erreurs Firebase
 - [x] Fonctionnalité de réinitialisation de mot de passe
 
+## 📊 **Données Intégrées - Bordeaux Métropole**
+
+### **🗑️ Dataset de Collecte des Déchets**
+- **Source** : Fichier `en_frcol_s.json` dans `src/assets/donnees/`
+- **Contenu** : Fréquences de collecte des déchets ménagers sur le territoire de Bordeaux Métropole
+- **Format** : JSON structuré avec coordonnées GPS et informations de collecte
+- **Données** : Plus de 100 zones géographiques avec informations détaillées
+
+#### **📋 Structure des Données**
+```json
+{
+  "geo_point_2d": {"lat": 44.837789, "lon": -0.57918},
+  "commune": "Bordeaux",
+  "type": "OM", // Ordures Ménagères
+  "jour_col": ["LUNDI", "MERCREDI", "VENDREDI"],
+  "passage": "Matin",
+  "zone": "Zone A"
+}
+```
+
+#### **🎯 Types de Collecte Supportés**
+- **OM (Ordures Ménagères)** : Déchets non recyclables (bac gris)
+- **TRI (Tri & Recyclage)** : Déchets recyclables (bac vert)
+- **Passages** : Matin, Après-midi, Soir
+- **Fréquences** : Quotidienne, Hebdomadaire, Bi-hebdomadaire
+
+#### **🌍 Zones Géographiques**
+- **Bordeaux** : Centre-ville et quartiers
+- **Mérignac** : Zones résidentielles et commerciales
+- **Pessac** : Secteurs universitaires et résidentiels
+- **Talence** : Zones mixtes et résidentielles
+- **Villenave-d'Ornon** : Secteurs périurbains
+- **Et plus de 20 autres communes** de la métropole
+
+### **🔍 Fonctionnalités de Recherche**
+- **Géolocalisation automatique** : Détection de la zone la plus proche
+- **Recherche par commune** : Sélection manuelle parmi les villes disponibles
+- **Filtrage intelligent** : Tri par type de collecte et fréquence
+- **Calcul de distance** : Algorithme de Haversine pour la précision GPS
+
+---
+
 ## 🚀 Installation et Démarrage
 
 ### Prérequis
@@ -1332,6 +1422,33 @@ npm test
 - [ ] Intégration avec bases de données de recyclage externes
 
 ## 🎯 Fonctionnalités Actuelles
+
+### ✅ **Implémentées et Fonctionnelles**
+
+#### **🗑️ Page de Collecte Intelligente (Version 7.0.0)**
+- **Intégration des données Bordeaux Métropole** : Dataset `en_frcol_s.json` avec fréquences de collecte par zone géographique
+- **Service de collecte intelligent** : `CollecteService` singleton pour la gestion centralisée des données
+- **Géolocalisation automatique** : Détection de la ville et affichage des informations de collecte correspondantes
+- **Sélecteur de commune** : Modal de sélection avec recherche et filtrage parmi les villes disponibles
+- **Calendrier hebdomadaire visuel** : Vue d'ensemble de la semaine avec badges colorés pour les types de collecte
+- **Composants réutilisables** : `CollecteInfo`, `CommuneSelector`, `WeeklyCalendar` modulaires
+- **Types de collecte** : Ordures Ménagères (OM) et Tri/Recyclage (TRI) avec passages et fréquences
+- **Informations détaillées** : Jours de collecte, passage, prochaine collecte, coordonnées GPS
+- **Interface modernisée** : Icons MaterialIcons, design cohérent, composants stylés
+
+#### **🌍 Service de Géolocalisation Centralisé (Version 6.0.0)**
+- **`LocationService`** : Singleton pour la gestion centralisée de la géolocalisation
+- **`useLocation`** : Hook React personnalisé pour l'utilisation du service dans les composants
+- **Permissions automatiques** : Gestion des permissions Android pour la localisation
+- **Reverse geocoding** : Conversion automatique coordonnées → nom de ville via OpenStreetMap
+- **Intégration unifiée** : Même service utilisé dans HomeScreen et ProfileScreen
+- **Performance optimisée** : Pas de duplication de code, état synchronisé
+
+#### **📱 Interface Utilisateur Modernisée**
+- **Icons MaterialIcons** : Remplacement des emojis par des icônes vectorielles professionnelles
+- **Design cohérent** : Utilisation de la palette de couleurs EcoTri sur tous les composants
+- **Composants stylés** : Ombres, bordures arrondies, espacement harmonieux
+- **Navigation intuitive** : Interface utilisateur cohérente et moderne
 
 ### ✅ **Implémentées et Fonctionnelles**
 

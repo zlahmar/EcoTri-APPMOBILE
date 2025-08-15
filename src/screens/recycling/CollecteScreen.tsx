@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
+import { CollecteInfo, CommuneSelector, WeeklyCalendar } from '../../components/common';
+import { useLocation, collecteService } from '../../services';
 
 const CollecteScreen = ({ 
   isAuthenticated = false, 
@@ -12,111 +14,130 @@ const CollecteScreen = ({
   onProfilePress?: () => void; 
   userInfo?: any; 
 }) => {
+  const [selectedCommune, setSelectedCommune] = useState<string>('');
+  const [collecteInfo, setCollecteInfo] = useState<any>(null);
+  const [showCommuneSelector, setShowCommuneSelector] = useState(false);
+  const [availableCommunes, setAvailableCommunes] = useState<string[]>([]);
+
+  // 📍 Utiliser le service de géolocalisation
+  const { city, location, getCurrentLocation } = useLocation({
+    onLocationUpdate: (locationData) => {
+      console.log('📍 Nouvelle localisation dans CollecteScreen:', locationData);
+      if (locationData) {
+        updateCollecteInfoByLocation(locationData.latitude, locationData.longitude);
+      }
+    },
+    onError: (error) => {
+      console.error('Erreur de localisation dans CollecteScreen:', error);
+    },
+  });
+
+  // Charger les communes disponibles au démarrage
+  useEffect(() => {
+    const communes = collecteService.getAvailableCommunes();
+    setAvailableCommunes(communes);
+    console.log('🏘️ Communes disponibles:', communes.length);
+  }, []);
+
+  // Mettre à jour les informations de collecte par localisation
+  const updateCollecteInfoByLocation = (lat: number, lon: number) => {
+    try {
+      const info = collecteService.getCollecteInfoByLocation(lat, lon);
+      if (info) {
+        setCollecteInfo(info);
+        setSelectedCommune(info.commune);
+        console.log('🗑️ Informations de collecte trouvées pour:', info.commune);
+      } else {
+        console.log('❌ Aucune information de collecte trouvée pour cette localisation');
+        setCollecteInfo(null);
+        setSelectedCommune('');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations de collecte:', error);
+    }
+  };
+
+  // Mettre à jour les informations de collecte par commune sélectionnée
+  const updateCollecteInfoByCommune = (commune: string) => {
+    try {
+      const info = collecteService.getCollecteInfo(commune);
+      if (info) {
+        setCollecteInfo(info);
+        setSelectedCommune(commune);
+        console.log('🗑️ Informations de collecte mises à jour pour:', commune);
+      } else {
+        console.log('❌ Aucune information de collecte trouvée pour:', commune);
+        setCollecteInfo(null);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations de collecte:', error);
+    }
+  };
+
+  // Gérer le changement de commune
+  const handleCommuneChange = (commune: string) => {
+    updateCollecteInfoByCommune(commune);
+  };
+
+  // Charger la localisation au démarrage
+  useEffect(() => {
+    getCurrentLocation();
+  }, [getCurrentLocation]);
+
+  // Mettre à jour les informations de collecte quand la localisation change
+  useEffect(() => {
+    if (location) {
+      updateCollecteInfoByLocation(location.latitude, location.longitude);
+    }
+  }, [location]);
+
   return (
     <SafeAreaView style={styles.container}>
       <Header 
-        title="Collecte & Recyclage" 
+        title="Calendrier de Collecte" 
         showProfileIcon={true}
         isAuthenticated={isAuthenticated} 
         onProfilePress={onProfilePress}
       />
       
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Statistiques de collecte */}
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Vos Statistiques</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>24</Text>
-              <Text style={styles.statLabel}>Déchets Scannés</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>18</Text>
-              <Text style={styles.statLabel}>Recyclés</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>6</Text>
-              <Text style={styles.statLabel}>En Attente</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Types de déchets */}
-        <View style={styles.wasteTypesSection}>
-          <Text style={styles.sectionTitle}>Types de Déchets</Text>
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.plastic }]}>
-              <Text style={styles.wasteIconText}>🥤</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Plastique</Text>
-              <Text style={styles.wasteCount}>8 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.paper }]}>
-              <Text style={styles.wasteIconText}>📄</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Papier</Text>
-              <Text style={styles.wasteCount}>6 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.glass }]}>
-              <Text style={styles.wasteIconText}>🍷</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Verre</Text>
-              <Text style={styles.wasteCount}>4 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.metal }]}>
-              <Text style={styles.wasteIconText}>🥫</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Métal</Text>
-              <Text style={styles.wasteCount}>6 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Centres de recyclage */}
-        <View style={styles.centersSection}>
-          <Text style={styles.sectionTitle}>Centres de Recyclage Proches</Text>
-          <TouchableOpacity style={styles.centerCard}>
-            <Text style={styles.centerName}>♻️ ÉcoPoint Centre</Text>
-            <Text style={styles.centerAddress}>123 Rue de l'Écologie, Paris</Text>
-            <Text style={styles.centerDistance}>À 0.8 km de chez vous</Text>
-          </TouchableOpacity>
+        {/* Informations de collecte */}
+        <View style={styles.collecteSection}>
           
-          <TouchableOpacity style={styles.centerCard}>
-            <Text style={styles.centerName}>♻️ Recyclage Express</Text>
-            <Text style={styles.centerAddress}>456 Avenue Verte, Paris</Text>
-            <Text style={styles.centerDistance}>À 1.2 km de chez vous</Text>
-          </TouchableOpacity>
+          {collecteInfo ? (
+            <>
+              <CollecteInfo
+                collecteInfo={collecteInfo}
+                onCommuneChange={() => setShowCommuneSelector(true)}
+                showCommuneSelector={true}
+              />
+              
+              {/* Calendrier hebdomadaire */}
+              <WeeklyCalendar collecteInfo={collecteInfo} />
+            </>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>
+                {city ? `Aucune information de collecte disponible pour ${city}` : 'Localisation en cours...'}
+              </Text>
+              <TouchableOpacity 
+                style={styles.selectCommuneButton}
+                onPress={() => setShowCommuneSelector(true)}
+              >
+                <Text style={styles.selectCommuneButtonText}>Sélectionner une commune</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        {/* Bouton d'action principal */}
-        <TouchableOpacity style={styles.mainActionButton}>
-          <Text style={styles.mainActionButtonText}>📱 Scanner un Nouveau Déchet</Text>
-        </TouchableOpacity>
+        {/* Sélecteur de commune */}
+        <CommuneSelector
+          selectedCommune={selectedCommune}
+          availableCommunes={availableCommunes}
+          onCommuneSelect={handleCommuneChange}
+          visible={showCommuneSelector}
+          onClose={() => setShowCommuneSelector(false)}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -131,141 +152,32 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 15,
+
+  collecteSection: {
+    marginBottom: 25,
+  },
+  noDataContainer: {
+    backgroundColor: colors.surface,
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
     marginTop: 10,
   },
-  statsSection: {
-    marginBottom: 25,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 5,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 5,
-  },
-  statLabel: {
-    fontSize: 12,
+  noDataText: {
+    fontSize: 16,
     color: colors.textLight,
     textAlign: 'center',
+    marginBottom: 15,
   },
-  wasteTypesSection: {
-    marginBottom: 25,
-  },
-  wasteTypeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  wasteIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  wasteIconText: {
-    fontSize: 24,
-  },
-  wasteInfo: {
-    flex: 1,
-  },
-  wasteName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  wasteCount: {
-    fontSize: 14,
-    color: colors.textLight,
-  },
-  collectButton: {
+  selectCommuneButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  collectButtonText: {
-    color: colors.textInverse,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  centersSection: {
-    marginBottom: 25,
-  },
-  centerCard: {
-    backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  centerName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 5,
-  },
-  centerAddress: {
-    fontSize: 14,
-    color: colors.textLight,
-    marginBottom: 3,
-  },
-  centerDistance: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  mainActionButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 25,
-    alignItems: 'center',
-    marginBottom: 30,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
   },
-  mainActionButtonText: {
+  selectCommuneButtonText: {
     color: colors.textInverse,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });
