@@ -1,155 +1,94 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { colors } from '../../styles/colors';
+import { colors } from '../../styles';
 
 interface HeaderProps {
   title: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  onLeftPress?: () => void;
-  onRightPress?: () => void;
-  showBackButton?: boolean;
-  onBackPress?: () => void;
-  // Nouvelles props pour le profil
   showProfileIcon?: boolean;
   isAuthenticated?: boolean;
   onProfilePress?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  title,
-  leftIcon,
-  rightIcon,
-  onLeftPress,
-  onRightPress,
-  showBackButton = false,
-  onBackPress,
-  showProfileIcon = false,
-  isAuthenticated = false,
-  onProfilePress,
+const Header: React.FC<HeaderProps> = ({ 
+  title, 
+  showProfileIcon = false, 
+  isAuthenticated = false, 
+  onProfilePress 
 }) => {
   return (
-    <View style={styles.container}>
-      <StatusBar
-        backgroundColor={colors.primaryDark}
-        barStyle="light-content"
-      />
-      <View style={styles.content}>
-        <View style={styles.leftSection}>
-          {showBackButton && (
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={onBackPress}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.backButtonText}>←</Text>
-            </TouchableOpacity>
-          )}
-          {leftIcon && (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onLeftPress}
-              activeOpacity={0.7}
-            >
-              {leftIcon}
-            </TouchableOpacity>
-          )}
-        </View>
-        
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-        
-        <View style={styles.rightSection}>
-          {rightIcon && (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onRightPress}
-              activeOpacity={0.7}
-            >
-              {rightIcon}
-            </TouchableOpacity>
-          )}
-          {showProfileIcon && (
-            <TouchableOpacity
-              style={styles.profileButton}
-              onPress={onProfilePress}
-              activeOpacity={0.7}
-            >
-              <MaterialIcons 
-                name={isAuthenticated ? "account-circle" : "person-add"} 
-                size={28} 
-                color="white" 
-              />
-            </TouchableOpacity>
-          )}
-        </View>
+    <View style={styles.header}>
+      {/* Logo à gauche */}
+      <View style={styles.leftSection}>
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logo} 
+          resizeMode="contain"
+        />
+      </View>
+      
+      {/* Titre au centre */}
+      <View style={styles.centerSection}>
+        <Text style={styles.title}>{title}</Text>
+      </View>
+      
+      {/* Icône de profil à droite */}
+      <View style={styles.rightSection}>
+        {showProfileIcon && (
+          <TouchableOpacity 
+            style={styles.profileIcon} 
+            onPress={onProfilePress}
+          >
+            <MaterialIcons 
+              name={isAuthenticated ? "account-circle" : "person-outline"} 
+              size={28} 
+              color={colors.primary} 
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.primaryDark,
-    paddingTop: 32, // Réduit de 44 à 32 pour économiser l'espace
-    paddingBottom: 12, // Réduit de 16 à 12
-  },
-  content: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: colors.primaryDark,
+    paddingTop: 32, // Espace pour la barre de statut
+    paddingBottom: 12,
     paddingHorizontal: 16,
-    minHeight: 36, // Réduit de 44 à 36
+    elevation: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   leftSection: {
-    flexDirection: 'row',
+    width: 60, // Fixed width for the logo
     alignItems: 'center',
-    minWidth: 60,
   },
-  rightSection: {
-    flexDirection: 'row',
+  logo: {
+    width: 40, // Adjust as needed
+    height: 40, // Adjust as needed
+  },
+  centerSection: {
+    flex: 1, // Takes available space for the title
     alignItems: 'center',
-    minWidth: 60,
-    justifyContent: 'flex-end',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.textInverse,
-    flex: 1,
     textAlign: 'center',
-    marginHorizontal: 16,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+  rightSection: {
+    width: 60, // Fixed width for the profile icon
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  backButtonText: {
-    fontSize: 20,
-    color: colors.textInverse,
-    fontWeight: '600',
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileButton: {
+  profileIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,

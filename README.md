@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
-**Version** : 6.0.0  
-**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET + PAGE D'ACCUEIL AVEC GÉOLOCALISATION + NAVIGATION INTELLIGENTE
+**Version** : 7.0.0  
+**Statut** : ✅ NAVIGATION MODERNISÉE + ICÔNES MATERIAL + INTERFACE COHÉRENTE + SYSTÈME DE STATISTIQUES COMPLET + PAGE D'ACCUEIL AVEC GÉOLOCALISATION + NAVIGATION INTELLIGENTE + SYSTÈME DE FILTRAGE AVANCÉ + SÉLECTION DE RAYON DYNAMIQUE
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -94,7 +94,24 @@ EcoTri/
 - Instructions étape par étape
 - Design moderne avec ombres et animations
 
-### 3. CollecteScreen ♻️
+### 3. HomeScreen 🏠 (Page d'Accueil)
+
+- **Géolocalisation intelligente** avec détection automatique de la ville
+- **Points de recyclage proches** via Overpass API et Nominatim (fallback)
+- **Système de filtrage avancé** par type de recyclage :
+  - 🍷 **Verre** : Bouteilles, contenants, etc.
+  - 🥤 **Plastique** : Bouteilles, emballages, etc.
+  - 📄 **Papier** : Papier, carton, livres, magazines
+  - 🔩 **Métal** : Aluminium, acier, boîtes de conserve
+  - 📱 **Électronique** : Téléphones, ordinateurs, électroménager
+  - 👕 **Textile** : Vêtements, chaussures
+  - 🔋 **Piles** : Piles, batteries, ampoules
+  - 🌱 **Organique** : Compost, déchets verts, biodégradables
+- **Sélection de rayon dynamique** : 500m, 1km, 2km, 5km, 10km
+- **Navigation intelligente** vers les points avec détection automatique des apps installées
+- **Interface moderne** avec logo personnalisé et design épuré
+
+### 4. CollecteScreen ♻️
 
 - Statistiques de collecte (déchets scannés, recyclés, en attente)
 - Types de déchets avec icônes colorées (plastique, papier, verre, métal)

@@ -1,6 +1,6 @@
 # 📚 Documentation Technique - EcoTri
 
-**Version :** 6.0.0  
+**Version :** 7.0.0  
 **Dernière mise à jour :** Décembre 2024
 
 ## 🎯 **Vue d'Ensemble**
@@ -14,6 +14,7 @@ Cette documentation technique couvre l'ensemble des fonctionnalités de l'applic
 #### **🏠 Page d'Accueil Intelligente**
 - [Géolocalisation et API Overpass](./GEOLOCALISATION_OVERPASS.md) - Système de géolocalisation et recherche de points de recyclage
 - [Navigation Intelligente](./NAVIGATION_INTELLIGENTE.md) - Détection automatique des apps de navigation installées
+- [Système de Filtrage Avancé](./FILTRAGE_AVANCE.md) - Filtrage par type de recyclage et sélection de rayon dynamique
 
 #### **📱 Interface et Navigation**
 - [Changelog](./CHANGELOG.md) - Historique complet des versions et fonctionnalités
@@ -96,6 +97,9 @@ FIREBASE_PROJECT_ID=your_project_id
 - **🗺️ Recherche de points de recyclage** via API Overpass
 - **🔄 Système de fallback** Overpass → Nominatim
 - **🧭 Navigation intelligente** vers les points
+- **🔍 Système de filtrage avancé** par type de recyclage (verre, plastique, papier, métal, etc.)
+- **📏 Sélection de rayon dynamique** (500m à 10km) avec interface moderne
+- **🎨 Interface optimisée** avec filtres visuels et design épuré
 
 ### **📸 Scanner Intelligent (ScanScreen)**
 - **🤖 Reconnaissance ML Kit** des types de déchets

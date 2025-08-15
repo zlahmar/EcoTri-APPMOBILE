@@ -1,5 +1,134 @@
 # 📚 Changelog - EcoTri
 
+## Version 7.0.0 - Système de Filtrage Avancé et Sélection de Rayon Dynamique
+**Date :** Décembre 2024
+
+### 🆕 **Nouvelles Fonctionnalités**
+
+#### 🔍 **Système de Filtrage Avancé par Type de Recyclage**
+- **🍷 Filtre Verre** : Bouteilles, contenants, verre en général
+- **🥤 Filtre Plastique** : Bouteilles, emballages, sacs plastique
+- **📄 Filtre Papier** : Papier, carton, livres, magazines, journaux
+- **🔩 Filtre Métal** : Aluminium, acier, boîtes de conserve, canettes
+- **📱 Filtre Électronique** : Téléphones, ordinateurs, électroménager, petits appareils
+- **👕 Filtre Textile** : Vêtements, chaussures, tissus
+- **🔋 Filtre Piles** : Piles, batteries, ampoules, tubes fluorescents
+- **🌱 Filtre Organique** : Compost, déchets verts, biodégradables, jardin
+- **🎯 Filtrage intelligent** : Recherche dans le type ET le nom du point
+- **🔍 Mots-clés multiples** : Chaque filtre utilise plusieurs termes de recherche
+- **📊 Interface de filtrage** : Boutons horizontaux scrollables avec états actifs/inactifs
+- **🧹 Bouton "Effacer"** : Suppression rapide de tous les filtres actifs
+
+#### 📏 **Sélection de Rayon de Recherche Dynamique**
+- **⚙️ Rayons configurables** : 500m, 1km, 2km, 5km, 10km
+- **🎛️ Interface dropdown** : Sélecteur compact avec menu flottant
+- **🔄 Mise à jour automatique** : Recherche immédiate lors du changement de rayon
+- **📱 Modal overlay** : Menu toujours visible au premier plan (z-index élevé)
+- **🎨 Design moderne** : Interface épurée et intuitive
+
+#### 🎨 **Améliorations de l'Interface Utilisateur**
+- **🏠 Page d'accueil optimisée** : Layout compact et élégant
+- **📍 Indicateur de localisation** : Emoji 📍 à gauche du nom de la ville
+- **🔄 Bouton de rafraîchissement unique** : Interface simplifiée et centrée
+- **🎯 Filtres visuels** : Icônes Material Design avec couleurs distinctes
+- **📱 Responsive design** : Adaptation automatique à toutes les tailles d'écran
+
+### 🛠️ **Modifications Techniques**
+
+#### **Fichiers Modifiés**
+- `src/screens/main/HomeScreen.tsx` : Ajout du système de filtrage et sélection de rayon
+- **Nouvelle logique de filtrage** : Fonction `getFilterKeywords()` avec mots-clés multiples
+- **Interface de sélection de rayon** : Composant Modal avec overlay
+- **Système de debug** : Logs détaillés pour le débogage des filtres
+
+#### **Nouvelles Fonctions**
+```typescript
+// Système de filtrage intelligent
+const getFilterKeywords = (filterKey: string): string[] => {
+  const keywords: { [key: string]: string[] } = {
+    'glass': ['verre', 'bouteille', 'bouteilles', 'glass', 'bouteilles en verre'],
+    'plastic': ['plastique', 'plastic', 'bouteilles en plastique', 'emballages plastique'],
+    // ... autres filtres avec mots-clés multiples
+  };
+  return keywords[filterKey] || [filterKey];
+};
+
+// Filtrage avancé
+const applyFilters = useCallback(() => {
+  // Recherche dans le type ET le nom du point
+  // Utilisation des mots-clés multiples pour chaque filtre
+}, [activeFilters, recyclingPoints]);
+```
+
+#### **Interface de Filtrage**
+- **Boutons de filtre** : Design Material avec états actifs/inactifs
+- **Scroll horizontal** : Navigation fluide entre tous les filtres
+- **Bouton "Effacer"** : Apparition conditionnelle quand des filtres sont actifs
+- **Icônes distinctes** : Chaque type de recyclage a sa propre icône
+
+#### **Sélecteur de Rayon**
+- **Menu dropdown** : Interface compacte avec Modal overlay
+- **Z-index élevé** : Affichage toujours au premier plan
+- **Mise à jour automatique** : Recherche immédiate des points de recyclage
+- **Design responsive** : Adaptation à toutes les tailles d'écran
+
+### 🎯 **Fonctionnalités Détaillées**
+
+#### **Système de Filtrage Intelligent**
+- **Recherche multi-critères** : Type du point + nom/description
+- **Mots-clés étendus** : Chaque filtre utilise 5-8 termes de recherche
+- **Filtrage en temps réel** : Mise à jour immédiate lors de la sélection
+- **Gestion des cas limites** : Fallback sur "Recyclage général" si pas de type spécifique
+- **Performance optimisée** : Filtrage client-side pour une réactivité maximale
+
+#### **Sélection de Rayon Dynamique**
+- **Rayons prédéfinis** : 500m, 1km, 2km, 5km, 10km
+- **Interface intuitive** : Menu flottant avec sélection visuelle
+- **Mise à jour automatique** : Recherche immédiate via Overpass API
+- **Gestion des erreurs** : Fallback sur le rayon précédent en cas d'échec
+
+#### **Interface Utilisateur Modernisée**
+- **Design épuré** : Suppression des éléments redondants
+- **Indicateurs visuels** : Emoji 📍 pour la localisation
+- **Boutons uniques** : Interface simplifiée et centrée
+- **Responsive design** : Adaptation automatique à toutes les tailles
+
+### 🚀 **Avantages Utilisateur**
+
+#### **Expérience de Filtrage**
+- **Recherche précise** : Trouve facilement les points de recyclage spécifiques
+- **Interface intuitive** : Boutons visuels avec icônes distinctes
+- **Filtrage rapide** : Résultats en temps réel
+- **Gestion des filtres** : Ajout/suppression facile avec bouton "Effacer"
+
+#### **Contrôle du Rayon de Recherche**
+- **Flexibilité** : Choix du rayon selon les besoins (proche vs éloigné)
+- **Interface compacte** : Sélecteur qui ne prend pas de place
+- **Mise à jour immédiate** : Résultats instantanés
+- **Rayons adaptés** : Du très proche (500m) au très large (10km)
+
+#### **Interface Optimisée**
+- **Plus d'espace** : Layout compact pour le contenu principal
+- **Navigation fluide** : Filtres et rayon facilement accessibles
+- **Design cohérent** : Style uniforme avec le reste de l'application
+- **Responsive** : Fonctionne sur tous les appareils
+
+### 🔮 **Prochaines Étapes**
+
+#### **Version 7.1.0 (Prévue)**
+- **🗺️ Carte interactive** : Affichage des points filtrés sur une carte
+- **💾 Sauvegarde des préférences** : Mémorisation des filtres et rayon favoris
+- **🔔 Notifications** : Rappels de recyclage personnalisés
+- **📊 Statistiques de filtrage** : Historique des recherches populaires
+
+#### **Version 7.2.0 (Prévue)**
+- **🤖 IA de recommandation** : Suggestions de points selon l'historique
+- **🌍 Mode hors ligne** : Synchronisation des données de recyclage
+- **📱 Widgets** : Accès rapide aux filtres depuis l'écran d'accueil
+- **🌙 Mode sombre** : Thème adaptatif pour l'interface
+
+---
+
 ## Version 6.0.0 - Page d'Accueil Intelligente et Navigation Automatique
 **Date :** Décembre 2024
 

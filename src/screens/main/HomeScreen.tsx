@@ -12,6 +12,8 @@ import {
   RefreshControl,
   PermissionsAndroid,
   Linking,
+  Image,
+  Modal,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -39,11 +41,89 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   userInfo: _userInfo 
 }) => {
   const [recyclingPoints, setRecyclingPoints] = useState<RecyclingPoint[]>([]);
+  const [filteredPoints, setFilteredPoints] = useState<RecyclingPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
   const [userCity, setUserCity] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'checking'>('checking');
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [searchRadius, setSearchRadius] = useState<number>(1000); // Rayon en mètres
+  const [showRadiusMenu, setShowRadiusMenu] = useState<boolean>(false);
+
+  // Options de rayon de recherche
+  const radiusOptions = [
+    { value: 500, label: '500m' },
+    { value: 1000, label: '1km' },
+    { value: 2000, label: '2km' },
+    { value: 5000, label: '5km' },
+    { value: 10000, label: '10km' },
+  ];
+
+  // Types de filtres disponibles
+  const availableFilters = [
+    { key: 'glass', label: 'Verre', icon: 'wine-bar', color: colors.success },
+    { key: 'plastic', label: 'Plastique', icon: 'local-drink', color: colors.primary },
+    { key: 'paper', label: 'Papier', icon: 'description', color: colors.warning },
+    { key: 'metal', label: 'Métal', icon: 'hardware', color: colors.text },
+    { key: 'electronics', label: 'Électronique', icon: 'devices', color: colors.error },
+    { key: 'textile', label: 'Textile', icon: 'checkroom', color: colors.primary },
+    { key: 'batteries', label: 'Piles', icon: 'battery-charging-full', color: colors.warning },
+    { key: 'organic', label: 'Organique', icon: 'eco', color: colors.success },
+  ];
+
+  // Appliquer les filtres
+  const applyFilters = useCallback(() => {
+    if (activeFilters.length === 0) {
+      setFilteredPoints(recyclingPoints);
+      return;
+    }
+
+    const filtered = recyclingPoints.filter(point => {
+      const pointType = point.type.toLowerCase();
+      const pointName = point.display_name.toLowerCase();
+      
+      const isMatch = activeFilters.some(filter => {
+        // Chercher dans le type du point
+        if (pointType.includes(filter)) {
+          return true;
+        }
+        
+        // Chercher dans le nom/description du point
+        if (pointName.includes(filter)) {
+          return true;
+        }
+        
+        // Chercher des mots-clés spécifiques pour chaque filtre
+        const filterKeywords = getFilterKeywords(filter);
+        const keywordMatch = filterKeywords.some(keyword => 
+          pointType.includes(keyword) || pointName.includes(keyword)
+        );
+        
+        return keywordMatch;
+      });
+      
+      return isMatch;
+    });
+
+    setFilteredPoints(filtered);
+  }, [activeFilters, recyclingPoints]);
+
+  // Toggle un filtre
+  const toggleFilter = (filterKey: string) => {
+    setActiveFilters(prev => {
+      if (prev.includes(filterKey)) {
+        return prev.filter(f => f !== filterKey);
+      } else {
+        return [...prev, filterKey];
+      }
+    });
+  };
+
+  // Effacer tous les filtres
+  const clearAllFilters = () => {
+    setActiveFilters([]);
+  };
 
   // Calculer la distance entre deux points (formule de Haversine)
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -58,58 +138,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return R * c * 1000; // Distance en mètres
   }, []);
 
-  // Récupérer les points de recyclage via Overpass API (plus précis que Nominatim)
-  const fetchRecyclingPoints = useCallback(async (lat: number, lon: number) => {
+  // Récupérer les points de recyclage via Overpass API
+  const fetchRecyclingPoints = useCallback(async (latitude: number, longitude: number) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      const delta = 0.05; // Rayon de recherche plus large (environ 5km)
-      
-      // Requête plus inclusive pour capturer plus de points de recyclage
       const overpassQuery = `
-        [out:json];
+        [out:json][timeout:25];
         (
-          node["amenity"="recycling"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          way["amenity"="recycling"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:glass"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:plastic"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:paper"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:metal"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:organic"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:electronics"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:clothes"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:batteries"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:oil"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:paint"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:medicines"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:printer_cartridges"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:mobile_phones"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:computers"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:white_goods"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:small_appliances"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:fluorescent_tubes"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:energy_saving_bulbs"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:car_batteries"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:engine_oil"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:cooking_oil"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:chemicals"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:ink_cartridges"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:toner_cartridges"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:plastic_bags"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:plastic_packaging"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:glass_containers"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:aluminum_cans"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:steel_cans"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:tetra_pak"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:wine_corks"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:coffee_capsules"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:tea_bags"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
-          node["recycling:food_packaging"="yes"](${lat - delta},${lon - delta},${lat + delta},${lon + delta});
+          node["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+          way["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+          relation["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:glass"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:glass"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:plastic"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:plastic"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:paper"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:paper"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:metal"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:metal"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:electronics"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:electronics"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:clothes"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:clothes"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:batteries"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:batteries"="yes"](around:${searchRadius},${latitude},${longitude});
+          node["recycling:organic"="yes"](around:${searchRadius},${latitude},${longitude});
+          way["recycling:organic"="yes"](around:${searchRadius},${latitude},${longitude});
         );
-        out;
+        out body;
+        >;
+        out skel qt;
       `;
-
-      console.log('Requête Overpass envoyée pour:', lat, lon);
 
       // Essayer d'abord le serveur principal
       try {
@@ -135,8 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         }
 
         const data = JSON.parse(text);
-        console.log('Réponse Overpass reçue:', data);
-        processOverpassData(data, lat, lon);
+        processOverpassData(data, latitude, longitude);
         
       } catch (error) {
         console.log("Serveur principal échoué, essai avec le serveur alternatif...");
@@ -153,8 +211,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Réponse serveur alternatif reçue:', data);
-          processOverpassData(data, lat, lon);
+          processOverpassData(data, latitude, longitude);
         } else {
           throw new Error("Tous les serveurs Overpass sont indisponibles");
         }
@@ -165,7 +222,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [calculateDistance, processOverpassData]);
+  }, [searchRadius, processOverpassData]);
 
   // Traiter les données Overpass et les formater
   const processOverpassData = useCallback((data: any, userLat: number, userLon: number) => {
@@ -185,16 +242,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
       
       setRecyclingPoints(points);
-      console.log(`${points.length} points de recyclage trouvés via Overpass`);
+      setFilteredPoints(points); // Initialiser les points filtrés
       
       // Si aucun point trouvé via Overpass, essayer Nominatim comme fallback
       if (points.length === 0) {
-        console.log('Aucun point trouvé via Overpass, essai avec Nominatim...');
         fetchRecyclingPointsFallback(userLat, userLon);
       }
     } else {
       setRecyclingPoints([]);
-      console.log('Aucun point de recyclage trouvé dans cette zone via Overpass');
+      setFilteredPoints([]);
       // Essayer Nominatim comme fallback
       fetchRecyclingPointsFallback(userLat, userLon);
     }
@@ -250,6 +306,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
         
         setRecyclingPoints(points);
+        setFilteredPoints(points); // Initialiser les points filtrés
         console.log(`${points.length} points de recyclage trouvés via Nominatim (fallback)`);
       }
     } catch (error) {
@@ -301,11 +358,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
     
     return "Recyclage général";
-  }, []);
+  }, [translateRecyclingType]);
 
   // Traduire les types de recyclage en français
   const translateRecyclingType = useCallback((tag: string): string => {
     const translations: { [key: string]: string } = {
+      // Tags Overpass spécifiques
       "recycling:glass_bottles": "Bouteilles en verre",
       "recycling:glass": "Verre",
       "recycling:plastic": "Plastique",
@@ -365,17 +423,207 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       "recycling:wine_corks": "Bouchons de vin",
       "recycling:coffee_capsules": "Capsules de café",
       "recycling:tea_bags": "Sachets de thé",
-      "recycling:food_packaging": "Emballages alimentaires"
+      "recycling:food_packaging": "Emballages alimentaires",
+      
+      // Termes génériques anglais
+      "waste": "Déchets",
+      "organic waste": "Déchets organiques",
+      "general waste": "Déchets généraux",
+      "household waste": "Déchets ménagers",
+      "recycling": "Recyclage",
+      "recycling center": "Centre de recyclage",
+      "recycling point": "Point de recyclage",
+      "item": "Objet",
+      "items": "Objets",
+      "materials": "Matériaux",
+      "packaging": "Emballages",
+      "containers": "Contenants",
+      "bottles": "Bouteilles",
+      "cans": "Boîtes",
+      "boxes": "Cartons",
+      "paper": "Papier",
+      "cardboard": "Carton",
+      "glass": "Verre",
+      "plastic": "Plastique",
+      "metal": "Métal",
+      "aluminum": "Aluminium",
+      "steel": "Acier",
+      "textile": "Textile",
+      "clothes": "Vêtements",
+      "shoes": "Chaussures",
+      "electronics": "Électronique",
+      "electrical": "Électrique",
+      "appliances": "Appareils",
+      "batteries": "Piles",
+      "light bulbs": "Ampoules",
+      "oil": "Huile",
+      "paint": "Peinture",
+      "chemicals": "Produits chimiques",
+      "medicines": "Médicaments",
+      "books": "Livres",
+      "magazines": "Magazines",
+      "newspapers": "Journaux",
+      "cds": "CD/DVD",
+      "computers": "Ordinateurs",
+      "phones": "Téléphones",
+      "mobile phones": "Téléphones mobiles",
+      "printers": "Imprimantes",
+      "cartridges": "Cartouches",
+      "ink": "Encre",
+      "toner": "Toner",
+      "wood": "Bois",
+      "garden waste": "Déchets de jardin",
+      "green waste": "Déchets verts",
+      "compost": "Compost",
+      "organic": "Organique",
+      "biodegradable": "Biodégradable",
+      "construction waste": "Déchets de construction",
+      "bulky waste": "Encombrants",
+      "food waste": "Déchets alimentaires",
+      "kitchen waste": "Déchets de cuisine",
+      "cooking oil": "Huile de cuisson",
+      "engine oil": "Huile moteur",
+      "car batteries": "Batteries de voiture",
+      "fluorescent tubes": "Tubes fluorescents",
+      "energy saving bulbs": "Ampoules économiques",
+      "small appliances": "Petits appareils",
+      "white goods": "Électroménager",
+      "electrical appliances": "Appareils électriques",
+      "scrap metal": "Métal de récupération",
+      "tin cans": "Boîtes de conserve",
+      "tetra pak": "Briques Tetra Pak",
+      "wine corks": "Bouchons de vin",
+      "coffee capsules": "Capsules de café",
+      "tea bags": "Sachets de thé",
+      "plastic bags": "Sacs plastique",
+      "plastic packaging": "Emballages plastique",
+      "glass containers": "Contenants en verre",
+      "aluminum cans": "Canettes en aluminium",
+      "steel cans": "Boîtes en acier"
     };
     
-    return translations[tag] || tag.replace("recycling:", "").replace(/_/g, " ");
+    // Nettoyer le tag
+    const cleanTag = tag.replace("recycling:", "").toLowerCase();
+    
+    // Chercher une traduction exacte
+    if (translations[cleanTag]) {
+      return translations[cleanTag];
+    }
+    
+    // Chercher une traduction partielle
+    for (const [key, value] of Object.entries(translations)) {
+      if (cleanTag.includes(key.toLowerCase()) || key.toLowerCase().includes(cleanTag)) {
+        return value;
+      }
+    }
+    
+    // Traduction automatique simple pour les termes non traduits
+    const autoTranslations: { [key: string]: string } = {
+      "waste": "Déchets",
+      "organic": "Organique",
+      "general": "Général",
+      "household": "Ménager",
+      "recycling": "Recyclage",
+      "center": "Centre",
+      "point": "Point",
+      "item": "Objet",
+      "materials": "Matériaux",
+      "packaging": "Emballages",
+      "containers": "Contenants",
+      "bottles": "Bouteilles",
+      "cans": "Boîtes",
+      "boxes": "Cartons",
+      "clothes": "Vêtements",
+      "shoes": "Chaussures",
+      "electronics": "Électronique",
+      "electrical": "Électrique",
+      "appliances": "Appareils",
+      "batteries": "Piles",
+      "bulbs": "Ampoules",
+      "oil": "Huile",
+      "paint": "Peinture",
+      "chemicals": "Produits chimiques",
+      "medicines": "Médicaments",
+      "phones": "Téléphones",
+      "computers": "Ordinateurs",
+      "printers": "Imprimantes",
+      "cartridges": "Cartouches",
+      "ink": "Encre",
+      "toner": "Toner",
+      "wood": "Bois",
+      "garden": "Jardin",
+      "green": "Vert",
+      "compost": "Compost",
+      "biodegradable": "Biodégradable",
+      "construction": "Construction",
+      "bulky": "Encombrant",
+      "food": "Alimentaire",
+      "kitchen": "Cuisine",
+      "cooking": "Cuisson",
+      "engine": "Moteur",
+      "car": "Voiture",
+      "fluorescent": "Fluorescent",
+      "energy": "Énergie",
+      "saving": "Économie",
+      "small": "Petit",
+      "white": "Blanc",
+      "scrap": "Récupération",
+      "tin": "Étain",
+      "tetra": "Tetra",
+      "pak": "Pak",
+      "wine": "Vin",
+      "corks": "Bouchons",
+      "coffee": "Café",
+      "capsules": "Capsules",
+      "tea": "Thé",
+      "bags": "Sacs",
+      "plastic": "Plastique",
+      "glass": "Verre",
+      "aluminum": "Aluminium",
+      "steel": "Acier"
+    };
+    
+    // Essayer la traduction automatique mot par mot
+    const words = cleanTag.split(/[\s_-]+/);
+    const translatedWords = words.map(word => {
+      const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+      return autoTranslations[cleanWord] || word;
+    });
+    
+    // Si on a des traductions, les joindre
+    if (translatedWords.some(word => autoTranslations[word.toLowerCase()])) {
+      return translatedWords.join(' ');
+    }
+    
+    // Dernier recours : formater le tag original
+    return cleanTag
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/\b\w+/g, word => {
+        const lowerWord = word.toLowerCase();
+        return autoTranslations[lowerWord] || word;
+      });
   }, []);
+
+  // Obtenir les mots-clés pour chaque filtre
+  const getFilterKeywords = (filterKey: string): string[] => {
+    const keywords: { [key: string]: string[] } = {
+      'glass': ['verre', 'bouteille', 'bouteilles', 'glass', 'bouteilles en verre', 'contenants en verre'],
+      'plastic': ['plastique', 'plastic', 'bouteilles en plastique', 'emballages plastique'],
+      'paper': ['papier', 'paper', 'carton', 'cardboard', 'livres', 'magazines', 'journaux'],
+      'metal': ['métal', 'metal', 'aluminium', 'acier', 'steel', 'boîtes', 'canettes'],
+      'electronics': ['électronique', 'electronics', 'électrique', 'appareils', 'téléphone', 'ordinateur'],
+      'textile': ['textile', 'vêtements', 'clothes', 'chaussures', 'shoes'],
+      'batteries': ['piles', 'batteries', 'batterie', 'ampoules', 'light_bulbs'],
+      'organic': ['organique', 'organic', 'compost', 'déchets verts', 'garden_waste', 'biodegradable']
+    };
+    
+    return keywords[filterKey] || [filterKey];
+  };
 
   // Demander les permissions de géolocalisation
   const requestLocationPermission = useCallback(async () => {
     try {
-      setLocationPermission('checking');
-      
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -388,22 +636,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           }
         );
         
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        if (granted === 'granted') {
           setLocationPermission('granted');
           // Appeler getCurrentLocation après avoir défini la permission
           setTimeout(() => {
             getCurrentLocation();
-          }, 100);
+          }, 500); // Délai un peu plus long pour s'assurer que la permission est bien enregistrée
         } else {
           setLocationPermission('denied');
-          Alert.alert(
-            'Permission refusée', 
-            'Impossible de localiser les points de recyclage sans accès à la position. Vous pouvez activer la géolocalisation dans les paramètres de votre appareil.',
-            [
-              { text: 'OK', style: 'default' },
-              { text: 'Réessayer', onPress: requestLocationPermission }
-            ]
-          );
         }
       } else {
         // Pour iOS, on vérifie d'abord si la permission est déjà accordée
@@ -411,13 +651,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         setLocationPermission('granted');
         setTimeout(() => {
           getCurrentLocation();
-        }, 100);
+        }, 500);
       }
     } catch (err) {
-      console.warn('Erreur lors de la demande de permission:', err);
       setLocationPermission('denied');
     }
-  }, []);
+  }, []); // Aucune dépendance
 
   // Récupérer le nom de la ville via Nominatim
   const fetchCityFromCoordinates = useCallback(async (lat: number, lon: number) => {
@@ -443,19 +682,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Obtenir la position actuelle avec la vraie géolocalisation
   const getCurrentLocation = useCallback(() => {
-    if (locationPermission !== 'granted') {
-      requestLocationPermission();
-      return;
-    }
-
+    // Ne pas vérifier la permission ici pour éviter la boucle
+    // La permission est déjà vérifiée avant l'appel de cette fonction
+    
     setLoading(true);
+    
+    // Timeout de sécurité pour éviter le blocage
+    const locationTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 30000); // 30 secondes de timeout
     
     Geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(locationTimeout);
         const { latitude, longitude } = position.coords;
         const location = { lat: latitude, lon: longitude };
         
-        console.log('Position obtenue:', location);
         setUserLocation(location);
         
         // Récupérer le nom de la ville
@@ -466,41 +708,76 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         setLoading(false);
       },
       (error) => {
-        console.error('Erreur de géolocalisation:', error);
+        clearTimeout(locationTimeout);
         setLoading(false);
         
         let errorMessage = 'Impossible d\'obtenir votre position';
+        let shouldRetry = false;
+        
         switch (error.code) {
           case 1: // PERMISSION_DENIED
-            errorMessage = 'Permission de géolocalisation refusée';
+            errorMessage = 'Permission de géolocalisation refusée. Activez-la dans les paramètres.';
             setLocationPermission('denied');
             break;
           case 2: // POSITION_UNAVAILABLE
-            errorMessage = 'Position temporairement indisponible';
+            errorMessage = 'Position temporairement indisponible. Vérifiez que le GPS est activé.';
+            shouldRetry = true;
             break;
           case 3: // TIMEOUT
-            errorMessage = 'Délai de géolocalisation dépassé';
+            errorMessage = 'Délai de géolocalisation dépassé. Vérifiez votre connexion GPS.';
+            shouldRetry = true;
+            break;
+          default:
+            errorMessage = `Erreur de géolocalisation: ${error.message}`;
+            shouldRetry = true;
             break;
         }
         
-        Alert.alert('Erreur de géolocalisation', errorMessage, [
-          { text: 'OK', style: 'default' },
-          { text: 'Réessayer', onPress: getCurrentLocation }
-        ]);
+        // Logs détaillés pour le diagnostic
+        console.error('🔍 Détails de l\'erreur de géolocalisation:');
+        console.error('   Code d\'erreur:', error.code);
+        console.error('   Message d\'erreur:', error.message);
+        console.error('   Permission actuelle:', locationPermission);
+        console.error('   Platform:', Platform.OS);
+        console.error('   Timestamp:', new Date().toISOString());
+        
+        if (error.code === 1) {
+          console.error('   ❌ PERMISSION_DENIED - L\'utilisateur a refusé la permission');
+        } else if (error.code === 2) {
+          console.error('   ❌ POSITION_UNAVAILABLE - Position temporairement indisponible');
+        } else if (error.code === 3) {
+          console.error('   ❌ TIMEOUT - Délai de géolocalisation dépassé');
+        } else {
+          console.error('   ❌ Erreur inconnue - Code non reconnu');
+        }
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000,
+        timeout: 25000, // 25 secondes (légèrement moins que le timeout de sécurité)
+        maximumAge: 60000, // 1 minute (plus permissif)
         distanceFilter: 10, // Mise à jour si déplacement > 10m
+        forceRequest: true, // Force la demande de position
+        showLocationDialog: true, // Affiche le dialogue de localisation Android
       }
     );
-  }, [locationPermission, requestLocationPermission, fetchRecyclingPoints, fetchCityFromCoordinates]);
+  }, [locationPermission]); // Seulement locationPermission comme dépendance
 
-  // Demander la géolocalisation au démarrage
+  // Demander la géolocalisation au démarrage (une seule fois)
   useEffect(() => {
     requestLocationPermission();
-  }, [requestLocationPermission]);
+  }, [requestLocationPermission]); // Remettre la dépendance requestLocationPermission
+
+  // Appliquer les filtres quand ils changent
+  useEffect(() => {
+    applyFilters();
+  }, [activeFilters, recyclingPoints, applyFilters]);
+
+  // Relancer la recherche quand le rayon change
+  useEffect(() => {
+    if (userLocation) {
+      fetchRecyclingPoints(userLocation.lat, userLocation.lon);
+    }
+  }, [searchRadius, userLocation, fetchRecyclingPoints]);
 
   // Actualiser les données
   const onRefresh = async () => {
@@ -677,8 +954,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       >
         {/* Section de bienvenue */}
         <View style={styles.welcomeSection}>
-          <MaterialIcons name="eco" size={40} color={colors.primary} />
-          <Text style={styles.welcomeTitle}>Bienvenue sur EcoTri ! 🌱</Text>
+          <View style={styles.logoTitleContainer}>
+            <Image source={require('../../assets/logo.png')} style={styles.logo} />
+            <Text style={styles.welcomeTitle}>Bienvenue sur EcoTri !</Text>
+          </View>
           <Text style={styles.welcomeSubtitle}>
             Découvrez les points de recyclage près de chez vous
           </Text>
@@ -686,33 +965,119 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Section de géolocalisation */}
         <View style={styles.locationSection}>
-          <View style={styles.locationHeader}>
-            <MaterialIcons name="location-on" size={24} color={colors.primary} />
-            <Text style={styles.locationTitle}>Votre position</Text>
+          <View style={styles.locationRow}>
+            {/* Localisation à gauche */}
+            <View style={styles.locationInfo}>
+              <View style={styles.locationHeader}>
+                <MaterialIcons name="location-on" size={18} color={colors.primary} />
+                <Text style={styles.locationTitle}>Votre Position</Text>
+              </View>
+              <Text style={styles.locationText}>
+                {userCity ? `📍 ${userCity}` : '📍 Localisation en cours...'}
+              </Text>
+            </View>
+            
+            {/* Rayon de recherche à droite */}
+            <View style={styles.radiusInfo}>
+              <Text style={styles.radiusLabel}>Rayon :</Text>
+              <View style={styles.radiusSelector}>
+                <TouchableOpacity
+                  style={styles.radiusDropdown}
+                  onPress={() => setShowRadiusMenu(!showRadiusMenu)}
+                >
+                  <Text style={styles.radiusValue}>{radiusOptions.find(opt => opt.value === searchRadius)?.label}</Text>
+                  <MaterialIcons name="keyboard-arrow-down" size={16} color={colors.primary} />
+                </TouchableOpacity>
+                
+                {/* Menu déroulant */}
+                <Modal
+                  visible={showRadiusMenu}
+                  transparent={true}
+                  animationType="fade"
+                  onRequestClose={() => setShowRadiusMenu(false)}
+                >
+                  <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowRadiusMenu(false)}
+                  >
+                    <View style={styles.radiusMenuModal}>
+                      {radiusOptions.map((option) => (
+                        <TouchableOpacity
+                          key={option.value}
+                          style={styles.radiusMenuItem}
+                          onPress={() => {
+                            setSearchRadius(option.value);
+                            setShowRadiusMenu(false);
+                          }}
+                        >
+                          <Text style={[
+                            styles.radiusMenuItemText,
+                            searchRadius === option.value && styles.radiusMenuItemTextActive
+                          ]}>
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
+              </View>
+            </View>
           </View>
           
-          {userLocation ? (
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationText}>
-                📍 {userCity || 'Détection de la ville...'}
-              </Text>
-              <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
-                <MaterialIcons name="refresh" size={20} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.locationButton} onPress={getCurrentLocation}>
-              <MaterialIcons name="my-location" size={20} color={colors.primary} />
-              <Text style={styles.locationButtonText}>Activer la géolocalisation</Text>
+          {/* Boutons d'action en dessous */}
+          <View style={styles.locationActions}>
+            <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
+              <MaterialIcons name="refresh" size={16} color={colors.primary} />
             </TouchableOpacity>
-          )}
+          </View>
         </View>
 
         {/* Section des points de recyclage */}
         <View style={styles.recyclingSection}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="recycling" size={24} color={colors.primary} />
+            <MaterialIcons name="recycling" size={20} color={colors.primary} />
             <Text style={styles.sectionTitle}>Points de Recyclage Proches</Text>
+          </View>
+          
+          {/* Filtres */}
+          <View style={styles.filtersContainer}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filtersScroll}
+            >
+              {availableFilters.map((filter) => (
+                <TouchableOpacity
+                  key={filter.key}
+                  style={[
+                    styles.filterButton,
+                    activeFilters.includes(filter.key) && styles.filterButtonActive
+                  ]}
+                  onPress={() => toggleFilter(filter.key)}
+                >
+                  <MaterialIcons 
+                    name={filter.icon as any} 
+                    size={16} 
+                    color={activeFilters.includes(filter.key) ? colors.textInverse : filter.color} 
+                  />
+                  <Text style={[
+                    styles.filterButtonText,
+                    activeFilters.includes(filter.key) && styles.filterButtonTextActive
+                  ]}>
+                    {filter.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+            {activeFilters.length > 0 && (
+              <TouchableOpacity style={styles.clearFiltersButton} onPress={clearAllFilters}>
+                <MaterialIcons name="clear" size={16} color={colors.error} />
+                <Text style={styles.clearFiltersText}>Effacer</Text>
+              </TouchableOpacity>
+            )}
           </View>
           
           {loading ? (
@@ -720,9 +1085,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               <ActivityIndicator size="large" color={colors.primary} />
               <Text style={styles.loadingText}>Recherche des points de recyclage...</Text>
             </View>
-          ) : recyclingPoints.length > 0 ? (
+          ) : (activeFilters.length > 0 ? filteredPoints : recyclingPoints).length > 0 ? (
             <View style={styles.pointsList}>
-              {recyclingPoints.map((point, _index) => (
+              {(activeFilters.length > 0 ? filteredPoints : recyclingPoints).map((point, _index) => (
                 <TouchableOpacity 
                   key={point.place_id} 
                   style={styles.pointCard}
@@ -792,99 +1157,163 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   welcomeSection: {
-    marginTop: 24,
-    marginBottom: 32,
+    marginTop: 16,
+    marginBottom: 24,
     alignItems: 'center',
   },
+  logoTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   welcomeTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 8,
+    marginLeft: 6,
   },
   welcomeSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.textLight,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   locationSection: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 32,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 20,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
       },
       android: {
-        elevation: 2,
+        elevation: 1,
       },
     }),
+  },
+  locationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  locationInfo: {
+    flex: 1,
   },
   locationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 4,
   },
   locationTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
     color: colors.text,
-    marginLeft: 8,
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginLeft: 6,
   },
   locationText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text,
   },
+  radiusInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  radiusLabel: {
+    fontSize: 12,
+    color: colors.textLight,
+    marginRight: 6,
+  },
+  radiusSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 1,
+    zIndex: 9999, // Z-index très élevé pour être au premier plan
+  },
+  radiusDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginHorizontal: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  radiusValue: {
+    fontSize: 11,
+    color: colors.text,
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  radiusMenuItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  radiusMenuItemText: {
+    fontSize: 13,
+    color: colors.text,
+  },
+  radiusMenuItemTextActive: {
+    color: colors.textInverse,
+    backgroundColor: colors.primary,
+  },
+  locationActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
   refreshButton: {
-    padding: 8,
+    padding: 6,
   },
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 10,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 8,
   },
   locationButtonText: {
     color: colors.primary,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 6,
   },
   recyclingSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    marginLeft: 8,
+    marginLeft: 6,
   },
   loadingContainer: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingVertical: 16,
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 8,
     color: colors.textLight,
+    fontSize: 14,
   },
   pointsList: {
     // No specific styles for the list, it will be handled by pointCard
@@ -894,34 +1323,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 10,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
       },
       android: {
-        elevation: 2,
+        elevation: 1,
       },
     }),
   },
   pointIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.surface,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    justifyContent: 'center',
+    marginRight: 12,
   },
   pointInfo: {
     flex: 1,
+    marginRight: 12,
   },
   pointName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
@@ -932,11 +1362,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   pointDistance: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textLight,
   },
   pointAction: {
-    paddingLeft: 16,
+    padding: 8,
   },
   noPointsContainer: {
     alignItems: 'center',
@@ -956,36 +1386,115 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   quickActionsSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   actionsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginTop: 12,
   },
   actionCard: {
-    width: '48%', // Two columns
+    flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    marginBottom: 16,
+    marginHorizontal: 4,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
       },
       android: {
-        elevation: 2,
+        elevation: 1,
       },
     }),
   },
   actionText: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
     marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    marginRight: 6,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  filtersScroll: {
+    alignItems: 'center',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterButtonText: {
+    fontSize: 12,
+    color: colors.text,
+    marginLeft: 6,
+  },
+  filterButtonTextActive: {
+    color: colors.textInverse,
+  },
+  clearFiltersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  clearFiltersText: {
+    fontSize: 12,
+    color: colors.error,
+    marginLeft: 6,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radiusMenuModal: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 8,
+    width: 120,
+    elevation: 9999,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 9999,
+      },
+    }),
   },
 });
 
