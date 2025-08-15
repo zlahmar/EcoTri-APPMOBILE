@@ -656,7 +656,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     } catch (err) {
       setLocationPermission('denied');
     }
-  }, []); // Aucune dépendance
+  }, [getCurrentLocation]); // Ajouter getCurrentLocation comme dépendance
 
   // Récupérer le nom de la ville via Nominatim
   const fetchCityFromCoordinates = useCallback(async (lat: number, lon: number) => {
@@ -711,25 +711,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         clearTimeout(locationTimeout);
         setLoading(false);
         
-        let errorMessage = 'Impossible d\'obtenir votre position';
-        let shouldRetry = false;
-        
         switch (error.code) {
           case 1: // PERMISSION_DENIED
-            errorMessage = 'Permission de géolocalisation refusée. Activez-la dans les paramètres.';
             setLocationPermission('denied');
             break;
           case 2: // POSITION_UNAVAILABLE
-            errorMessage = 'Position temporairement indisponible. Vérifiez que le GPS est activé.';
-            shouldRetry = true;
             break;
           case 3: // TIMEOUT
-            errorMessage = 'Délai de géolocalisation dépassé. Vérifiez votre connexion GPS.';
-            shouldRetry = true;
             break;
           default:
-            errorMessage = `Erreur de géolocalisation: ${error.message}`;
-            shouldRetry = true;
             break;
         }
         
@@ -760,7 +750,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         showLocationDialog: true, // Affiche le dialogue de localisation Android
       }
     );
-  }, [locationPermission]); // Seulement locationPermission comme dépendance
+  }, [locationPermission, fetchCityFromCoordinates, fetchRecyclingPoints]); // Seulement locationPermission comme dépendance
 
   // Demander la géolocalisation au démarrage (une seule fois)
   useEffect(() => {
