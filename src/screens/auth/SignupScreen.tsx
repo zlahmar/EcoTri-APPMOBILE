@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
@@ -94,7 +95,11 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoSection}>
-            <Text style={styles.logo}>🌱</Text>
+            <Image 
+              source={require('../../assets/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.title}>Rejoignez EcoTri</Text>
             <Text style={styles.subtitle}>Créez votre compte pour commencer votre voyage écologique</Text>
           </View>
@@ -215,7 +220,8 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   logo: {
-    fontSize: 65,
+    width: 100,
+    height: 100,
     marginBottom: 15,
   },
   title: {

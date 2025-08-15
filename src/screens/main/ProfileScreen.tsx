@@ -6,28 +6,50 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
-import Header from '../../components/common/Header';
+import { Header, LocationDisplay } from '../../components/common';
 import { colors } from '../../styles/colors';
 import localStatsService, { UserStats } from '../../services/localStatsService';
+import { useLocation } from '../../services';
 
 interface ProfileScreenProps {
-  navigation: any;
+  navigation?: any;
+  isAuthenticated?: boolean;
+  onLoginPress?: () => void;
+  onLogout?: () => void;
+  onCloseModal?: () => void;
+  userInfo?: any;
 }
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation: _navigation }) => {
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ 
+  navigation: _navigation, 
+  isAuthenticated: _isAuthenticated, 
+  onLoginPress, 
+  onLogout, 
+  onCloseModal,
+  userInfo: _userInfo 
+}) => {
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Écouter les changements d'authentification
+  // 📍 Utiliser le service de géolocalisation
+  const { city, isLoading: locationLoading, getCurrentLocation } = useLocation({
+    onError: (error) => console.error('Erreur de localisation:', error),
+    onPermissionDenied: () => console.log('Permission de localisation refusée'),
+  });
+
+  // 🔐 Écouter les changements d'authentification Firebase
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         loadUserStats();
+        // Récupérer la localisation quand l'utilisateur se connecte
+        getCurrentLocation();
       } else {
         setStats(null);
         setLoading(false);
@@ -35,7 +57,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation: _navigation }
     });
 
     return unsubscribe;
-  }, []);
+  }, [getCurrentLocation]);
 
   // 📊 Charger les statistiques utilisateur
   const loadUserStats = async () => {
@@ -54,6 +76,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation: _navigation }
   const handleSignOut = async () => {
     try {
       await auth().signOut();
+      // Utiliser la fonction onLogout du MainNavigator si disponible
+      if (onLogout) {
+        onLogout();
+      }
+      // Fermer la modal du profil
+      if (onCloseModal) {
+        onCloseModal();
+      }
       Alert.alert('Déconnexion', 'Vous avez été déconnecté avec succès');
     } catch (error) {
       Alert.alert('Erreur', 'Erreur lors de la déconnexion');
@@ -214,6 +244,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation: _navigation }
                 <Text style={styles.userName}>{user.email}</Text>
                 <Text style={styles.userStatus}>Connecté</Text>
                 <Text style={styles.userSubtitle}>Membre EcoTri</Text>
+                {/* 📍 Affichage de la localisation */}
+                <LocationDisplay 
+                  city={city} 
+                  isLoading={locationLoading}
+                  size="small"
+                />
               </View>
               <View style={styles.userActions}>
                 <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
@@ -230,11 +266,24 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation: _navigation }
           </>
         ) : (
           <View style={styles.authContainer}>
-            <MaterialIcons name="account-circle" size={80} color={colors.textLight} />
+            <Image 
+              source={require('../../assets/logo.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.authTitle}>Connexion Requise</Text>
             <Text style={styles.authSubtitle}>
               Connectez-vous pour voir vos statistiques !
             </Text>
+            {onLoginPress && (
+              <TouchableOpacity 
+                style={styles.loginButton} 
+                onPress={onLoginPress}
+              >
+                <MaterialIcons name="login" size={20} color="white" />
+                <Text style={styles.loginButtonText}>Se connecter</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
@@ -286,6 +335,7 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     marginTop: 4,
   },
+
   userActions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -355,8 +405,8 @@ const styles = StyleSheet.create({
   },
   statCard: {
     alignItems: 'center',
-    width: '30%', // Adjust as needed for 3 columns
-    paddingLeft: 10, // Added for borderLeftWidth
+    width: '30%',
+    paddingLeft: 10,
   },
   statValue: {
     fontSize: 24,
@@ -386,7 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     marginLeft: 10,
-    flexShrink: 1, // Allows text to shrink if icon is present
+    flexShrink: 1,
   },
   inlineIcon: {
     marginRight: 5,
@@ -450,6 +500,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textLight,
     marginTop: 16,
+  },
+  loginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    marginLeft: 8,
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
   },
 });
 

@@ -6,19 +6,17 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Platform,
   Alert,
   ActivityIndicator,
   RefreshControl,
-  PermissionsAndroid,
   Linking,
   Image,
   Modal,
 } from 'react-native';
-import Geolocation from 'react-native-geolocation-service';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
+import { useLocation } from '../../services';
 
 interface HomeScreenProps {
   isAuthenticated?: boolean;
@@ -43,13 +41,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [recyclingPoints, setRecyclingPoints] = useState<RecyclingPoint[]>([]);
   const [filteredPoints, setFilteredPoints] = useState<RecyclingPoint[]>([]);
   const [loading, setLoading] = useState(false);
-  const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null);
-  const [userCity, setUserCity] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
-  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'checking'>('checking');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchRadius, setSearchRadius] = useState<number>(1000); // Rayon en mètres
   const [showRadiusMenu, setShowRadiusMenu] = useState<boolean>(false);
+
+  // 📍 Utiliser le service de géolocalisation
+  const { city: userCity, location, getCurrentLocation } = useLocation({
+    onLocationUpdate: (locationData) => {
+      console.log('📍 Nouvelle localisation dans HomeScreen:', locationData);
+      // Récupérer les points de recyclage avec la nouvelle localisation
+      if (locationData) {
+        fetchRecyclingPoints(locationData.latitude, locationData.longitude);
+      }
+    },
+    onError: (error) => {
+      console.error('Erreur de localisation dans HomeScreen:', error);
+    },
+    onPermissionDenied: () => {
+      console.log('Permission de localisation refusée dans HomeScreen');
+    },
+  });
 
   // Options de rayon de recherche
   const radiusOptions = [
@@ -71,6 +83,267 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     { key: 'batteries', label: 'Piles', icon: 'battery-charging-full', color: colors.warning },
     { key: 'organic', label: 'Organique', icon: 'eco', color: colors.success },
   ];
+
+  // Calculer la distance entre deux points (formule de Haversine)
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c * 1000; // Distance en mètres
+  }, []);
+
+  // Traduire les types de recyclage
+  const translateRecyclingType = useCallback((type: string): string => {
+    const translations: { [key: string]: string } = {
+      'glass': 'Verre',
+      'plastic': 'Plastique',
+      'paper': 'Papier',
+      'metal': 'Métal',
+      'electronics': 'Électronique',
+      'textile': 'Textile',
+      'batteries': 'Piles',
+      'organic': 'Organique',
+    };
+    
+    return translations[type] || type;
+  }, []);
+
+  // Formater l'adresse à partir des tags
+  const formatAddressFromTags = useCallback((tags: any): string => {
+    if (!tags) return 'Adresse inconnue';
+    
+    const addressParts = [];
+    
+    if (tags.name) {
+      addressParts.push(tags.name);
+    }
+    
+    if (tags['addr:street']) {
+      addressParts.push(tags['addr:street']);
+    }
+    
+    if (tags['addr:housenumber']) {
+      addressParts.push(tags['addr:housenumber']);
+    }
+    
+    if (tags['addr:postcode']) {
+      addressParts.push(tags['addr:postcode']);
+    }
+    
+    if (tags['addr:city']) {
+      addressParts.push(tags['addr:city']);
+    }
+    
+    if (addressParts.length === 0) {
+      return 'Point de recyclage';
+    }
+    
+    return addressParts.join(', ');
+  }, []);
+
+  // Obtenir les types de recyclage à partir des tags
+  const getRecyclingTypes = useCallback((tags: any): string => {
+    if (!tags) return 'Général';
+    
+    const types = [];
+    
+    if (tags.recycling_glass === 'yes' || tags.recycling_glass === 'container') {
+      types.push('glass');
+    }
+    
+    if (tags.recycling_plastic === 'yes' || tags.recycling_plastic === 'container') {
+      types.push('plastic');
+    }
+    
+    if (tags.recycling_paper === 'yes' || tags.recycling_paper === 'container') {
+      types.push('paper');
+    }
+    
+    if (tags.recycling_metal === 'yes' || tags.recycling_metal === 'container') {
+      types.push('metal');
+    }
+    
+    if (tags.recycling_electronics === 'yes' || tags.recycling_electronics === 'container') {
+      types.push('electronics');
+    }
+    
+    if (tags.recycling_textile === 'yes' || tags.recycling_textile === 'container') {
+      types.push('textile');
+    }
+    
+    if (tags.recycling_batteries === 'yes' || tags.recycling_batteries === 'container') {
+      types.push('batteries');
+    }
+    
+    if (tags.recycling_organic === 'yes' || tags.recycling_organic === 'container') {
+      types.push('organic');
+    }
+    
+    if (types.length === 0) {
+      return 'Général';
+    }
+    
+    return types.join(', ');
+  }, []);
+
+  // Fallback avec Nominatim si Overpass ne trouve rien
+  const fetchRecyclingPointsFallback = useCallback(async (lat: number, lon: number) => {
+    try {
+      console.log('Tentative de récupération via Nominatim...');
+      
+      // Recherche des points de recyclage via Nominatim
+      const searchQuery = `recycling center near ${lat},${lon}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=15&radius=5000`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data && Array.isArray(data)) {
+        // Filtrer et formater les résultats
+        const points = data
+          .filter((point: any) => 
+            point.display_name.toLowerCase().includes('recycl') ||
+            point.display_name.toLowerCase().includes('déchetterie') ||
+            point.display_name.toLowerCase().includes('collecte') ||
+            point.display_name.toLowerCase().includes('déchet') ||
+            point.display_name.toLowerCase().includes('verre') ||
+            point.display_name.toLowerCase().includes('plastique') ||
+            point.display_name.toLowerCase().includes('papier') ||
+            point.display_name.toLowerCase().includes('métal') ||
+            point.display_name.toLowerCase().includes('électro') ||
+            point.display_name.toLowerCase().includes('textile') ||
+            point.display_name.toLowerCase().includes('batterie') ||
+            point.display_name.toLowerCase().includes('huile') ||
+            point.display_name.toLowerCase().includes('peinture') ||
+            point.display_name.toLowerCase().includes('médicament') ||
+            point.display_name.toLowerCase().includes('pharmacie')
+          )
+          .map((point: any) => ({
+            place_id: point.place_id,
+            display_name: point.display_name,
+            lat: point.lat,
+            lon: point.lon,
+            type: 'Général',
+            distance: calculateDistance(lat, lon, parseFloat(point.lat), parseFloat(point.lon)),
+          }))
+          .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
+        
+        setRecyclingPoints(points);
+        setFilteredPoints(points);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération via Nominatim:', error);
+    }
+  }, [calculateDistance]);
+
+  // Traiter les données Overpass et les formater
+  const processOverpassData = useCallback((data: any, userLat: number, userLon: number) => {
+    if (data.elements && Array.isArray(data.elements)) {
+      const points = data.elements
+        .filter((el: any) => el.lat && el.lon) // Filtrer les éléments avec coordonnées
+        .map((el: any) => ({
+          place_id: el.id,
+          display_name: formatAddressFromTags(el.tags),
+          lat: el.lat.toString(),
+          lon: el.lon.toString(),
+          type: getRecyclingTypes(el.tags),
+          distance: calculateDistance(userLat, userLon, el.lat, el.lon),
+          tags: el.tags,
+          rawElement: el
+        }))
+        .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
+      
+      setRecyclingPoints(points);
+      setFilteredPoints(points); // Initialiser les points filtrés
+      
+      // Si aucun point trouvé via Overpass, essayer Nominatim comme fallback
+      if (points.length === 0) {
+        fetchRecyclingPointsFallback(userLat, userLon);
+      }
+    } else {
+      setRecyclingPoints([]);
+      setFilteredPoints([]);
+      // Essayer Nominatim comme fallback
+      fetchRecyclingPointsFallback(userLat, userLon);
+    }
+  }, [calculateDistance, formatAddressFromTags, getRecyclingTypes, fetchRecyclingPointsFallback]);
+
+  // Récupérer les points de recyclage via Overpass API
+  const fetchRecyclingPoints = useCallback(async (latitude: number, longitude: number) => {
+    setLoading(true);
+    try {
+      const overpassQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+          way["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+          relation["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
+        );
+        out body;
+        >;
+        out skel qt;
+      `;
+
+      console.log('🔍 Recherche de points de recyclage...');
+      console.log('📍 Position:', latitude, longitude);
+      console.log('📏 Rayon:', searchRadius, 'mètres');
+
+      try {
+        const response = await fetch("https://overpass.kumi.systems/api/interpreter", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "EcoTri/1.0 (zineblahmar1@gmail.com)"
+          },
+          body: `data=${encodeURIComponent(overpassQuery)}`,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        
+        if (text.trim().startsWith("<")) {
+          console.error("API surchargée - réessayez plus tard");
+          throw new Error("API surchargée");
+        }
+
+        const data = JSON.parse(text);
+        processOverpassData(data, latitude, longitude);
+        
+      } catch (error) {
+        console.log("Serveur principal échoué, essai avec le serveur alternatif...");
+        
+        // Serveur alternatif en cas d'échec
+        const response = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "EcoTri/1.0 (zineblahmar1@gmail.com)"
+          },
+          body: `data=${encodeURIComponent(overpassQuery)}`,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          processOverpassData(data, latitude, longitude);
+        } else {
+          throw new Error("Tous les serveurs Overpass sont indisponibles");
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des points de recyclage:', error);
+      Alert.alert('Erreur', 'Impossible de récupérer les points de recyclage. Réessayez plus tard.');
+    } finally {
+      setLoading(false);
+    }
+  }, [searchRadius, processOverpassData]);
 
   // Appliquer les filtres
   const applyFilters = useCallback(() => {
@@ -125,486 +398,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     setActiveFilters([]);
   };
 
-  // Calculer la distance entre deux points (formule de Haversine)
-  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Rayon de la Terre en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c * 1000; // Distance en mètres
-  }, []);
-
-  // Récupérer les points de recyclage via Overpass API
-  const fetchRecyclingPoints = useCallback(async (latitude: number, longitude: number) => {
-    setLoading(true);
-    try {
-      const overpassQuery = `
-        [out:json][timeout:25];
-        (
-          node["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
-          way["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
-          relation["amenity"="recycling"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:glass"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:glass"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:plastic"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:plastic"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:paper"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:paper"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:metal"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:metal"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:electronics"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:electronics"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:clothes"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:clothes"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:batteries"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:batteries"="yes"](around:${searchRadius},${latitude},${longitude});
-          node["recycling:organic"="yes"](around:${searchRadius},${latitude},${longitude});
-          way["recycling:organic"="yes"](around:${searchRadius},${latitude},${longitude});
-        );
-        out body;
-        >;
-        out skel qt;
-      `;
-
-      // Essayer d'abord le serveur principal
-      try {
-        const response = await fetch("https://overpass.kumi.systems/api/interpreter", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "EcoTri/1.0 (zineblahmar1@gmail.com)"
-          },
-          body: `data=${encodeURIComponent(overpassQuery)}`,
-        });
-
-        if (!response.ok) {
-          console.error(`Erreur API: ${response.status}`);
-          throw new Error(`Erreur API: ${response.status}`);
-        }
-
-        const text = await response.text();
-        
-        if (text.trim().startsWith("<")) {
-          console.error("API surchargée - réessayez plus tard");
-          throw new Error("API surchargée");
-        }
-
-        const data = JSON.parse(text);
-        processOverpassData(data, latitude, longitude);
-        
-      } catch (error) {
-        console.log("Serveur principal échoué, essai avec le serveur alternatif...");
-        
-        // Serveur alternatif en cas d'échec
-        const response = await fetch("https://overpass-api.de/api/interpreter", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "EcoTri/1.0 (zineblahmar1@gmail.com)"
-          },
-          body: `data=${encodeURIComponent(overpassQuery)}`,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          processOverpassData(data, latitude, longitude);
-        } else {
-          throw new Error("Tous les serveurs Overpass sont indisponibles");
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération des points de recyclage:', error);
-      Alert.alert('Erreur', 'Impossible de récupérer les points de recyclage. Réessayez plus tard.');
-    } finally {
-      setLoading(false);
-    }
-  }, [searchRadius, processOverpassData]);
-
-  // Traiter les données Overpass et les formater
-  const processOverpassData = useCallback((data: any, userLat: number, userLon: number) => {
-    if (data.elements && Array.isArray(data.elements)) {
-      const points = data.elements
-        .filter((el: any) => el.lat && el.lon) // Filtrer les éléments avec coordonnées
-        .map((el: any) => ({
-          place_id: el.id,
-          display_name: formatAddressFromTags(el.tags),
-          lat: el.lat.toString(),
-          lon: el.lon.toString(),
-          type: getRecyclingTypes(el.tags),
-          distance: calculateDistance(userLat, userLon, el.lat, el.lon),
-          tags: el.tags,
-          rawElement: el
-        }))
-        .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
-      
-      setRecyclingPoints(points);
-      setFilteredPoints(points); // Initialiser les points filtrés
-      
-      // Si aucun point trouvé via Overpass, essayer Nominatim comme fallback
-      if (points.length === 0) {
-        fetchRecyclingPointsFallback(userLat, userLon);
-      }
-    } else {
-      setRecyclingPoints([]);
-      setFilteredPoints([]);
-      // Essayer Nominatim comme fallback
-      fetchRecyclingPointsFallback(userLat, userLon);
-    }
-  }, [calculateDistance, formatAddressFromTags, getRecyclingTypes, fetchRecyclingPointsFallback]);
-
-  // Fallback avec Nominatim si Overpass ne trouve rien
-  const fetchRecyclingPointsFallback = useCallback(async (lat: number, lon: number) => {
-    try {
-      console.log('Tentative de récupération via Nominatim...');
-      
-      // Recherche des points de recyclage via Nominatim
-      const searchQuery = `recycling center near ${lat},${lon}`;
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=15&radius=5000`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data && Array.isArray(data)) {
-        // Filtrer et formater les résultats
-        const points = data
-          .filter((point: any) => 
-            point.display_name.toLowerCase().includes('recycl') ||
-            point.display_name.toLowerCase().includes('déchetterie') ||
-            point.display_name.toLowerCase().includes('collecte') ||
-            point.display_name.toLowerCase().includes('déchet') ||
-            point.display_name.toLowerCase().includes('verre') ||
-            point.display_name.toLowerCase().includes('plastique') ||
-            point.display_name.toLowerCase().includes('papier') ||
-            point.display_name.toLowerCase().includes('métal') ||
-            point.display_name.toLowerCase().includes('électro') ||
-            point.display_name.toLowerCase().includes('textile') ||
-            point.display_name.toLowerCase().includes('batterie') ||
-            point.display_name.toLowerCase().includes('huile') ||
-            point.display_name.toLowerCase().includes('peinture') ||
-            point.display_name.toLowerCase().includes('médicament') ||
-            point.display_name.toLowerCase().includes('cartouche') ||
-            point.display_name.toLowerCase().includes('téléphone') ||
-            point.display_name.toLowerCase().includes('ordinateur') ||
-            point.display_name.toLowerCase().includes('électroménager') ||
-            point.display_name.toLowerCase().includes('ampoule') ||
-            point.display_name.toLowerCase().includes('produit chimique')
-          )
-          .map((point: any) => ({
-            place_id: point.place_id,
-            display_name: point.display_name,
-            lat: point.lat,
-            lon: point.lon,
-            type: 'Point de recyclage',
-            distance: calculateDistance(lat, lon, parseFloat(point.lat), parseFloat(point.lon)),
-            tags: {},
-            rawElement: point
-          }))
-          .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
-        
-        setRecyclingPoints(points);
-        setFilteredPoints(points); // Initialiser les points filtrés
-        console.log(`${points.length} points de recyclage trouvés via Nominatim (fallback)`);
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération via Nominatim:', error);
-    }
-  }, [calculateDistance]);
-
-  // Formater l'adresse à partir des tags Overpass
-  const formatAddressFromTags = useCallback((tags: any): string => {
-    if (!tags) return "Point de recyclage";
-    
-    const parts: string[] = [];
-    
-    if (tags['addr:housenumber']) parts.push(tags['addr:housenumber']);
-    if (tags['addr:street']) parts.push(tags['addr:street']);
-    if (tags['addr:postcode']) parts.push(tags['addr:postcode']);
-    if (tags['addr:city']) parts.push(tags['addr:city']);
-    else if (tags['addr:town']) parts.push(tags['addr:town']);
-    
-    if (parts.length > 0) {
-      return parts.join(', ');
-    }
-    
-    // Fallback sur le nom ou la description
-    if (tags.name) return tags.name;
-    if (tags.description) return tags.description;
-    
-    return "Point de recyclage";
-  }, []);
-
-  // Extraire les types de recyclage disponibles
-  const getRecyclingTypes = useCallback((tags: any): string => {
-    if (!tags) return "Recyclage général";
-    
-    const recyclingTypes: string[] = [];
-    
-    // Vérifier tous les tags de recyclage
-    Object.keys(tags).forEach(key => {
-      if (key.startsWith('recycling:') && tags[key] === 'yes') {
-        const type = translateRecyclingType(key);
-        if (type && !recyclingTypes.includes(type)) {
-          recyclingTypes.push(type);
-        }
-      }
-    });
-    
-    if (recyclingTypes.length > 0) {
-      return recyclingTypes.slice(0, 3).join(', '); // Limiter à 3 types
-    }
-    
-    return "Recyclage général";
-  }, [translateRecyclingType]);
-
-  // Traduire les types de recyclage en français
-  const translateRecyclingType = useCallback((tag: string): string => {
-    const translations: { [key: string]: string } = {
-      // Tags Overpass spécifiques
-      "recycling:glass_bottles": "Bouteilles en verre",
-      "recycling:glass": "Verre",
-      "recycling:plastic": "Plastique",
-      "recycling:plastic_bottles": "Bouteilles en plastique",
-      "recycling:paper": "Papier",
-      "recycling:cardboard": "Carton",
-      "recycling:scrap_metal": "Métal",
-      "recycling:metal": "Métal",
-      "recycling:organic": "Déchets organiques",
-      "recycling:electronics": "Électronique",
-      "recycling:electrical_appliances": "Appareils électriques",
-      "recycling:textile": "Textile",
-      "recycling:clothes": "Vêtements",
-      "recycling:shoes": "Chaussures",
-      "recycling:aluminium": "Aluminium",
-      "recycling:steel": "Acier",
-      "recycling:tin_cans": "Boîtes de conserve",
-      "recycling:oil": "Huile",
-      "recycling:batteries": "Piles",
-      "recycling:light_bulbs": "Ampoules",
-      "recycling:cds": "CD/DVD",
-      "recycling:books": "Livres",
-      "recycling:magazines": "Magazines",
-      "recycling:newspapers": "Journaux",
-      "recycling:wood": "Bois",
-      "recycling:green_waste": "Déchets verts",
-      "recycling:compost": "Compost",
-      "recycling:construction_waste": "Déchets de construction",
-      "recycling:bulky_waste": "Encombrants",
-      "recycling:household_waste": "Déchets ménagers",
-      "recycling:general": "Déchets généraux",
-      "recycling:food_waste": "Déchets alimentaires",
-      "recycling:kitchen_waste": "Déchets de cuisine",
-      "recycling:biodegradable": "Déchets biodégradables",
-      "recycling:garden_waste": "Déchets de jardin",
-      "recycling:printer_cartridges": "Cartouches d'imprimante",
-      "recycling:mobile_phones": "Téléphones mobiles",
-      "recycling:computers": "Ordinateurs",
-      "recycling:white_goods": "Électroménager",
-      "recycling:small_appliances": "Petits appareils",
-      "recycling:fluorescent_tubes": "Tubes fluorescents",
-      "recycling:energy_saving_bulbs": "Ampoules économiques",
-      "recycling:car_batteries": "Batteries de voiture",
-      "recycling:engine_oil": "Huile moteur",
-      "recycling:cooking_oil": "Huile de cuisson",
-      "recycling:paint": "Peinture",
-      "recycling:chemicals": "Produits chimiques",
-      "recycling:medicines": "Médicaments",
-      "recycling:ink_cartridges": "Cartouches d'encre",
-      "recycling:toner_cartridges": "Cartouches de toner",
-      "recycling:plastic_bags": "Sacs plastique",
-      "recycling:plastic_packaging": "Emballages plastique",
-      "recycling:glass_containers": "Contenants en verre",
-      "recycling:aluminum_cans": "Canettes en aluminium",
-      "recycling:steel_cans": "Boîtes en acier",
-      "recycling:tetra_pak": "Briques Tetra Pak",
-      "recycling:wine_corks": "Bouchons de vin",
-      "recycling:coffee_capsules": "Capsules de café",
-      "recycling:tea_bags": "Sachets de thé",
-      "recycling:food_packaging": "Emballages alimentaires",
-      
-      // Termes génériques anglais
-      "waste": "Déchets",
-      "organic waste": "Déchets organiques",
-      "general waste": "Déchets généraux",
-      "household waste": "Déchets ménagers",
-      "recycling": "Recyclage",
-      "recycling center": "Centre de recyclage",
-      "recycling point": "Point de recyclage",
-      "item": "Objet",
-      "items": "Objets",
-      "materials": "Matériaux",
-      "packaging": "Emballages",
-      "containers": "Contenants",
-      "bottles": "Bouteilles",
-      "cans": "Boîtes",
-      "boxes": "Cartons",
-      "paper": "Papier",
-      "cardboard": "Carton",
-      "glass": "Verre",
-      "plastic": "Plastique",
-      "metal": "Métal",
-      "aluminum": "Aluminium",
-      "steel": "Acier",
-      "textile": "Textile",
-      "clothes": "Vêtements",
-      "shoes": "Chaussures",
-      "electronics": "Électronique",
-      "electrical": "Électrique",
-      "appliances": "Appareils",
-      "batteries": "Piles",
-      "light bulbs": "Ampoules",
-      "oil": "Huile",
-      "paint": "Peinture",
-      "chemicals": "Produits chimiques",
-      "medicines": "Médicaments",
-      "books": "Livres",
-      "magazines": "Magazines",
-      "newspapers": "Journaux",
-      "cds": "CD/DVD",
-      "computers": "Ordinateurs",
-      "phones": "Téléphones",
-      "mobile phones": "Téléphones mobiles",
-      "printers": "Imprimantes",
-      "cartridges": "Cartouches",
-      "ink": "Encre",
-      "toner": "Toner",
-      "wood": "Bois",
-      "garden waste": "Déchets de jardin",
-      "green waste": "Déchets verts",
-      "compost": "Compost",
-      "organic": "Organique",
-      "biodegradable": "Biodégradable",
-      "construction waste": "Déchets de construction",
-      "bulky waste": "Encombrants",
-      "food waste": "Déchets alimentaires",
-      "kitchen waste": "Déchets de cuisine",
-      "cooking oil": "Huile de cuisson",
-      "engine oil": "Huile moteur",
-      "car batteries": "Batteries de voiture",
-      "fluorescent tubes": "Tubes fluorescents",
-      "energy saving bulbs": "Ampoules économiques",
-      "small appliances": "Petits appareils",
-      "white goods": "Électroménager",
-      "electrical appliances": "Appareils électriques",
-      "scrap metal": "Métal de récupération",
-      "tin cans": "Boîtes de conserve",
-      "tetra pak": "Briques Tetra Pak",
-      "wine corks": "Bouchons de vin",
-      "coffee capsules": "Capsules de café",
-      "tea bags": "Sachets de thé",
-      "plastic bags": "Sacs plastique",
-      "plastic packaging": "Emballages plastique",
-      "glass containers": "Contenants en verre",
-      "aluminum cans": "Canettes en aluminium",
-      "steel cans": "Boîtes en acier"
-    };
-    
-    // Nettoyer le tag
-    const cleanTag = tag.replace("recycling:", "").toLowerCase();
-    
-    // Chercher une traduction exacte
-    if (translations[cleanTag]) {
-      return translations[cleanTag];
-    }
-    
-    // Chercher une traduction partielle
-    for (const [key, value] of Object.entries(translations)) {
-      if (cleanTag.includes(key.toLowerCase()) || key.toLowerCase().includes(cleanTag)) {
-        return value;
-      }
-    }
-    
-    // Traduction automatique simple pour les termes non traduits
-    const autoTranslations: { [key: string]: string } = {
-      "waste": "Déchets",
-      "organic": "Organique",
-      "general": "Général",
-      "household": "Ménager",
-      "recycling": "Recyclage",
-      "center": "Centre",
-      "point": "Point",
-      "item": "Objet",
-      "materials": "Matériaux",
-      "packaging": "Emballages",
-      "containers": "Contenants",
-      "bottles": "Bouteilles",
-      "cans": "Boîtes",
-      "boxes": "Cartons",
-      "clothes": "Vêtements",
-      "shoes": "Chaussures",
-      "electronics": "Électronique",
-      "electrical": "Électrique",
-      "appliances": "Appareils",
-      "batteries": "Piles",
-      "bulbs": "Ampoules",
-      "oil": "Huile",
-      "paint": "Peinture",
-      "chemicals": "Produits chimiques",
-      "medicines": "Médicaments",
-      "phones": "Téléphones",
-      "computers": "Ordinateurs",
-      "printers": "Imprimantes",
-      "cartridges": "Cartouches",
-      "ink": "Encre",
-      "toner": "Toner",
-      "wood": "Bois",
-      "garden": "Jardin",
-      "green": "Vert",
-      "compost": "Compost",
-      "biodegradable": "Biodégradable",
-      "construction": "Construction",
-      "bulky": "Encombrant",
-      "food": "Alimentaire",
-      "kitchen": "Cuisine",
-      "cooking": "Cuisson",
-      "engine": "Moteur",
-      "car": "Voiture",
-      "fluorescent": "Fluorescent",
-      "energy": "Énergie",
-      "saving": "Économie",
-      "small": "Petit",
-      "white": "Blanc",
-      "scrap": "Récupération",
-      "tin": "Étain",
-      "tetra": "Tetra",
-      "pak": "Pak",
-      "wine": "Vin",
-      "corks": "Bouchons",
-      "coffee": "Café",
-      "capsules": "Capsules",
-      "tea": "Thé",
-      "bags": "Sacs",
-      "plastic": "Plastique",
-      "glass": "Verre",
-      "aluminum": "Aluminium",
-      "steel": "Acier"
-    };
-    
-    // Essayer la traduction automatique mot par mot
-    const words = cleanTag.split(/[\s_-]+/);
-    const translatedWords = words.map(word => {
-      const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
-      return autoTranslations[cleanWord] || word;
-    });
-    
-    // Si on a des traductions, les joindre
-    if (translatedWords.some(word => autoTranslations[word.toLowerCase()])) {
-      return translatedWords.join(' ');
-    }
-    
-    // Dernier recours : formater le tag original
-    return cleanTag
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
-      .replace(/\b\w+/g, word => {
-        const lowerWord = word.toLowerCase();
-        return autoTranslations[lowerWord] || word;
-      });
-  }, []);
-
   // Obtenir les mots-clés pour chaque filtre
   const getFilterKeywords = (filterKey: string): string[] => {
     const keywords: { [key: string]: string[] } = {
@@ -621,141 +414,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return keywords[filterKey] || [filterKey];
   };
 
-  // Demander les permissions de géolocalisation
-  const requestLocationPermission = useCallback(async () => {
-    try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Permission de localisation',
-            message: 'EcoTri a besoin d\'accéder à votre position pour trouver les points de recyclage proches',
-            buttonNeutral: 'Demander plus tard',
-            buttonNegative: 'Annuler',
-            buttonPositive: 'OK',
-          }
-        );
-        
-        if (granted === 'granted') {
-          setLocationPermission('granted');
-          // Appeler getCurrentLocation après avoir défini la permission
-          setTimeout(() => {
-            getCurrentLocation();
-          }, 500); // Délai un peu plus long pour s'assurer que la permission est bien enregistrée
-        } else {
-          setLocationPermission('denied');
-        }
-      } else {
-        // Pour iOS, on vérifie d'abord si la permission est déjà accordée
-        Geolocation.requestAuthorization('whenInUse');
-        setLocationPermission('granted');
-        setTimeout(() => {
-          getCurrentLocation();
-        }, 500);
-      }
-    } catch (err) {
-      setLocationPermission('denied');
-    }
-  }, [getCurrentLocation]); // Ajouter getCurrentLocation comme dépendance
-
-  // Récupérer le nom de la ville via Nominatim
-  const fetchCityFromCoordinates = useCallback(async (lat: number, lon: number) => {
-    try {
-      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
-      const response = await fetch(url, {
-        headers: { "User-Agent": "EcoTri/1.0 (zineblahmar1@gmail.com)" },
-      });
-      const data = await response.json();
-      
-      if (data.address) {
-        const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Ville inconnue';
-        setUserCity(city);
-        console.log('Ville détectée:', city);
-      } else {
-        setUserCity('Ville inconnue');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération de la ville:', error);
-      setUserCity('Ville inconnue');
-    }
-  }, []);
-
-  // Obtenir la position actuelle avec la vraie géolocalisation
-  const getCurrentLocation = useCallback(() => {
-    // Ne pas vérifier la permission ici pour éviter la boucle
-    // La permission est déjà vérifiée avant l'appel de cette fonction
-    
-    setLoading(true);
-    
-    // Timeout de sécurité pour éviter le blocage
-    const locationTimeout = setTimeout(() => {
-      setLoading(false);
-    }, 30000); // 30 secondes de timeout
-    
-    Geolocation.getCurrentPosition(
-      (position) => {
-        clearTimeout(locationTimeout);
-        const { latitude, longitude } = position.coords;
-        const location = { lat: latitude, lon: longitude };
-        
-        setUserLocation(location);
-        
-        // Récupérer le nom de la ville
-        fetchCityFromCoordinates(latitude, longitude);
-        
-        // Récupérer les points de recyclage
-        fetchRecyclingPoints(latitude, longitude);
-        setLoading(false);
-      },
-      (error) => {
-        clearTimeout(locationTimeout);
-        setLoading(false);
-        
-        switch (error.code) {
-          case 1: // PERMISSION_DENIED
-            setLocationPermission('denied');
-            break;
-          case 2: // POSITION_UNAVAILABLE
-            break;
-          case 3: // TIMEOUT
-            break;
-          default:
-            break;
-        }
-        
-        // Logs détaillés pour le diagnostic
-        console.error('🔍 Détails de l\'erreur de géolocalisation:');
-        console.error('   Code d\'erreur:', error.code);
-        console.error('   Message d\'erreur:', error.message);
-        console.error('   Permission actuelle:', locationPermission);
-        console.error('   Platform:', Platform.OS);
-        console.error('   Timestamp:', new Date().toISOString());
-        
-        if (error.code === 1) {
-          console.error('   ❌ PERMISSION_DENIED - L\'utilisateur a refusé la permission');
-        } else if (error.code === 2) {
-          console.error('   ❌ POSITION_UNAVAILABLE - Position temporairement indisponible');
-        } else if (error.code === 3) {
-          console.error('   ❌ TIMEOUT - Délai de géolocalisation dépassé');
-        } else {
-          console.error('   ❌ Erreur inconnue - Code non reconnu');
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 25000, // 25 secondes (légèrement moins que le timeout de sécurité)
-        maximumAge: 60000, // 1 minute (plus permissif)
-        distanceFilter: 10, // Mise à jour si déplacement > 10m
-        forceRequest: true, // Force la demande de position
-        showLocationDialog: true, // Affiche le dialogue de localisation Android
-      }
-    );
-  }, [locationPermission, fetchCityFromCoordinates, fetchRecyclingPoints]); // Seulement locationPermission comme dépendance
-
   // Demander la géolocalisation au démarrage (une seule fois)
   useEffect(() => {
-    requestLocationPermission();
-  }, [requestLocationPermission]); // Remettre la dépendance requestLocationPermission
+    getCurrentLocation();
+  }, [getCurrentLocation]); // Remettre la dépendance getCurrentLocation
 
   // Appliquer les filtres quand ils changent
   useEffect(() => {
@@ -764,19 +426,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Relancer la recherche quand le rayon change
   useEffect(() => {
-    if (userLocation) {
-      fetchRecyclingPoints(userLocation.lat, userLocation.lon);
+    if (location) {
+      fetchRecyclingPoints(location.latitude, location.longitude);
     }
-  }, [searchRadius, userLocation, fetchRecyclingPoints]);
+  }, [searchRadius, location, fetchRecyclingPoints]);
 
   // Actualiser les données
   const onRefresh = async () => {
     setRefreshing(true);
-    if (userLocation) {
-      // Mettre à jour la ville
-      await fetchCityFromCoordinates(userLocation.lat, userLocation.lon);
+    if (location) {
       // Mettre à jour les points de recyclage
-      await fetchRecyclingPoints(userLocation.lat, userLocation.lon);
+      await fetchRecyclingPoints(location.latitude, location.longitude);
     }
     setRefreshing(false);
   };

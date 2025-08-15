@@ -3,5 +3,8 @@ export { default as firestoreService } from './firestoreService';
 export { default as mlKitService } from './mlKitService';
 export { default as IconService } from './iconService';
 export { default as firebaseApp } from './firebase';
+export { default as locationService } from './locationService';
+export { useLocation } from './useLocation';
 export * from './authService';
 export * from './firestoreService';
+export * from './locationService';

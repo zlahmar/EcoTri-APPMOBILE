@@ -211,6 +211,7 @@ const MainNavigator = () => {
             isAuthenticated={isAuthenticated}
             onLoginPress={handleLoginPress}
             onLogout={handleLogout}
+            onCloseModal={() => setShowProfileModal(false)}
             userInfo={userInfo || undefined}
           />
         </SafeAreaView>

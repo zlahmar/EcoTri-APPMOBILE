@@ -10,7 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import authService, { UserData } from '../../services/authService';
@@ -74,7 +76,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onSwitchToSig
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoSection}>
-            <Text style={styles.logo}>🌱</Text>
+            <Image 
+              source={require('../../assets/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.title}>Bienvenue sur EcoTri</Text>
             <Text style={styles.subtitle}>Connectez-vous pour accéder à votre profil</Text>
           </View>
@@ -157,7 +163,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    fontSize: 70,
+    width: 100,
+    height: 100,
     marginBottom: 20,
   },
   title: {
