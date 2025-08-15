@@ -34,15 +34,37 @@ const CollecteScreen = ({
 
   // Charger les communes disponibles au démarrage
   useEffect(() => {
-    const communes = collecteService.getAvailableCommunes();
-    setAvailableCommunes(communes);
-    console.log('🏘️ Communes disponibles:', communes.length);
+    console.log('🏘️ Début du chargement des communes...');
+    console.log('🏘️ collecteService disponible:', !!collecteService);
+    
+    try {
+      // Test direct du service
+      console.log('🧪 Test du service - getAvailableCommunes appelé');
+      const communes = collecteService.getAvailableCommunes();
+      console.log('🏘️ Communes récupérées du service:', communes);
+      console.log('🏘️ Nombre de communes:', communes.length);
+      console.log('🏘️ Type des communes:', typeof communes);
+      console.log('🏘️ Est-ce un array?', Array.isArray(communes));
+      
+      if (Array.isArray(communes) && communes.length > 0) {
+        console.log('🏘️ Premières communes:', communes.slice(0, 5));
+        setAvailableCommunes(communes);
+      } else {
+        console.log('❌ Aucune commune trouvée ou format incorrect');
+        setAvailableCommunes([]);
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des communes:', error);
+      setAvailableCommunes([]);
+    }
   }, []);
 
   // Mettre à jour les informations de collecte par localisation
   const updateCollecteInfoByLocation = (lat: number, lon: number) => {
     try {
+      console.log('📍 Tentative de mise à jour par localisation:', { lat, lon });
       const info = collecteService.getCollecteInfoByLocation(lat, lon);
+      console.log('📍 Info récupérée:', info);
       if (info) {
         setCollecteInfo(info);
         setSelectedCommune(info.commune);
@@ -60,6 +82,7 @@ const CollecteScreen = ({
   // Mettre à jour les informations de collecte par commune sélectionnée
   const updateCollecteInfoByCommune = (commune: string) => {
     try {
+      console.log('🏘️ Tentative de mise à jour par commune:', commune);
       const info = collecteService.getCollecteInfo(commune);
       if (info) {
         setCollecteInfo(info);
@@ -76,17 +99,20 @@ const CollecteScreen = ({
 
   // Gérer le changement de commune
   const handleCommuneChange = (commune: string) => {
+    console.log('🏘️ Changement de commune sélectionnée:', commune);
     updateCollecteInfoByCommune(commune);
   };
 
   // Charger la localisation au démarrage
   useEffect(() => {
+    console.log('📍 Démarrage de la localisation...');
     getCurrentLocation();
   }, [getCurrentLocation]);
 
   // Mettre à jour les informations de collecte quand la localisation change
   useEffect(() => {
     if (location) {
+      console.log('📍 Nouvelle localisation détectée:', location);
       updateCollecteInfoByLocation(location.latitude, location.longitude);
     }
   }, [location]);
@@ -129,16 +155,16 @@ const CollecteScreen = ({
             </View>
           )}
         </View>
-
-        {/* Sélecteur de commune */}
-        <CommuneSelector
-          selectedCommune={selectedCommune}
-          availableCommunes={availableCommunes}
-          onCommuneSelect={handleCommuneChange}
-          visible={showCommuneSelector}
-          onClose={() => setShowCommuneSelector(false)}
-        />
       </ScrollView>
+
+      {/* Sélecteur de commune - EN DEHORS du ScrollView principal */}
+      <CommuneSelector
+        selectedCommune={selectedCommune}
+        availableCommunes={availableCommunes}
+        onCommuneSelect={handleCommuneChange}
+        visible={showCommuneSelector}
+        onClose={() => setShowCommuneSelector(false)}
+      />
     </SafeAreaView>
   );
 };

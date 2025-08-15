@@ -5,8 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  FlatList,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
@@ -38,28 +38,6 @@ const CommuneSelector: React.FC<CommuneSelectorProps> = ({
     setSearchQuery('');
   };
 
-  const renderCommuneItem = ({ item }: { item: string }) => (
-    <TouchableOpacity
-      style={[
-        styles.communeItem,
-        item === selectedCommune && styles.selectedCommuneItem,
-      ]}
-      onPress={() => handleCommuneSelect(item)}
-    >
-      <Text
-        style={[
-          styles.communeText,
-          item === selectedCommune && styles.selectedCommuneText,
-        ]}
-      >
-        {item}
-      </Text>
-      {item === selectedCommune && (
-        <MaterialIcons name="check" size={20} color={colors.primary} />
-      )}
-    </TouchableOpacity>
-  );
-
   return (
     <Modal
       visible={visible}
@@ -77,29 +55,47 @@ const CommuneSelector: React.FC<CommuneSelectorProps> = ({
           </View>
 
           <View style={styles.searchContainer}>
-            <MaterialIcons name="search" size={20} color={colors.textSecondary} />
+            <MaterialIcons name="search" size={20} color={colors.textLight} />
             <TextInput
               style={styles.searchInput}
               placeholder="Rechercher une commune..."
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.textLight}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
 
-          <FlatList
-            data={filteredCommunes}
-            renderItem={renderCommuneItem}
-            keyExtractor={(item) => item}
-            style={styles.communesList}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <MaterialIcons name="search-off" size={48} color={colors.textSecondary} />
-                <Text style={styles.emptyText}>Aucune commune trouvée</Text>
-              </View>
-            }
-          />
+          <View style={styles.communesListContainer}>
+            {/* Liste des communes à sélectionner */}
+            <ScrollView 
+              style={styles.communesList}
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={styles.communesListContent}
+            >
+              {filteredCommunes.map((commune) => (
+                <TouchableOpacity
+                  key={commune}
+                  style={[
+                    styles.communeItem,
+                    commune === selectedCommune && styles.selectedCommuneItem,
+                  ]}
+                  onPress={() => handleCommuneSelect(commune)}
+                >
+                  <Text
+                    style={[
+                      styles.communeText,
+                      commune === selectedCommune && styles.selectedCommuneText,
+                    ]}
+                  >
+                    {commune}
+                  </Text>
+                  {commune === selectedCommune && (
+                    <MaterialIcons name="check" size={20} color="white" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
           <View style={styles.modalFooter}>
             <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
@@ -120,104 +116,91 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: colors.background,
-    borderRadius: 16,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
     width: '90%',
     maxHeight: '80%',
-    elevation: 5,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.text,
   },
   closeButton: {
-    padding: 4,
+    padding: 5,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 15,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
+    marginLeft: 10,
+    fontSize: 14,
     color: colors.text,
   },
   communesList: {
-    flex: 1,
-    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  communesListContent: {
+    paddingBottom: 1, // Add padding at the bottom for the last item
+  },
+  communesListContainer: {
+    marginBottom: 1,
+    maxHeight: 300, // Limite la hauteur pour permettre le scroll
   },
   communeItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 8,
-    backgroundColor: colors.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
   selectedCommuneItem: {
-    backgroundColor: colors.primary + '20',
-    borderWidth: 1,
+    backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   communeText: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  selectedCommuneText: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  modalFooter: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  cancelButton: {
-    backgroundColor: colors.surface,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text,
     fontWeight: '500',
+    flex: 1,
+  },
+  selectedCommuneText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalFooter: {
+    marginTop: 15,
+  },
+  cancelButton: {
+    backgroundColor: '#6c757d',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

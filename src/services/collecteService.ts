@@ -33,7 +33,27 @@ class CollecteService {
   private zones: CollecteZone[] = [];
 
   private constructor() {
-    this.zones = collecteData as CollecteZone[];
+    console.log('🏗️ Initialisation du CollecteService...');
+    console.log('📊 collecteData reçu:', collecteData);
+    console.log('📊 Type de collecteData:', typeof collecteData);
+    console.log('📊 Est-ce un array?', Array.isArray(collecteData));
+    
+    try {
+      console.log('📊 Tentative de chargement des données...');
+      this.zones = collecteData as CollecteZone[];
+      console.log('🏘️ Zones chargées avec succès:', this.zones.length);
+      
+      if (this.zones.length > 0) {
+        console.log('🏘️ Première zone:', this.zones[0]);
+        console.log('🏘️ Commune de la première zone:', this.zones[0].commune);
+        console.log('🏘️ Type de la première zone:', this.zones[0].type);
+      } else {
+        console.log('⚠️ Aucune zone chargée');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des données:', error);
+      this.zones = [];
+    }
   }
 
   public static getInstance(): CollecteService {
@@ -95,13 +115,21 @@ class CollecteService {
 
   // Obtenir toutes les communes disponibles
   public getAvailableCommunes(): string[] {
+    console.log('🔍 getAvailableCommunes appelé');
+    console.log('🔍 Nombre total de zones:', this.zones.length);
+    
     const communes = new Set<string>();
     this.zones.forEach(zone => {
       if (zone.commune) {
         communes.add(zone.commune);
       }
     });
-    return Array.from(communes).sort();
+    
+    const communesArray = Array.from(communes).sort();
+    console.log('🔍 Communes uniques trouvées:', communesArray.length);
+    console.log('🔍 Premières communes:', communesArray.slice(0, 10));
+    
+    return communesArray;
   }
 
   // Obtenir les informations de collecte pour une position GPS

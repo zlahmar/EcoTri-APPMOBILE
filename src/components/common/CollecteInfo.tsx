@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   passageText: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.textLight,
     marginBottom: 8,
   },
   nextCollecte: {
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
   },
   noCollecteText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.textLight,
     fontStyle: 'italic',
   },
   noDataText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.textLight,
     textAlign: 'center',
     fontStyle: 'italic',
   },
