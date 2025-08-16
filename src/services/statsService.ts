@@ -154,7 +154,6 @@ class StatsService {
       const statsData = await AsyncStorage.getItem(this.STORAGE_KEY);
       return statsData ? JSON.parse(statsData) : null;
     } catch (error) {
-      console.error('Erreur lors de la récupération des stats:', error);
       return null;
     }
   }
@@ -227,7 +226,6 @@ class StatsService {
     try {
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(stats));
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde des stats:', error);
       throw error;
     }
   }
@@ -244,7 +242,7 @@ class StatsService {
 
       await AsyncStorage.setItem(this.SCAN_HISTORY_KEY, JSON.stringify(history));
     } catch (error) {
-      console.error('Erreur lors de l\'ajout à l\'historique:', error);
+      // Gestion silencieuse de l'erreur
     }
   }
 

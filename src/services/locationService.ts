@@ -65,10 +65,8 @@ class LocationService {
         );
         
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log(' Permission accordée');
           return true;
         } else {
-          console.log(' Permission refusée');
           this.callbacks.onPermissionDenied?.();
           return false;
         }
@@ -92,7 +90,6 @@ class LocationService {
   // Récupération de la localisation actuelle
   public async getCurrentLocation(): Promise<LocationData | null> {
     if (this.isRequestingLocation) {
-      console.log(' Localisation déjà en cours...');
       return this.currentLocation;
     }
 
@@ -119,7 +116,6 @@ class LocationService {
           this.isRequestingLocation = false;
           
           const { latitude, longitude } = position.coords;
-          console.log(' Position obtenue:', latitude, longitude);
           
           const city = await this.fetchCityFromCoordinates(latitude, longitude);
           
@@ -192,7 +188,6 @@ class LocationService {
                   'Ville inconnue';
       }
       
-      console.log(' Ville détectée:', cityName);
       return cityName;
       
     } catch (error) {
@@ -203,7 +198,6 @@ class LocationService {
 
   // Actualisation de la localisation
   public async refreshLocation(): Promise<LocationData | null> {
-    console.log(' Actualisation de la localisation...');
     return this.getCurrentLocation();
   }
 
