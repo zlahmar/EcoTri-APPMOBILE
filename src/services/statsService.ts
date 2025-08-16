@@ -11,6 +11,8 @@ export interface UserStats {
     [key: string]: number; // Type de déchet -> nombre de scans
   };
   accuracyScore: number; // Score de précision moyen
+  recyclingPointSearches: number; // Nombre de recherches de points de recyclage
+  lastRecyclingSearch: string | null; // Date de la dernière recherche
 }
 
 export interface ScanResult {
@@ -24,12 +26,12 @@ class StatsService {
   private readonly STORAGE_KEY = 'ecotri_user_stats';
   private readonly SCAN_HISTORY_KEY = 'ecotri_scan_history';
 
-  // 🎯 Points par scan réussi
+  // Points par scan réussi
   private readonly POINTS_PER_SCAN = 10;
-  private readonly BONUS_POINTS_HIGH_CONFIDENCE = 5; // Bonus si confiance > 80%
-  private readonly STREAK_BONUS = 2; // Bonus par jour consécutif
+  private readonly BONUS_POINTS_HIGH_CONFIDENCE = 5;
+  private readonly STREAK_BONUS = 2;
 
-  // 📊 Initialiser les statistiques
+  // Initialisation des statistiques
   async initializeStats(): Promise<UserStats> {
     try {
       const existingStats = await this.getStats();
@@ -46,6 +48,8 @@ class StatsService {
         recyclingStreak: 0,
         wasteTypesScanned: {},
         accuracyScore: 0,
+        recyclingPointSearches: 0,
+        lastRecyclingSearch: null,
       };
 
       await this.saveStats(defaultStats);
@@ -56,7 +60,7 @@ class StatsService {
     }
   }
 
-  // 🎯 Ajouter un scan et calculer les points
+  // Ajout d'un scan et calcul des points
   async addScan(wasteType: string, confidence: number): Promise<{
     pointsEarned: number;
     newStats: UserStats;
@@ -71,20 +75,16 @@ class StatsService {
       const now = new Date();
       const today = now.toISOString().split('T')[0];
 
-      // 🎯 Calculer les points
       let pointsEarned = this.POINTS_PER_SCAN;
-      
-      // Bonus pour haute confiance
+    
       if (confidence > 0.8) {
         pointsEarned += this.BONUS_POINTS_HIGH_CONFIDENCE;
       }
 
-      // Bonus pour streak
       if (currentStats.recyclingStreak > 0) {
         pointsEarned += Math.min(currentStats.recyclingStreak * this.STREAK_BONUS, 10);
       }
 
-      // 📊 Mettre à jour les statistiques
       const newStats: UserStats = {
         ...currentStats,
         totalScans: currentStats.totalScans + 1,
@@ -96,32 +96,19 @@ class StatsService {
         },
       };
 
-      // 🗓️ Mettre à jour les scans de la semaine/mois
       newStats.scansThisWeek = await this.calculateWeeklyScans();
       newStats.scansThisMonth = await this.calculateMonthlyScans();
 
-      // 🔥 Mettre à jour le streak
-      newStats.recyclingStreak = await this.calculateStreak(today, currentStats.lastScanDate);
+      newStats.recyclingStreak = await this.calculateStreak(currentStats.lastScanDate, today);
 
-      // 📈 Mettre à jour le score de précision
       newStats.accuracyScore = await this.calculateAccuracyScore();
 
-      // 💾 Sauvegarder
       await this.saveStats(newStats);
-      await this.addToScanHistory({
-        timestamp: now.toISOString(),
-        points: pointsEarned,
-        wasteType,
-        confidence,
-      });
-
-      // 🎉 Message de motivation
-      const message = this.generateMotivationalMessage(pointsEarned, newStats);
 
       return {
         pointsEarned,
         newStats,
-        message,
+        message: `+${pointsEarned} points ! ${this.getStreakMessage(newStats.recyclingStreak)}`,
       };
     } catch (error) {
       console.error('Erreur lors de l\'ajout du scan:', error);
@@ -129,7 +116,39 @@ class StatsService {
     }
   }
 
-  // 📊 Obtenir les statistiques actuelles
+  // Enregistrement d'une recherche de points de recyclage
+  async addRecyclingPointSearch(): Promise<{
+    newStats: UserStats;
+    message: string;
+  }> {
+    try {
+      const currentStats = await this.getStats();
+      if (!currentStats) {
+        throw new Error('Statistiques non initialisées');
+      }
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+
+      const newStats: UserStats = {
+        ...currentStats,
+        recyclingPointSearches: currentStats.recyclingPointSearches + 1,
+        lastRecyclingSearch: today,
+      };
+
+      await this.saveStats(newStats);
+
+      return {
+        newStats,
+        message: `Recherche de points de recyclage enregistrée ! Total: ${newStats.recyclingPointSearches}`,
+      };
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement de la recherche:', error);
+      throw error;
+    }
+  }
+
+  // Récupération des statistiques actuelles
   async getStats(): Promise<UserStats | null> {
     try {
       const statsData = await AsyncStorage.getItem(this.STORAGE_KEY);
@@ -140,7 +159,7 @@ class StatsService {
     }
   }
 
-  // 🗓️ Calculer les scans de la semaine
+  // Calcul des scans de la semaine
   private async calculateWeeklyScans(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -155,7 +174,7 @@ class StatsService {
     }
   }
 
-  // 🗓️ Calculer les scans du mois
+  // Calcul des scans du mois
   private async calculateMonthlyScans(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -170,7 +189,7 @@ class StatsService {
     }
   }
 
-  // 🔥 Calculer le streak de recyclage
+  // Calcul du streak de recyclage
   private async calculateStreak(today: string, lastScanDate: string | null): Promise<number> {
     if (!lastScanDate) return 1;
 
@@ -180,20 +199,17 @@ class StatsService {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 1) {
-      // Scan consécutif
       const currentStats = await this.getStats();
       return (currentStats?.recyclingStreak || 0) + 1;
     } else if (diffDays === 0) {
-      // Même jour, garder le streak
       const currentStats = await this.getStats();
       return currentStats?.recyclingStreak || 0;
     } else {
-      // Streak brisé
       return 1;
     }
   }
 
-  // 📈 Calculer le score de précision moyen
+  // Calcul du score de précision moyen
   private async calculateAccuracyScore(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -206,7 +222,7 @@ class StatsService {
     }
   }
 
-  // 💾 Sauvegarder les statistiques
+  // Sauvegarde des statistiques
   private async saveStats(stats: UserStats): Promise<void> {
     try {
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(stats));
@@ -216,13 +232,12 @@ class StatsService {
     }
   }
 
-  // 📝 Ajouter au historique des scans
+  // Ajout à l'historique des scans
   private async addToScanHistory(scan: ScanResult): Promise<void> {
     try {
       const history = await this.getScanHistory();
       history.push(scan);
       
-      // Garder seulement les 100 derniers scans
       if (history.length > 100) {
         history.splice(0, history.length - 100);
       }
@@ -233,7 +248,7 @@ class StatsService {
     }
   }
 
-  // 📚 Obtenir l'historique des scans
+  // Récupération de l'historique des scans
   async getScanHistory(): Promise<ScanResult[]> {
     try {
       const historyData = await AsyncStorage.getItem(this.SCAN_HISTORY_KEY);
@@ -243,7 +258,7 @@ class StatsService {
     }
   }
 
-  // 🎉 Générer un message de motivation
+  // Génération d'un message de motivation
   private generateMotivationalMessage(pointsEarned: number, stats: UserStats): string {
     const messages = [
       `🎉 +${pointsEarned} points ! Excellent recyclage !`,
@@ -256,7 +271,7 @@ class StatsService {
     return messages[Math.floor(Math.random() * messages.length)];
   }
 
-  // 🏆 Obtenir les classements
+  // Récupération des classements
   async getLeaderboard(): Promise<{
     totalPoints: number;
     totalScans: number;
@@ -274,7 +289,7 @@ class StatsService {
     };
   }
 
-  // 🔄 Réinitialiser les statistiques (pour les tests)
+  // Réinitialisation des statistiques
   async resetStats(): Promise<void> {
     try {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
@@ -283,6 +298,12 @@ class StatsService {
     } catch (error) {
       console.error('Erreur lors de la réinitialisation:', error);
     }
+  }
+
+  private getStreakMessage(streak: number): string {
+    if (streak === 0) return '';
+    if (streak === 1) return 'Votre streak de recyclage est de 1 jour !';
+    return `Votre streak de recyclage est de ${streak} jours !`;
   }
 }
 

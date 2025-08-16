@@ -15,7 +15,7 @@ export const useLocation = (callbacks?: LocationServiceCallbacks): UseLocationRe
   const [location, setLocation] = useState<LocationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Configurer les callbacks du service
+  // Configuration des callbacks du service
   useEffect(() => {
     if (callbacks) {
       locationService.setCallbacks({
@@ -37,13 +37,12 @@ export const useLocation = (callbacks?: LocationServiceCallbacks): UseLocationRe
       });
     }
 
-    // Nettoyer les callbacks au démontage
     return () => {
       locationService.clearCallbacks();
     };
   }, [callbacks]);
 
-  // Récupérer la localisation actuelle
+  // Récupération de la localisation actuelle
   const getCurrentLocation = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -59,7 +58,7 @@ export const useLocation = (callbacks?: LocationServiceCallbacks): UseLocationRe
     }
   }, []);
 
-  // Actualiser la localisation
+  // Actualisation de la localisation
   const refreshLocation = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -75,7 +74,7 @@ export const useLocation = (callbacks?: LocationServiceCallbacks): UseLocationRe
     }
   }, []);
 
-  // Initialiser avec la localisation existante si disponible
+  // Initialisation avec la localisation existante si disponible
   useEffect(() => {
     const currentLocation = locationService.getLocation();
     const currentCity = locationService.getCity();

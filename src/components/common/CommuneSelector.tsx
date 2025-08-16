@@ -155,11 +155,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   communesListContent: {
-    paddingBottom: 1, // Add padding at the bottom for the last item
+    paddingBottom: 1,
   },
   communesListContainer: {
     marginBottom: 1,
-    maxHeight: 300, // Limite la hauteur pour permettre le scroll
+    maxHeight: 300,
   },
   communeItem: {
     flexDirection: 'row',

@@ -18,7 +18,6 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <View style={styles.header}>
-      {/* Logo à gauche */}
       <View style={styles.leftSection}>
         <Image 
           source={require('../../assets/logo.png')} 
@@ -27,12 +26,10 @@ const Header: React.FC<HeaderProps> = ({
         />
       </View>
       
-      {/* Titre au centre */}
       <View style={styles.centerSection}>
         <Text style={styles.title}>{title}</Text>
       </View>
       
-      {/* Icône de profil à droite */}
       <View style={styles.rightSection}>
         {showProfileIcon && (
           <TouchableOpacity 
@@ -56,7 +53,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primaryDark,
-    paddingTop: 32, // Espace pour la barre de statut
+    paddingTop: 32,
     paddingBottom: 12,
     paddingHorizontal: 16,
     elevation: 4,
@@ -66,15 +63,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   leftSection: {
-    width: 60, // Fixed width for the logo
+    width: 60,
     alignItems: 'center',
   },
   logo: {
-    width: 40, // Adjust as needed
-    height: 40, // Adjust as needed
+    width: 40,
+    height: 40,
   },
   centerSection: {
-    flex: 1, // Takes available space for the title
+    flex: 1,
     alignItems: 'center',
   },
   title: {
@@ -84,7 +81,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   rightSection: {
-    width: 60, // Fixed width for the profile icon
+    width: 60,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },

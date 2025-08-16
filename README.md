@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
-**Version** : 7.0.0  
-**Statut** : ✅ PAGE DE COLLECTE INTELLIGENTE + DONNÉES BORDEAUX MÉTROPOLE + CALENDRIER HEBDOMADAIRE + SERVICES CENTRALISÉS + GÉOLOCALISATION UNIFIÉE + INTERFACE MODERNISÉE + COMPOSANTS RÉUTILISABLES
+**Version** : 7.1.0  
+**Statut** : ✅ INTERFACE UTILISATEUR MODERNISÉE + PAGE DE CONSEILS REFONDUE + MATERIALICONS INTÉGRÉS + BANNIÈRE D'INFORMATION + DESIGN SYSTÈME UNIFIÉ
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -40,42 +40,45 @@ L'application compile et s'installe parfaitement sur Android avec tous les servi
 ### **Architecture des Services (Versions 6.0.0+)**
 
 #### **🌍 LocationService - Géolocalisation Centralisée**
+
 ```typescript
 // Service singleton pour la gestion de la géolocalisation
 class LocationService {
   private static instance: LocationService;
-  
+
   // Méthodes principales
-  async getCurrentLocation(): Promise<LocationData>
-  async checkAndRequestPermissions(): Promise<boolean>
-  async reverseGeocode(lat: number, lon: number): Promise<string>
-  async refreshLocation(): Promise<LocationData>
+  async getCurrentLocation(): Promise<LocationData>;
+  async checkAndRequestPermissions(): Promise<boolean>;
+  async reverseGeocode(lat: number, lon: number): Promise<string>;
+  async refreshLocation(): Promise<LocationData>;
 }
 
 // Hook React personnalisé
 export const useLocation = (options: UseLocationOptions) => {
   // Retourne : city, location, isLoading, hasLocation, getCurrentLocation, refreshLocation
-}
+};
 ```
 
 #### **🗑️ CollecteService - Gestion des Données de Collecte**
+
 ```typescript
 // Service singleton pour la gestion des données de collecte
 class CollecteService {
   private static instance: CollecteService;
   private zones: CollecteZone[] = [];
-  
+
   // Méthodes principales
-  findNearestZone(lat: number, lon: number): CollecteZone | null
-  getCollecteInfo(commune: string): CollecteInfo | null
-  getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null
-  getAvailableCommunes(): string[]
-  formatCollecteDays(jours: string[]): string
-  getNextCollecteDay(jours: string[]): string | null
+  findNearestZone(lat: number, lon: number): CollecteZone | null;
+  getCollecteInfo(commune: string): CollecteInfo | null;
+  getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null;
+  getAvailableCommunes(): string[];
+  formatCollecteDays(jours: string[]): string;
+  getNextCollecteDay(jours: string[]): string | null;
 }
 ```
 
 #### **📊 Composants Réutilisables**
+
 - **`CollecteInfo`** : Affichage détaillé des informations de collecte
 - **`CommuneSelector`** : Modal de sélection de commune avec recherche
 - **`WeeklyCalendar`** : Calendrier hebdomadaire visuel avec badges colorés
@@ -174,10 +177,13 @@ EcoTri/
 
 ### 5. ConseilsScreen 💡
 
-- Conseil du jour avec impact environnemental
-- Catégories de conseils par type de matériau
-- Conseils rapides en format liste
-- Suivi de l'impact environnemental personnel
+- **Interface modernisée** : Remplacement complet des emojis par MaterialIcons
+- **Bannière d'information** : Indication "Prochainement disponible" pour la prochaine mise à jour
+- **Conseil du jour** avec impact environnemental et statistiques
+- **Catégories de conseils** par type de matériau (Plastique, Papier/Carton, Verre, Métal)
+- **Conseils rapides** en format liste avec icônes de validation
+- **Suivi de l'impact environnemental** personnel (CO2, eau, énergie)
+- **Design cohérent** : Utilisation de la palette de couleurs EcoTri et composants stylés
 
 ## 🤖 **Module Natif ML Kit Android - Intelligence Artificielle Native**
 
@@ -1281,15 +1287,17 @@ override val isHermesEnabled: Boolean = true
 ## 📊 **Données Intégrées - Bordeaux Métropole**
 
 ### **🗑️ Dataset de Collecte des Déchets**
+
 - **Source** : Fichier `en_frcol_s.json` dans `src/assets/donnees/`
 - **Contenu** : Fréquences de collecte des déchets ménagers sur le territoire de Bordeaux Métropole
 - **Format** : JSON structuré avec coordonnées GPS et informations de collecte
 - **Données** : Plus de 100 zones géographiques avec informations détaillées
 
 #### **📋 Structure des Données**
+
 ```json
 {
-  "geo_point_2d": {"lat": 44.837789, "lon": -0.57918},
+  "geo_point_2d": { "lat": 44.837789, "lon": -0.57918 },
   "commune": "Bordeaux",
   "type": "OM", // Ordures Ménagères
   "jour_col": ["LUNDI", "MERCREDI", "VENDREDI"],
@@ -1299,12 +1307,14 @@ override val isHermesEnabled: Boolean = true
 ```
 
 #### **🎯 Types de Collecte Supportés**
+
 - **OM (Ordures Ménagères)** : Déchets non recyclables (bac gris)
 - **TRI (Tri & Recyclage)** : Déchets recyclables (bac vert)
 - **Passages** : Matin, Après-midi, Soir
 - **Fréquences** : Quotidienne, Hebdomadaire, Bi-hebdomadaire
 
 #### **🌍 Zones Géographiques**
+
 - **Bordeaux** : Centre-ville et quartiers
 - **Mérignac** : Zones résidentielles et commerciales
 - **Pessac** : Secteurs universitaires et résidentiels
@@ -1313,6 +1323,7 @@ override val isHermesEnabled: Boolean = true
 - **Et plus de 20 autres communes** de la métropole
 
 ### **🔍 Fonctionnalités de Recherche**
+
 - **Géolocalisation automatique** : Détection de la zone la plus proche
 - **Recherche par commune** : Sélection manuelle parmi les villes disponibles
 - **Filtrage intelligent** : Tri par type de collecte et fréquence
@@ -1426,6 +1437,7 @@ npm test
 ### ✅ **Implémentées et Fonctionnelles**
 
 #### **🗑️ Page de Collecte Intelligente (Version 7.0.0)**
+
 - **Intégration des données Bordeaux Métropole** : Dataset `en_frcol_s.json` avec fréquences de collecte par zone géographique
 - **Service de collecte intelligent** : `CollecteService` singleton pour la gestion centralisée des données
 - **Géolocalisation automatique** : Détection de la ville et affichage des informations de collecte correspondantes
@@ -1437,6 +1449,7 @@ npm test
 - **Interface modernisée** : Icons MaterialIcons, design cohérent, composants stylés
 
 #### **🌍 Service de Géolocalisation Centralisé (Version 6.0.0)**
+
 - **`LocationService`** : Singleton pour la gestion centralisée de la géolocalisation
 - **`useLocation`** : Hook React personnalisé pour l'utilisation du service dans les composants
 - **Permissions automatiques** : Gestion des permissions Android pour la localisation
@@ -1445,6 +1458,7 @@ npm test
 - **Performance optimisée** : Pas de duplication de code, état synchronisé
 
 #### **📱 Interface Utilisateur Modernisée**
+
 - **Icons MaterialIcons** : Remplacement des emojis par des icônes vectorielles professionnelles
 - **Design cohérent** : Utilisation de la palette de couleurs EcoTri sur tous les composants
 - **Composants stylés** : Ombres, bordures arrondies, espacement harmonieux
@@ -1921,12 +1935,14 @@ import IconService from '../../services/iconService';
 ### **🚀 Navigation Modernisée**
 
 #### **📱 Barre de Navigation Principale**
+
 - **3 onglets principaux** : Scan, Collecte, Conseils
 - **Icons MaterialIcons** : Remplacement des emojis par des icônes vectorielles
 - **Design cohérent** : Interface harmonieuse et professionnelle
 - **Suppression de l'onglet Profile** : Accès via icône en haut à droite
 
 #### **👤 Accès au Profil**
+
 - **Icône du profil** : Affichée en haut à droite de chaque écran
 - **Modal plein écran** : Ouverture du profil en overlay
 - **État d'authentification** : Icône différente selon la connexion
@@ -1936,11 +1952,13 @@ import IconService from '../../services/iconService';
 ### **🌟 Améliorations Visuelles**
 
 #### **🎨 Icons MaterialIcons**
+
 - **Remplacement des emojis** : Icons vectoriels professionnels
 - **Cohérence visuelle** : Même style sur tous les écrans
 - **Performance optimisée** : Icons natifs Android
 
 #### **📱 Interface Responsive**
+
 - **Header adaptatif** : Hauteur optimisée pour l'espace
 - **Navigation intuitive** : Accès rapide au profil
 - **Design moderne** : Ombres, bordures arrondies, couleurs harmonieuses
@@ -1948,6 +1966,7 @@ import IconService from '../../services/iconService';
 ### **🔧 Architecture Technique**
 
 #### **📦 Props d'Authentification**
+
 ```typescript
 // Props passées à chaque écran
 interface ScreenProps {
@@ -1958,6 +1977,7 @@ interface ScreenProps {
 ```
 
 #### **🔄 Gestion d'État**
+
 - **État centralisé** : Authentification gérée dans MainNavigator
 - **Props drilling** : Transmission des données d'authentification
 - **Modals synchronisées** : Profil et authentification cohérents
@@ -1965,16 +1985,19 @@ interface ScreenProps {
 ### **✅ Avantages de la Nouvelle Interface**
 
 #### **🎯 Expérience Utilisateur**
+
 - **Navigation intuitive** : 3 onglets clairs et logiques
 - **Accès rapide** : Profil accessible depuis n'importe quel écran
 - **Interface cohérente** : Design uniforme sur tous les écrans
 
 #### **🚀 Performance**
+
 - **Icons vectoriels** : Chargement rapide et qualité optimale
 - **Navigation fluide** : Transitions entre écrans optimisées
 - **État synchronisé** : Données d'authentification cohérentes
 
 #### **🔧 Maintenance**
+
 - **Code centralisé** : Logique d'authentification dans MainNavigator
 - **Composants réutilisables** : Header avec icône du profil
 - **Props typées** : Interface TypeScript claire et maintenable

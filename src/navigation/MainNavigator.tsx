@@ -15,7 +15,7 @@ const MainNavigator = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserData | null>(null);
 
-  // Écouter les changements d'état d'authentification Firebase
+  // Écoute des changements d'état d'authentification Firebase
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
       if (user) {
@@ -25,7 +25,6 @@ const MainNavigator = () => {
           setIsAuthenticated(true);
         } catch (error) {
           console.error('Erreur lors de la récupération des données utilisateur:', error);
-          // L'utilisateur est connecté mais on ne peut pas récupérer ses données
           setIsAuthenticated(true);
         }
       } else {
@@ -116,7 +115,6 @@ const MainNavigator = () => {
         {renderScreen()}
       </View>
 
-      {/* Barre de navigation personnalisée */}
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tab, currentScreen === 'home' && styles.activeTab]}
@@ -142,7 +140,7 @@ const MainNavigator = () => {
             color={currentScreen === 'scan' ? colors.primary : colors.textLight} 
           />
           <Text style={[styles.tabText, currentScreen === 'scan' && styles.activeTabText]}>
-            Scan
+            Scanner Éco
           </Text>
         </TouchableOpacity>
 

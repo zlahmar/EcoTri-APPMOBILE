@@ -7,18 +7,15 @@ class FirebaseStatsService {
   private readonly COLLECTION_STATS = 'userStats';
   private readonly COLLECTION_SCAN_HISTORY = 'scanHistory';
 
-  // 🎯 Points par scan réussi
   private readonly POINTS_PER_SCAN = 10;
-  private readonly BONUS_POINTS_HIGH_CONFIDENCE = 5; // Bonus si confiance > 80%
-  private readonly STREAK_BONUS = 2; // Bonus par jour consécutif
+  private readonly BONUS_POINTS_HIGH_CONFIDENCE = 5;
+  private readonly STREAK_BONUS = 2;
 
-  // 🔐 Obtenir l'ID de l'utilisateur connecté
   private getCurrentUserId(): string | null {
     const user = auth().currentUser;
     return user?.uid || null;
   }
 
-  // 📊 Initialiser les statistiques pour un nouvel utilisateur
   async initializeStats(): Promise<UserStats> {
     try {
       const userId = this.getCurrentUserId();
@@ -26,13 +23,11 @@ class FirebaseStatsService {
         throw new Error('Utilisateur non connecté');
       }
 
-      // Vérifier si les stats existent déjà
       const existingStats = await this.getStats();
       if (existingStats) {
         return existingStats;
       }
 
-      // Créer des stats par défaut
       const defaultStats: UserStats = {
         totalScans: 0,
         totalPoints: 0,
@@ -44,7 +39,6 @@ class FirebaseStatsService {
         accuracyScore: 0,
       };
 
-      // Sauvegarder dans Firestore
       await firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
@@ -59,7 +53,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🎯 Ajouter un scan et calculer les points
   async addScan(wasteType: string, confidence: number): Promise<{
     pointsEarned: number;
     newStats: UserStats;
@@ -79,20 +72,16 @@ class FirebaseStatsService {
       const now = new Date();
       const today = now.toISOString().split('T')[0];
 
-      // 🎯 Calculer les points
       let pointsEarned = this.POINTS_PER_SCAN;
       
-      // Bonus pour haute confiance
       if (confidence > 0.8) {
         pointsEarned += this.BONUS_POINTS_HIGH_CONFIDENCE;
       }
 
-      // Bonus pour streak
       if (currentStats.recyclingStreak > 0) {
         pointsEarned += Math.min(currentStats.recyclingStreak * this.STREAK_BONUS, 10);
       }
 
-      // 📊 Mettre à jour les statistiques
       const newStats: UserStats = {
         ...currentStats,
         totalScans: currentStats.totalScans + 1,
@@ -104,20 +93,15 @@ class FirebaseStatsService {
         },
       };
 
-      // 🗓️ Mettre à jour les scans de la semaine/mois
       newStats.scansThisWeek = await this.calculateWeeklyScans();
       newStats.scansThisMonth = await this.calculateMonthlyScans();
 
-      // 🔥 Mettre à jour le streak
       newStats.recyclingStreak = await this.calculateStreak(today, currentStats.lastScanDate);
 
-      // 📈 Mettre à jour le score de précision
       newStats.accuracyScore = await this.calculateAccuracyScore();
 
-      // 💾 Sauvegarder dans Firestore (avec support offline)
       const batch = firestore().batch();
       
-      // Mettre à jour les stats
       const statsRef = firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
@@ -126,7 +110,6 @@ class FirebaseStatsService {
       
       batch.set(statsRef, newStats);
 
-      // Ajouter à l'historique
       const historyRef = firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
@@ -142,10 +125,8 @@ class FirebaseStatsService {
 
       batch.set(historyRef, scanRecord);
 
-      // Exécuter le batch
       await batch.commit();
 
-      // 🎉 Message de motivation
       const message = this.generateMotivationalMessage(pointsEarned, newStats);
 
       return {
@@ -159,7 +140,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 📊 Obtenir les statistiques actuelles
   async getStats(): Promise<UserStats | null> {
     try {
       const userId = this.getCurrentUserId();
@@ -185,7 +165,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🗓️ Calculer les scans de la semaine
   private async calculateWeeklyScans(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -200,7 +179,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🗓️ Calculer les scans du mois
   private async calculateMonthlyScans(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -215,7 +193,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🔥 Calculer le streak de recyclage
   private async calculateStreak(today: string, lastScanDate: string | null): Promise<number> {
     if (!lastScanDate) return 1;
 
@@ -225,20 +202,16 @@ class FirebaseStatsService {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 1) {
-      // Scan consécutif
       const currentStats = await this.getStats();
       return (currentStats?.recyclingStreak || 0) + 1;
     } else if (diffDays === 0) {
-      // Même jour, garder le streak
       const currentStats = await this.getStats();
       return currentStats?.recyclingStreak || 0;
     } else {
-      // Streak brisé
       return 1;
     }
   }
 
-  // 📈 Calculer le score de précision moyen
   private async calculateAccuracyScore(): Promise<number> {
     try {
       const history = await this.getScanHistory();
@@ -251,7 +224,7 @@ class FirebaseStatsService {
     }
   }
 
-  // 📚 Obtenir l'historique des scans
+  // Récupération de l'historique des scans
   async getScanHistory(): Promise<ScanResult[]> {
     try {
       const userId = this.getCurrentUserId();
@@ -264,7 +237,7 @@ class FirebaseStatsService {
         .doc(userId)
         .collection(this.COLLECTION_SCAN_HISTORY)
         .orderBy('timestamp', 'desc')
-        .limit(100) // Limiter à 100 derniers scans
+        .limit(100)
         .get();
 
       return historySnapshot.docs.map(doc => doc.data() as ScanResult);
@@ -274,7 +247,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🎉 Générer un message de motivation
   private generateMotivationalMessage(pointsEarned: number, stats: UserStats): string {
     const messages = [
       `🎉 +${pointsEarned} points ! Excellent recyclage !`,
@@ -287,20 +259,18 @@ class FirebaseStatsService {
     return messages[Math.floor(Math.random() * messages.length)];
   }
 
-  // 🏆 Obtenir les classements (pour comparaison avec d'autres utilisateurs)
   async getLeaderboard(): Promise<{
     totalPoints: number;
     totalScans: number;
     recyclingStreak: number;
     accuracyScore: number;
-    rank?: number; // Position dans le classement
+    rank?: number;
   }> {
     const stats = await this.getStats();
     if (!stats) {
       return { totalPoints: 0, totalScans: 0, recyclingStreak: 0, accuracyScore: 0 };
     }
 
-    // Calculer le rang (optionnel - pour les classements)
     const rank = await this.calculateUserRank(stats.totalPoints);
 
     return {
@@ -312,7 +282,6 @@ class FirebaseStatsService {
     };
   }
 
-  // 🏅 Calculer le rang de l'utilisateur
   private async calculateUserRank(userPoints: number): Promise<number | undefined> {
     try {
       const usersSnapshot = await firestore()
@@ -336,7 +305,6 @@ class FirebaseStatsService {
     }
   }
 
-  // 🔄 Réinitialiser les statistiques (pour les tests)
   async resetStats(): Promise<void> {
     try {
       const userId = this.getCurrentUserId();
@@ -344,10 +312,8 @@ class FirebaseStatsService {
         throw new Error('Utilisateur non connecté');
       }
 
-      // Supprimer les stats et l'historique
       const batch = firestore().batch();
       
-      // Supprimer les stats
       const statsRef = firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
@@ -356,7 +322,6 @@ class FirebaseStatsService {
       
       batch.delete(statsRef);
 
-      // Supprimer l'historique
       const historySnapshot = await firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
@@ -369,14 +334,12 @@ class FirebaseStatsService {
 
       await batch.commit();
 
-      // Réinitialiser
       await this.initializeStats();
     } catch (error) {
       console.error('Erreur lors de la réinitialisation Firebase:', error);
     }
   }
 
-  // 📱 Écouter les changements en temps réel
   onStatsChange(callback: (stats: UserStats | null) => void) {
     const userId = this.getCurrentUserId();
     if (!userId) {

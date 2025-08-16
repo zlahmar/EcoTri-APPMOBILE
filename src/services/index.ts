@@ -6,8 +6,11 @@ export { default as firebaseApp } from './firebase';
 export { default as locationService } from './locationService';
 export { useLocation } from './useLocation';
 export { default as collecteService } from './collecteService';
-
+export { default as statsService } from './statsService';
+export { default as localStatsService } from './localStatsService';
 export * from './authService';
 export * from './firestoreService';
 export * from './locationService';
 export * from './collecteService';
+export * from './statsService';
+export * from './localStatsService';

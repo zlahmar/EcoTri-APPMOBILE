@@ -18,7 +18,6 @@ import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import mlKitService, { ScanResult } from '../../services/mlKitService';
 import statsService from '../../services/localStatsService';
-// import IconService from '../../services/iconService';
 
 const ScanScreen = ({ 
   isAuthenticated = false, 
@@ -29,28 +28,20 @@ const ScanScreen = ({
   onProfilePress?: () => void; 
   userInfo?: any; 
 }) => {
-  // État pour l'image sélectionnée
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
-  // État pour le résultat de l'analyse
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   
-  // État pour le chargement
   const [isScanning, setIsScanning] = useState(false);
-  
-  // État pour la classification automatique
   const [wasteClassification, setWasteClassification] = useState<any>(null);
 
-  // 🎯 État pour les points gagnés et motivation
   const [pointsEarned, setPointsEarned] = useState<number | null>(null);
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null);
 
-  // Demander les permissions au démarrage
   useEffect(() => {
     requestPermissions();
   }, []);
 
-  // Demander les permissions
+  // Demande des permissions
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -78,9 +69,9 @@ const ScanScreen = ({
 
         if (cameraPermission === PermissionsAndroid.RESULTS.GRANTED && 
             storagePermission === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('✅ Permissions accordées');
+          console.log(' Permissions accordées');
         } else {
-          console.log('❌ Permissions refusées');
+          console.log(' Permissions refusées');
         }
       } catch (err) {
         console.warn('Erreur lors de la demande de permissions:', err);
@@ -88,7 +79,7 @@ const ScanScreen = ({
     }
   };
 
-  // Prendre une photo avec la caméra
+  // Prise d'une photo avec la caméra
   const takePhoto = async () => {
     try {
       const result = await launchCamera({
@@ -111,7 +102,7 @@ const ScanScreen = ({
     }
   };
 
-  // Sélectionner une image depuis la galerie
+  // Sélection d'une image depuis la galerie
   const selectImage = async () => {
     try {
       const result = await launchImageLibrary({
@@ -134,7 +125,7 @@ const ScanScreen = ({
     }
   };
 
-  // Analyser l'image avec ML Kit
+  // Analyse d'une image avec ML Kit
   const analyzeImage = async (imageUri: string) => {
     setIsScanning(true);
     try {
@@ -142,13 +133,12 @@ const ScanScreen = ({
       setScanResult(result);
       console.log('Analyse ML Kit réussie:', result);
       
-      // 🚀 Classification automatique immédiate après l'analyse
       try {
         const classification = await mlKitService.classifyWaste(result);
         setWasteClassification(classification);
-        console.log('✅ Classification automatique réussie:', classification);
+        console.log(' Classification automatique réussie:', classification);
 
-        // 🎯 Ajouter les statistiques et points (si connecté)
+        //  Ajout des statistiques et points (si connecté)
         if (classification && classification.type) {
           try {
             const confidence = classification.confidence || 0.5;
@@ -158,24 +148,24 @@ const ScanScreen = ({
             );
             
             if (statsResult) {
-              // Utilisateur connecté - Stats enregistrées
               setPointsEarned(statsResult.pointsEarned);
               setMotivationalMessage(statsResult.message);
-              console.log('🎉 Points gagnés:', statsResult.pointsEarned);
+              console.log(' Points gagnés:', statsResult.pointsEarned);
             } else {
-              // Utilisateur non connecté - Pas de stats
-              setPointsEarned(0); // 0 pour indiquer "non connecté"
-              setMotivationalMessage('⚠️ Connectez-vous pour enregistrer vos statistiques et gagner des points !');
-              console.log('⚠️ Utilisateur non connecté - Stats non enregistrées');
+              setPointsEarned(0);
+              setMotivationalMessage(' Connectez-vous pour enregistrer vos statistiques et gagner des points !');
+              console.log(' Utilisateur non connecté - Stats non enregistrées');
+              setPointsEarned(0);
+              setMotivationalMessage(' Connectez-vous pour enregistrer vos statistiques et gagner des points !');
             }
           } catch (statsError) {
-            console.warn('⚠️ Erreur lors de l\'ajout des statistiques:', statsError);
+            console.warn(' Erreur lors de l\'ajout des statistiques:', statsError);
             setPointsEarned(0);
-            setMotivationalMessage('⚠️ Erreur lors de l\'enregistrement des statistiques');
+            setMotivationalMessage(' Erreur lors de l\'enregistrement des statistiques');
           }
         }
       } catch (classificationError) {
-        console.warn('⚠️ Erreur lors de la classification automatique:', classificationError);
+        console.warn(' Erreur lors de la classification automatique:', classificationError);
         setWasteClassification(null);
       }
     } catch (error) {
@@ -186,18 +176,16 @@ const ScanScreen = ({
     }
   };
 
-  // Réinitialiser le scan
+  // Réinitialisation du scan
   const resetScan = () => {
     setScanResult(null);
     setSelectedImage(null);
     setWasteClassification(null);
   };
 
-  // Rendu des résultats du scan
   const renderScanResults = () => {
     if (!scanResult) return null;
 
-    // Vérification de sécurité pour éviter les erreurs undefined
     const objects = scanResult.objects || [];
     const barcodes = scanResult.barcodes || [];
     const text = scanResult.text || [];
@@ -299,7 +287,6 @@ const ScanScreen = ({
           </View>
         )}
 
-        {/* Affichage des données brutes pour debug */}
         <View style={styles.debugSection}>
           <Text style={styles.debugTitle}>
             <MaterialIcons name="info" size={18} color={colors.warning} style={styles.resultIcon} />
@@ -316,7 +303,6 @@ const ScanScreen = ({
           </Text>
         </View>
 
-        {/* 🚀 Classification automatique des déchets */}
         {wasteClassification && (
           <View style={styles.classificationSection}>
             <Text style={styles.classificationTitle}>
@@ -350,11 +336,9 @@ const ScanScreen = ({
               </View>
             </View>
 
-            {/* 🎯 Points gagnés et message de motivation */}
             {pointsEarned !== null && (
               <View style={styles.pointsSection}>
                 {pointsEarned > 0 ? (
-                  // Utilisateur connecté - Points gagnés
                   <View style={styles.pointsCard}>
                     <MaterialIcons name="stars" size={24} color={colors.warning} style={styles.pointsIcon} />
                     <Text style={styles.pointsText}>
@@ -362,7 +346,6 @@ const ScanScreen = ({
                     </Text>
                   </View>
                 ) : (
-                  // Utilisateur non connecté - Message d'information
                   <View style={[styles.pointsCard, { borderColor: colors.primary, backgroundColor: colors.surface }]}>
                     <MaterialIcons name="info" size={24} color={colors.primary} style={styles.pointsIcon} />
                     <Text style={[styles.pointsText, { color: colors.primary }]}>
@@ -391,17 +374,16 @@ const ScanScreen = ({
     );
   };
 
-  // Obtenir la couleur de confiance
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.8) return '#4CAF50'; // Vert
-    if (confidence >= 0.6) return '#FF9800'; // Orange
-    return '#F44336'; // Rouge
+    if (confidence >= 0.8) return '#4CAF50';
+    if (confidence >= 0.6) return '#FF9800';
+    return '#F44336';
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header 
-        title="Scanner de Déchets" 
+        title="Scanner Éco" 
         showProfileIcon={true}
         isAuthenticated={isAuthenticated} 
         onProfilePress={onProfilePress}
@@ -461,7 +443,6 @@ const ScanScreen = ({
             4. Suivez les instructions de recyclage
           </Text>
           
-          {/* 🔐 Message d'authentification */}
           <View style={styles.authInfo}>
             <MaterialIcons name="info" size={16} color={colors.textLight} style={styles.authIcon} />
             <Text style={styles.authText}>
@@ -485,7 +466,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   scrollContent: {
-    paddingBottom: 120, // Espace suffisant pour éviter que le contenu soit caché par la navigation
+    paddingBottom: 120,
   },
   scanArea: {
     alignItems: 'center',

@@ -21,7 +21,6 @@ class LocationService {
   private currentLocation: LocationData | null = null;
   private isRequestingLocation = false;
 
-  // Singleton pattern
   public static getInstance(): LocationService {
     if (!LocationService.instance) {
       LocationService.instance = new LocationService();
@@ -29,12 +28,11 @@ class LocationService {
     return LocationService.instance;
   }
 
-  // Définir les callbacks
   public setCallbacks(callbacks: LocationServiceCallbacks): void {
     this.callbacks = { ...this.callbacks, ...callbacks };
   }
 
-  // Vérifier si la permission est accordée
+  // Vérification si la permission est accordée
   public async checkPermission(): Promise<boolean> {
     if (Platform.OS === 'android') {
       try {
@@ -51,7 +49,7 @@ class LocationService {
     return true;
   }
 
-  // Demander la permission
+  // Demande de la permission
   public async requestPermission(): Promise<boolean> {
     if (Platform.OS === 'android') {
       try {
@@ -67,10 +65,10 @@ class LocationService {
         );
         
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('📍 Permission accordée');
+          console.log(' Permission accordée');
           return true;
         } else {
-          console.log('📍 Permission refusée');
+          console.log(' Permission refusée');
           this.callbacks.onPermissionDenied?.();
           return false;
         }
@@ -91,15 +89,13 @@ class LocationService {
     }
   }
 
-  // Récupérer la localisation actuelle
+  // Récupération de la localisation actuelle
   public async getCurrentLocation(): Promise<LocationData | null> {
-    // Si on est déjà en train de récupérer, ne pas relancer
     if (this.isRequestingLocation) {
-      console.log('📍 Localisation déjà en cours...');
+      console.log(' Localisation déjà en cours...');
       return this.currentLocation;
     }
 
-    // Vérifier la permission d'abord
     const hasPermission = await this.checkPermission();
     if (!hasPermission) {
       const permissionGranted = await this.requestPermission();
@@ -123,16 +119,15 @@ class LocationService {
           this.isRequestingLocation = false;
           
           const { latitude, longitude } = position.coords;
-          console.log('📍 Position obtenue:', latitude, longitude);
+          console.log(' Position obtenue:', latitude, longitude);
           
-          // Récupérer le nom de la ville
           const city = await this.fetchCityFromCoordinates(latitude, longitude);
           
           const locationData: LocationData = {
             latitude,
             longitude,
             city,
-            address: null, // On pourrait l'ajouter si nécessaire
+            address: null,
           };
           
           this.currentLocation = locationData;
@@ -168,13 +163,13 @@ class LocationService {
         {
           enableHighAccuracy: true,
           timeout: 15000,
-          maximumAge: 60000, // Cache de 1 minute
+          maximumAge: 60000,
         }
       );
     });
   }
 
-  // Récupérer le nom de la ville via OpenStreetMap
+  // Récupération du nom de la ville via OpenStreetMap
   private async fetchCityFromCoordinates(lat: number, lon: number): Promise<string> {
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=fr`;
@@ -197,7 +192,7 @@ class LocationService {
                   'Ville inconnue';
       }
       
-      console.log('📍 Ville détectée:', cityName);
+      console.log(' Ville détectée:', cityName);
       return cityName;
       
     } catch (error) {
@@ -206,32 +201,31 @@ class LocationService {
     }
   }
 
-  // Actualiser la localisation
+  // Actualisation de la localisation
   public async refreshLocation(): Promise<LocationData | null> {
-    console.log('📍 Actualisation de la localisation...');
+    console.log(' Actualisation de la localisation...');
     return this.getCurrentLocation();
   }
 
-  // Obtenir la localisation actuelle (depuis le cache si disponible)
+    // Obtenir la localisation actuelle (depuis le cache si disponible)
   public getLocation(): LocationData | null {
     return this.currentLocation;
   }
 
-  // Obtenir la ville actuelle
+
   public getCity(): string {
     return this.currentLocation?.city || '';
   }
 
-  // Vérifier si on a une localisation
   public hasLocation(): boolean {
     return this.currentLocation !== null;
   }
 
-  // Nettoyer les callbacks
+
   public clearCallbacks(): void {
     this.callbacks = {};
   }
 }
 
-// Export d'une instance unique
+// Exportation d'une instance unique
 export default LocationService.getInstance();

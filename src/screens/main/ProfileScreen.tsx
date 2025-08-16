@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
-import { Header, LocationDisplay } from '../../components/common';
+import { Avatar } from '@kolking/react-native-avatar';
+import { Header, UserGuide } from '../../components/common';
 import { colors } from '../../styles/colors';
 import localStatsService, { UserStats } from '../../services/localStatsService';
 import { useLocation } from '../../services';
@@ -35,20 +36,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showUserGuide, setShowUserGuide] = useState(false);
 
-  // 📍 Utiliser le service de géolocalisation
-  const { city, isLoading: locationLoading, getCurrentLocation } = useLocation({
+  //  Utilisation du service de géolocalisation
+  const { city, getCurrentLocation } = useLocation({
     onError: (error) => console.error('Erreur de localisation:', error),
     onPermissionDenied: () => console.log('Permission de localisation refusée'),
   });
 
-  // 🔐 Écouter les changements d'authentification Firebase
+  //  Écoute des changements d'authentification Firebase
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         loadUserStats();
-        // Récupérer la localisation quand l'utilisateur se connecte
         getCurrentLocation();
       } else {
         setStats(null);
@@ -59,7 +60,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     return unsubscribe;
   }, [getCurrentLocation]);
 
-  // 📊 Charger les statistiques utilisateur
+  //  Chargement des statistiques utilisateur
   const loadUserStats = async () => {
     try {
       setLoading(true);
@@ -72,15 +73,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     }
   };
 
-  // 🚪 Se déconnecter
+  //  Déconnexion
   const handleSignOut = async () => {
     try {
       await auth().signOut();
-      // Utiliser la fonction onLogout du MainNavigator si disponible
       if (onLogout) {
         onLogout();
       }
-      // Fermer la modal du profil
       if (onCloseModal) {
         onCloseModal();
       }
@@ -90,10 +89,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     }
   };
 
-  // 🗑️ Supprimer le profil
+  //  Suppression du profil
   const handleDeleteProfile = async () => {
     Alert.alert(
-      '⚠️ Suppression du Profil',
+      ' Suppression du Profil',
       'Êtes-vous sûr de vouloir supprimer définitivement votre profil ? Cette action est irréversible.',
       [
         { text: 'Annuler', style: 'cancel' },
@@ -102,9 +101,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           style: 'destructive',
           onPress: async () => {
             try {
-              // Supprimer les statistiques locales
               await localStatsService.resetStats();
-              // Supprimer le compte Firebase
               await user.delete();
               Alert.alert('Profil supprimé', 'Votre profil a été supprimé avec succès');
             } catch (error) {
@@ -116,57 +113,93 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     );
   }
 
-  // 🎯 Afficher le niveau de l'utilisateur
-  const getUserLevel = (totalPoints: number) => {
-    if (totalPoints >= 1000) return { level: 'Champion', color: colors.warning, icon: 'emoji-events' };
-    if (totalPoints >= 500) return { level: 'Expert', color: colors.primary, icon: 'star' };
-    if (totalPoints >= 200) return { level: 'Intermédiaire', color: colors.success, icon: 'trending-up' };
-    if (totalPoints >= 50) return { level: 'Débutant', color: colors.info, icon: 'person' };
-    return { level: 'Nouveau', color: colors.textLight, icon: 'person-add' };
+  //  Composant StatCard
+  const StatCard = ({ icon, value, label, color }: { icon: string; value: string | number; label: string; color: string }) => (
+    <View style={[styles.statCard, { borderLeftColor: color }]}>
+      <MaterialIcons name={icon as any} size={28} color={color} />
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+
+  const getMotivationalQuote = (_totalPoints: number) => {
+    const quotes = [
+      "Chaque geste compte 🌍",
+      "Le recyclage, c'est l'avenir ♻️",
+      "Tu fais la différence 💪",
+      "Continue comme ça ! 🚀",
+      "Un champion du recyclage ! 🏆"
+    ];
+    return quotes[Math.floor(Math.random() * quotes.length)];
   };
 
-  // 🏆 Afficher les statistiques
+  //  Génération du badge selon le niveau
+  const getUserLevelBadge = (totalPoints: number) => {
+    if (totalPoints >= 1000) return '🏆'; // Champion
+    if (totalPoints >= 500) return '⭐'; // Expert
+    if (totalPoints >= 200) return '📈'; // Intermédiaire
+    if (totalPoints >= 100) return '🌱'; // Débutant
+    if (totalPoints >= 50) return '🌱'; // Nouveau
+    return '';
+  };
+
   const renderStats = () => {
     if (!stats) return null;
 
-    const levelInfo = getUserLevel(stats.totalPoints);
-
     return (
       <View style={styles.statsContainer}>
-        {/* 🎯 Niveau et Points */}
-        <View style={styles.levelSection}>
-          <View style={[styles.levelBadge, { backgroundColor: levelInfo.color }]}>
-            <MaterialIcons name={levelInfo.icon as any} size={32} color="white" />
+        <View style={styles.userInfoSection}>
+          <View style={styles.userMainInfo}>
+            <View style={styles.userAvatar}>
+              <Avatar
+                size={50}
+                name={user?.email?.split('@')[0] || 'U'}
+                email={user?.email}
+                colorize={true}
+                radius={25}
+                badge={getUserLevelBadge(stats.totalPoints)}
+              />
+            </View>
+            <View style={styles.userDetails}>
+              <Text style={styles.userEmail}>{user?.email}</Text>
+              <Text style={styles.userStatus}>Membre EcoTri</Text>
+              <View style={styles.pointsRow}>
+                <MaterialIcons name="star" size={16} color={colors.warning} />
+                <Text style={styles.pointsText}>{stats.totalPoints} points</Text>
+              </View>
+              <View style={styles.locationRow}>
+                <MaterialIcons name="location-on" size={16} color={colors.textLight} />
+                <Text style={styles.locationText}>{city || 'Localisation...'}</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.levelInfo}>
-            <Text style={styles.levelText}>{levelInfo.level}</Text>
-            <Text style={styles.pointsText}>{stats.totalPoints} points</Text>
-            <Text style={styles.levelSubtitle}>Niveau actuel</Text>
+          <View style={styles.userActions}>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+              <MaterialIcons name="logout" size={20} color={colors.error} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile}>
+              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* 📊 Statistiques Principales */}
         <View style={styles.mainStats}>
-          <View style={[styles.statCard, { borderLeftColor: colors.primary, borderLeftWidth: 4 }]}>
-            <MaterialIcons name="camera-alt" size={28} color={colors.primary} />
-            <Text style={styles.statValue}>{stats.totalScans}</Text>
-            <Text style={styles.statLabel}>Scans Totaux</Text>
-          </View>
+          <StatCard icon="camera-alt" value={stats.totalScans} label="Scans Totaux" color={colors.primary} />
           
-          <View style={[styles.statCard, { borderLeftColor: colors.warning, borderLeftWidth: 4 }]}>
-            <MaterialIcons name="local-fire-department" size={28} color={colors.warning} />
-            <Text style={styles.statValue}>{stats.recyclingStreak}</Text>
-            <Text style={styles.statLabel}>Jours Consécutifs</Text>
-          </View>
+          <StatCard icon="local-fire-department" value={stats.recyclingStreak} label="Jours Consécutifs" color={colors.warning} />
           
-          <View style={[styles.statCard, { borderLeftColor: colors.success, borderLeftWidth: 4 }]}>
-            <MaterialIcons name="trending-up" size={28} color={colors.success} />
-            <Text style={styles.statValue}>{stats.accuracyScore}%</Text>
-            <Text style={styles.statLabel}>Précision</Text>
-          </View>
+          <StatCard icon="trending-up" value={stats.accuracyScore + "%"} label="Précision" color={colors.success} />
         </View>
 
-        {/* 🎉 Message de motivation */}
+        <View style={styles.recyclingSearchSection}>
+          <StatCard icon="search" value={stats.recyclingPointSearches || 0} label="Recherches de Points" color={colors.info} />
+          {stats.lastRecyclingSearch && (
+            <Text style={styles.lastSearchText}>
+              Dernière: {new Date(stats.lastRecyclingSearch).toLocaleDateString('fr-FR')}
+            </Text>
+          )}
+        </View>
+
         <View style={styles.motivationSection}>
           <MaterialIcons name="emoji-events" size={24} color={colors.warning} />
           <Text style={styles.motivationText}>
@@ -187,39 +220,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </>
             )}
           </Text>
-        </View>
-
-        {/* 🔄 Actions */}
-        <View style={styles.actionsSection}>
-          <TouchableOpacity style={styles.actionButton} onPress={loadUserStats}>
-            <MaterialIcons name="refresh" size={20} color={colors.primary} />
-            <Text style={styles.actionButtonText}>Actualiser</Text>
-          </TouchableOpacity>
+          <Text style={styles.quoteText}>{getMotivationalQuote(stats.totalPoints)}</Text>
           
           <TouchableOpacity 
-            style={[styles.actionButton, styles.resetButton]} 
-            onPress={() => {
-              Alert.alert(
-                'Réinitialiser',
-                'Voulez-vous vraiment réinitialiser toutes vos statistiques ?',
-                [
-                  { text: 'Annuler', style: 'cancel' },
-                  { 
-                    text: 'Réinitialiser', 
-                    style: 'destructive',
-                    onPress: async () => {
-                      await localStatsService.resetStats();
-                      loadUserStats();
-                    }
-                  }
-                ]
-              );
-            }}
+            style={styles.guideButton} 
+            onPress={() => setShowUserGuide(true)}
           >
-            <MaterialIcons name="restore" size={20} color={colors.error} />
-            <Text style={[styles.actionButtonText, { color: colors.error }]}>
-              Réinitialiser
-            </Text>
+            <MaterialIcons name="help-outline" size={20} color={colors.primary} />
+            <Text style={styles.guideButtonText}>Guide d'Utilisation</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -238,30 +246,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         ) : user ? (
           <>
-            {/* 👤 Informations Utilisateur */}
-            <View style={styles.userSection}>
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.email}</Text>
-                <Text style={styles.userStatus}>Connecté</Text>
-                <Text style={styles.userSubtitle}>Membre EcoTri</Text>
-                {/* 📍 Affichage de la localisation */}
-                <LocationDisplay 
-                  city={city} 
-                  isLoading={locationLoading}
-                  size="small"
-                />
-              </View>
-              <View style={styles.userActions}>
-                <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-                  <MaterialIcons name="logout" size={20} color={colors.error} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile}>
-                  <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* 📊 Statistiques */}
             {renderStats()}
           </>
         ) : (
@@ -287,6 +271,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         )}
       </ScrollView>
+      {showUserGuide && <UserGuide isVisible={showUserGuide} onClose={() => setShowUserGuide(false)} />}
     </View>
   );
 };
@@ -303,74 +288,124 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-  userSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: 20,
-    borderRadius: 16,
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  userStatus: {
-    fontSize: 14,
-    color: colors.success,
-    fontWeight: '500',
-  },
-  userSubtitle: {
-    fontSize: 14,
-    color: colors.textLight,
-    marginTop: 4,
-  },
 
-  userActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  signOutButton: {
-    marginLeft: 10,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.error,
-  },
-  deleteButton: {
-    marginLeft: 10,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.error,
-  },
   statsContainer: {
     backgroundColor: colors.surface,
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 20,
     marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  userInfoSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    backgroundColor: colors.surface,
+    padding: 16,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
+    minHeight: 80,
+  },
+  userMainInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  userAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userEmail: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  userStatus: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 2,
+  },
+  pointsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  pointsText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 5,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationText: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginLeft: 5,
+  },
+  userActions: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    marginTop: 2,
+  },
+  
+  signOutButton: {
+    marginLeft: 6,
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.error,
+    minWidth: 32,
+    minHeight: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    marginLeft: 6,
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.error,
+    minWidth: 32,
+    minHeight: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   levelSection: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: colors.surface,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   levelBadge: {
     width: 60,
@@ -379,24 +414,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
   },
   levelInfo: {
     flex: 1,
   },
   levelText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
     color: colors.text,
-    marginBottom: 4,
-  },
-  pointsText: {
-    fontSize: 16,
-    color: colors.textLight,
+    marginBottom: 5,
   },
   levelSubtitle: {
     fontSize: 14,
     color: colors.textLight,
-    marginTop: 4,
+    fontWeight: '500',
   },
   mainStats: {
     flexDirection: 'row',
@@ -406,64 +442,80 @@ const styles = StyleSheet.create({
   statCard: {
     alignItems: 'center',
     width: '30%',
-    paddingLeft: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderLeftWidth: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
+    transform: [{ scale: 1 }],
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
     color: colors.text,
-    marginTop: 10,
+    marginTop: 12,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.textLight,
+    marginTop: 6,
+    fontWeight: '500',
     textAlign: 'center',
   },
-  motivationSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  recyclingSearchSection: {
     backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  lastSearchText: {
+    fontSize: 12,
+    color: colors.textLight,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  motivationSection: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
   },
   motivationText: {
     fontSize: 16,
     color: colors.text,
-    marginLeft: 10,
+    marginLeft: 0,
     flexShrink: 1,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   inlineIcon: {
     marginRight: 5,
   },
-  actionsSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginLeft: 8,
-  },
-  resetButton: {
-    borderColor: colors.error,
-    borderWidth: 1,
+  quoteText: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginTop: 12,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontStyle: 'italic',
   },
   authContainer: {
     alignItems: 'center',
@@ -526,6 +578,29 @@ const styles = StyleSheet.create({
     height: 120,
     marginBottom: 20,
   },
+  guideButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  guideButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 8,
+  },
+
 });
 
 export default ProfileScreen;

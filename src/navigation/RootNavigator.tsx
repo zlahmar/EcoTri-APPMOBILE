@@ -6,7 +6,6 @@ const RootNavigator = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulation du chargement des ressources
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 3000);

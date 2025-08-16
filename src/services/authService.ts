@@ -17,12 +17,11 @@ export interface AuthError {
 }
 
 class AuthService {
-  // Écouter les changements d'état d'authentification
   onAuthStateChanged(callback: (user: FirebaseAuthTypes.User | null) => void) {
     return auth().onAuthStateChanged(callback);
   }
 
-  // Obtenir l'utilisateur actuel
+  // Récupération de l'utilisateur actuel
   getCurrentUser(): FirebaseAuthTypes.User | null {
     return auth().currentUser;
   }
@@ -33,10 +32,8 @@ class AuthService {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
       
-      // Mettre à jour la date de dernière connexion
       await this.updateLastLogin(user.uid);
       
-      // Récupérer les données utilisateur depuis Firestore
       const userData = await this.getUserData(user.uid);
       
       return userData;
@@ -45,7 +42,6 @@ class AuthService {
     }
   }
 
-  // Inscription avec email et mot de passe
   async createUserWithEmailAndPassword(
     email: string, 
     password: string, 
@@ -56,7 +52,6 @@ class AuthService {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
       
-      // Créer le profil utilisateur dans Firestore
       const userData: Omit<UserData, 'uid'> = {
         email,
         firstName,
@@ -79,7 +74,6 @@ class AuthService {
     }
   }
 
-  // Déconnexion
   async signOut(): Promise<void> {
     try {
       await auth().signOut();
@@ -88,7 +82,6 @@ class AuthService {
     }
   }
 
-  // Récupérer les données utilisateur depuis Firestore
   async getUserData(uid: string): Promise<UserData> {
     try {
       const userDoc = await firestore()
@@ -114,7 +107,6 @@ class AuthService {
     }
   }
 
-  // Mettre à jour la date de dernière connexion
   private async updateLastLogin(uid: string): Promise<void> {
     try {
       await firestore()
@@ -128,7 +120,6 @@ class AuthService {
     }
   }
 
-  // Gestion des erreurs Firebase avec messages utilisateur
   private handleAuthError(error: any): AuthError {
     let userFriendlyMessage = 'Une erreur est survenue';
     
@@ -165,7 +156,6 @@ class AuthService {
     };
   }
 
-  // Réinitialisation du mot de passe
   async resetPassword(email: string): Promise<void> {
     try {
       await auth().sendPasswordResetEmail(email);
@@ -174,13 +164,11 @@ class AuthService {
     }
   }
 
-  // Vérifier si l'email est vérifié
   isEmailVerified(): boolean {
     const user = auth().currentUser;
     return user ? user.emailVerified : false;
   }
 
-  // Envoyer l'email de vérification
   async sendEmailVerification(): Promise<void> {
     try {
       const user = auth().currentUser;

@@ -33,25 +33,25 @@ class CollecteService {
   private zones: CollecteZone[] = [];
 
   private constructor() {
-    console.log('🏗️ Initialisation du CollecteService...');
-    console.log('📊 collecteData reçu:', collecteData);
-    console.log('📊 Type de collecteData:', typeof collecteData);
-    console.log('📊 Est-ce un array?', Array.isArray(collecteData));
+    console.log(' Initialisation du CollecteService...');
+    console.log('collecteData reçu:', collecteData);
+    console.log('Type de collecteData:', typeof collecteData);
+    console.log('Est-ce un array?', Array.isArray(collecteData));
     
     try {
-      console.log('📊 Tentative de chargement des données...');
+      console.log('Tentative de chargement des données...');
       this.zones = collecteData as CollecteZone[];
-      console.log('🏘️ Zones chargées avec succès:', this.zones.length);
+      console.log('Zones chargées avec succès:', this.zones.length);
       
       if (this.zones.length > 0) {
-        console.log('🏘️ Première zone:', this.zones[0]);
-        console.log('🏘️ Commune de la première zone:', this.zones[0].commune);
-        console.log('🏘️ Type de la première zone:', this.zones[0].type);
+        console.log('Première zone:', this.zones[0]);
+        console.log('Commune de la première zone:', this.zones[0].commune);
+        console.log('Type de la première zone:', this.zones[0].type);
       } else {
-        console.log('⚠️ Aucune zone chargée');
+        console.log('Aucune zone chargée');
       }
     } catch (error) {
-      console.error('❌ Erreur lors du chargement des données:', error);
+      console.error('Erreur lors du chargement des données:', error);
       this.zones = [];
     }
   }
@@ -63,7 +63,7 @@ class CollecteService {
     return CollecteService.instance;
   }
 
-  // Trouver la zone de collecte la plus proche d'un point GPS
+  // Recherche de la zone de collecte la plus proche d'un point GPS
   public findNearestZone(lat: number, lon: number): CollecteZone | null {
     if (this.zones.length === 0) return null;
 
@@ -89,7 +89,7 @@ class CollecteService {
     return nearestZone;
   }
 
-  // Obtenir les informations de collecte pour une commune
+  // Récupération des informations de collecte pour une commune
   public getCollecteInfo(commune: string): CollecteInfo | null {
     const zonesCommune = this.zones.filter(zone => 
       zone.commune.toLowerCase() === commune.toLowerCase()
@@ -113,10 +113,10 @@ class CollecteService {
     };
   }
 
-  // Obtenir toutes les communes disponibles
+  // Récupération de toutes les communes disponibles
   public getAvailableCommunes(): string[] {
-    console.log('🔍 getAvailableCommunes appelé');
-    console.log('🔍 Nombre total de zones:', this.zones.length);
+    console.log('getAvailableCommunes appelé');
+    console.log('Nombre total de zones:', this.zones.length);
     
     const communes = new Set<string>();
     this.zones.forEach(zone => {
@@ -126,13 +126,13 @@ class CollecteService {
     });
     
     const communesArray = Array.from(communes).sort();
-    console.log('🔍 Communes uniques trouvées:', communesArray.length);
-    console.log('🔍 Premières communes:', communesArray.slice(0, 10));
+    console.log('Communes uniques trouvées:', communesArray.length);
+    console.log('Premières communes:', communesArray.slice(0, 10));
     
     return communesArray;
   }
 
-  // Obtenir les informations de collecte pour une position GPS
+  // Récupération des informations de collecte pour une position GPS
   public getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null {
     const nearestZone = this.findNearestZone(lat, lon);
     if (!nearestZone) return null;
@@ -140,7 +140,7 @@ class CollecteService {
     return this.getCollecteInfo(nearestZone.commune);
   }
 
-  // Calculer la distance entre deux points GPS (formule de Haversine)
+  // Calcul de la distance entre deux points GPS (formule de Haversine)
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371; // Rayon de la Terre en km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -153,7 +153,7 @@ class CollecteService {
     return R * c; // Distance en km
   }
 
-  // Formater les jours de collecte pour l'affichage
+  // Formatage des jours de collecte pour l'affichage
   public formatCollecteDays(jours: string[]): string {
     if (jours.length === 0) return 'Aucune collecte programmée';
     
@@ -181,19 +181,17 @@ class CollecteService {
     }
   }
 
-  // Obtenir le prochain jour de collecte
+  // Récupération du prochain jour de collecte
   public getNextCollecteDay(jours: string[]): string | null {
     if (jours.length === 0) return null;
 
     const today = new Date();
     const todayName = this.getDayName(today.getDay());
     
-    // Si aujourd'hui est un jour de collecte
     if (jours.includes(todayName)) {
       return 'Aujourd\'hui';
     }
 
-    // Trouver le prochain jour de collecte
     const joursOrdre = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
     const todayIndex = joursOrdre.indexOf(todayName);
     
@@ -218,7 +216,7 @@ class CollecteService {
     return null;
   }
 
-  // Convertir l'index du jour en nom
+  // Conversion de l'index du jour en nom
   private getDayName(dayIndex: number): string {
     const jours = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
     return jours[dayIndex];

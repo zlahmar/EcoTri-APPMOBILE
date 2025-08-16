@@ -16,7 +16,7 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
-import { useLocation } from '../../services';
+import { useLocation, localStatsService } from '../../services';
 
 interface HomeScreenProps {
   isAuthenticated?: boolean;
@@ -46,11 +46,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [searchRadius, setSearchRadius] = useState<number>(1000); // Rayon en mètres
   const [showRadiusMenu, setShowRadiusMenu] = useState<boolean>(false);
 
-  // 📍 Utiliser le service de géolocalisation
+  // Utilisation du service de géolocalisation
   const { city: userCity, location, getCurrentLocation } = useLocation({
     onLocationUpdate: (locationData) => {
-      console.log('📍 Nouvelle localisation dans HomeScreen:', locationData);
-      // Récupérer les points de recyclage avec la nouvelle localisation
+      console.log(' Nouvelle localisation dans HomeScreen:', locationData);
       if (locationData) {
         fetchRecyclingPoints(locationData.latitude, locationData.longitude);
       }
@@ -86,7 +85,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Calculer la distance entre deux points (formule de Haversine)
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Rayon de la Terre en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -94,10 +93,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c * 1000; // Distance en mètres
+    return R * c * 1000;
   }, []);
 
-  // Traduire les types de recyclage
+  // Traduction des types de recyclage
   const translateRecyclingType = useCallback((type: string): string => {
     const translations: { [key: string]: string } = {
       'glass': 'Verre',
@@ -113,7 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return translations[type] || type;
   }, []);
 
-  // Formater l'adresse à partir des tags
+  // Formatage de l'adresse à partir des tags
   const formatAddressFromTags = useCallback((tags: any): string => {
     if (!tags) return 'Adresse inconnue';
     
@@ -146,7 +145,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return addressParts.join(', ');
   }, []);
 
-  // Obtenir les types de recyclage à partir des tags
+  // Récupération des types de recyclage à partir des tags
   const getRecyclingTypes = useCallback((tags: any): string => {
     if (!tags) return 'Général';
     
@@ -191,12 +190,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return types.join(', ');
   }, []);
 
-  // Fallback avec Nominatim si Overpass ne trouve rien
+  // Fallback avec Nominatim si Overpass ne trouve pas
   const fetchRecyclingPointsFallback = useCallback(async (lat: number, lon: number) => {
     try {
       console.log('Tentative de récupération via Nominatim...');
       
-      // Recherche des points de recyclage via Nominatim
       const searchQuery = `recycling center near ${lat},${lon}`;
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=15&radius=5000`;
       
@@ -204,7 +202,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const data = await response.json();
       
       if (data && Array.isArray(data)) {
-        // Filtrer et formater les résultats
         const points = data
           .filter((point: any) => 
             point.display_name.toLowerCase().includes('recycl') ||
@@ -241,11 +238,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   }, [calculateDistance]);
 
-  // Traiter les données Overpass et les formater
+  // Traitement des données Overpass et formatage
   const processOverpassData = useCallback((data: any, userLat: number, userLon: number) => {
     if (data.elements && Array.isArray(data.elements)) {
       const points = data.elements
-        .filter((el: any) => el.lat && el.lon) // Filtrer les éléments avec coordonnées
+        .filter((el: any) => el.lat && el.lon)
         .map((el: any) => ({
           place_id: el.id,
           display_name: formatAddressFromTags(el.tags),
@@ -259,23 +256,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         .sort((a: RecyclingPoint, b: RecyclingPoint) => (a.distance || 0) - (b.distance || 0));
       
       setRecyclingPoints(points);
-      setFilteredPoints(points); // Initialiser les points filtrés
+      setFilteredPoints(points);
       
-      // Si aucun point trouvé via Overpass, essayer Nominatim comme fallback
       if (points.length === 0) {
         fetchRecyclingPointsFallback(userLat, userLon);
       }
     } else {
       setRecyclingPoints([]);
       setFilteredPoints([]);
-      // Essayer Nominatim comme fallback
       fetchRecyclingPointsFallback(userLat, userLon);
     }
   }, [calculateDistance, formatAddressFromTags, getRecyclingTypes, fetchRecyclingPointsFallback]);
 
-  // Récupérer les points de recyclage via Overpass API
+  // Récupération des points de recyclage via Overpass API
   const fetchRecyclingPoints = useCallback(async (latitude: number, longitude: number) => {
     setLoading(true);
+    
+    try {
+      const statsResult = await localStatsService.addRecyclingPointSearch();
+      if (statsResult) {
+        console.log('Recherche de points enregistrée:', statsResult.message);
+      } else {
+        console.log('Impossible d\'enregistrer la recherche (utilisateur non connecté)');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement de la recherche:', error);
+    }
+    
     try {
       const overpassQuery = `
         [out:json][timeout:25];
@@ -289,9 +296,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         out skel qt;
       `;
 
-      console.log('🔍 Recherche de points de recyclage...');
-      console.log('📍 Position:', latitude, longitude);
-      console.log('📏 Rayon:', searchRadius, 'mètres');
+      console.log('Recherche de points de recyclage...');
+      console.log('Position:', latitude, longitude);
+      console.log('Rayon:', searchRadius, 'mètres');
 
       try {
         const response = await fetch("https://overpass.kumi.systems/api/interpreter", {
@@ -345,7 +352,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   }, [searchRadius, processOverpassData]);
 
-  // Appliquer les filtres
+  // Application des filtres
   const applyFilters = useCallback(() => {
     if (activeFilters.length === 0) {
       setFilteredPoints(recyclingPoints);
@@ -357,17 +364,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const pointName = point.display_name.toLowerCase();
       
       const isMatch = activeFilters.some(filter => {
-        // Chercher dans le type du point
         if (pointType.includes(filter)) {
           return true;
         }
         
-        // Chercher dans le nom/description du point
         if (pointName.includes(filter)) {
           return true;
         }
         
-        // Chercher des mots-clés spécifiques pour chaque filtre
         const filterKeywords = getFilterKeywords(filter);
         const keywordMatch = filterKeywords.some(keyword => 
           pointType.includes(keyword) || pointName.includes(keyword)
@@ -382,7 +386,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     setFilteredPoints(filtered);
   }, [activeFilters, recyclingPoints]);
 
-  // Toggle un filtre
+  // Activation d'un filtre
   const toggleFilter = (filterKey: string) => {
     setActiveFilters(prev => {
       if (prev.includes(filterKey)) {
@@ -393,12 +397,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     });
   };
 
-  // Effacer tous les filtres
+  // Suppression de tous les filtres
   const clearAllFilters = () => {
     setActiveFilters([]);
   };
 
-  // Obtenir les mots-clés pour chaque filtre
+  // Récupération des mots-clés pour chaque filtre
   const getFilterKeywords = (filterKey: string): string[] => {
     const keywords: { [key: string]: string[] } = {
       'glass': ['verre', 'bouteille', 'bouteilles', 'glass', 'bouteilles en verre', 'contenants en verre'],
@@ -414,49 +418,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return keywords[filterKey] || [filterKey];
   };
 
-  // Demander la géolocalisation au démarrage (une seule fois)
   useEffect(() => {
     getCurrentLocation();
-  }, [getCurrentLocation]); // Remettre la dépendance getCurrentLocation
+  }, [getCurrentLocation]);
 
-  // Appliquer les filtres quand ils changent
   useEffect(() => {
     applyFilters();
   }, [activeFilters, recyclingPoints, applyFilters]);
 
-  // Relancer la recherche quand le rayon change
   useEffect(() => {
     if (location) {
       fetchRecyclingPoints(location.latitude, location.longitude);
     }
   }, [searchRadius, location, fetchRecyclingPoints]);
 
-  // Actualiser les données
   const onRefresh = async () => {
     setRefreshing(true);
     if (location) {
-      // Mettre à jour les points de recyclage
       await fetchRecyclingPoints(location.latitude, location.longitude);
     }
     setRefreshing(false);
   };
 
-  // Ouvrir la navigation vers un point
+  // Ouverture de la navigation vers un point
   const openNavigation = async (point: RecyclingPoint) => {
     const latitude = parseFloat(point.lat);
     const longitude = parseFloat(point.lon);
     
-    // Détecter les apps de navigation disponibles
+    // Détection des apps de navigation disponibles
     const availableApps = await detectAvailableNavigationApps(latitude, longitude);
     
     if (availableApps.length === 0) {
-      // Aucune app de navigation trouvée, ouvrir directement dans le navigateur
       const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
       await Linking.openURL(webUrl);
       return;
     }
     
-    // Créer les options pour l'alerte
     const alertOptions = [
       { text: 'Annuler', style: 'cancel' as const },
       ...availableApps.map(app => ({
@@ -472,7 +469,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     );
   };
 
-  // Détecter les apps de navigation disponibles
+  // Détection des apps de navigation disponibles
   const detectAvailableNavigationApps = async (latitude: number, longitude: number) => {
     const apps = [];
     
@@ -513,24 +510,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         url: `mapsme://route?ll=${latitude},${longitude}`,
         scheme: 'mapsme://'
       },
-      {
-        name: 'OsmAnd',
-        url: `osmand://navigate?lat=${latitude}&lon=${longitude}`,
-        scheme: 'osmand://'
-      },
-      {
-        name: 'Bing Maps',
-        url: `bingmaps://?cp=${latitude}~${longitude}&lvl=16`,
-        scheme: 'bingmaps://'
-      },
-      {
-        name: 'Yandex Maps',
-        url: `yandexmaps://maps.yandex.com/?pt=${longitude},${latitude}&z=16`,
-        scheme: 'yandexmaps://'
-      }
     ];
     
-    // Vérifier quelles apps sont installées
     for (const app of navigationApps) {
       try {
         const canOpen = await Linking.canOpenURL(app.scheme);
@@ -543,7 +524,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       }
     }
     
-    // Ajouter l'app de navigation par défaut du système
     const defaultMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
     try {
       const canOpenDefault = await Linking.canOpenURL(defaultMapsUrl);
@@ -563,7 +543,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return apps;
   };
 
-  // Ouvrir une application ou URL
+  // Ouverture d'une application ou URL
   const openApp = async (url: string, appName: string, latitude: number, longitude: number) => {
     try {
       const supported = await Linking.canOpenURL(url);
@@ -572,7 +552,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         await Linking.openURL(url);
         console.log(`Navigation ouverte dans ${appName}`);
       } else {
-        // Si l'URL n'est pas supportée, essayer d'ouvrir dans le navigateur
         const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
         await Linking.openURL(webUrl);
         console.log('Navigation ouverte dans le navigateur web');
@@ -616,7 +595,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Section de géolocalisation */}
         <View style={styles.locationSection}>
           <View style={styles.locationRow}>
-            {/* Localisation à gauche */}
             <View style={styles.locationInfo}>
               <View style={styles.locationHeader}>
                 <MaterialIcons name="location-on" size={18} color={colors.primary} />
@@ -627,7 +605,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               </Text>
             </View>
             
-            {/* Rayon de recherche à droite */}
             <View style={styles.radiusInfo}>
               <Text style={styles.radiusLabel}>Rayon :</Text>
               <View style={styles.radiusSelector}>
@@ -639,7 +616,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                   <MaterialIcons name="keyboard-arrow-down" size={16} color={colors.primary} />
                 </TouchableOpacity>
                 
-                {/* Menu déroulant */}
                 <Modal
                   visible={showRadiusMenu}
                   transparent={true}
@@ -676,7 +652,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </View>
           </View>
           
-          {/* Boutons d'action en dessous */}
           <View style={styles.locationActions}>
             <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
               <MaterialIcons name="refresh" size={16} color={colors.primary} />
@@ -684,14 +659,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           </View>
         </View>
 
-        {/* Section des points de recyclage */}
         <View style={styles.recyclingSection}>
           <View style={styles.sectionHeader}>
             <MaterialIcons name="recycling" size={20} color={colors.primary} />
             <Text style={styles.sectionTitle}>Points de Recyclage Proches</Text>
           </View>
           
-          {/* Filtres */}
           <View style={styles.filtersContainer}>
             <ScrollView 
               horizontal 
@@ -772,7 +745,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           )}
         </View>
 
-        {/* Section des actions rapides */}
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionTitle}>Actions Rapides</Text>
           <View style={styles.actionsGrid}>
@@ -885,7 +857,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 1,
-    zIndex: 9999, // Z-index très élevé pour être au premier plan
+      zIndex: 9999,
   },
   radiusDropdown: {
     flexDirection: 'row',
@@ -966,7 +938,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   pointsList: {
-    // No specific styles for the list, it will be handled by pointCard
+      // Aucun style spécifique pour la liste, elle sera gérée par pointCard
   },
   pointCard: {
     flexDirection: 'row',

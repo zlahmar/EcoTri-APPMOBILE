@@ -1,8 +1,6 @@
 import { colors } from '../styles/colors';
 
-// 🎨 Service d'Icons Unifié pour EcoTri
 export class IconService {
-  // 🌱 Icons de Recyclage et Environnement
   static getRecyclingIconName(type: string): string {
     switch (type.toLowerCase()) {
       case 'plastic':
@@ -24,7 +22,6 @@ export class IconService {
     }
   }
 
-  // 📱 Icons d'Interface Utilisateur
   static getUIIconName(name: string): string {
     switch (name) {
       case 'camera':
@@ -64,7 +61,6 @@ export class IconService {
     }
   }
 
-  // 🔍 Icons de Détection ML Kit
   static getMLKitIconName(name: string): string {
     switch (name) {
       case 'object-detection':
@@ -86,7 +82,6 @@ export class IconService {
     }
   }
 
-  // 🌍 Icons Environnementaux
   static getEnvironmentalIconName(name: string): string {
     switch (name) {
       case 'co2':
@@ -108,7 +103,6 @@ export class IconService {
     }
   }
 
-  // 📊 Icons de Métriques et Statistiques
   static getMetricsIconName(name: string): string {
     switch (name) {
       case 'chart':
@@ -128,7 +122,6 @@ export class IconService {
     }
   }
 
-  // 🎯 Icons d'Actions et Navigation
   static getActionIconName(name: string): string {
     switch (name) {
       case 'add':
@@ -166,7 +159,6 @@ export class IconService {
     }
   }
 
-  // 🎨 Icons de Statut et Feedback
   static getStatusIconName(name: string): string {
     switch (name) {
       case 'success':
@@ -188,14 +180,12 @@ export class IconService {
     }
   }
 
-  // 🌱 Méthode rapide pour les icons de recyclage
   static getRecyclingIcon(type: string, size: number = 24, color?: string) {
     const iconName = this.getRecyclingIconName(type);
     const iconColor = color || colors.primary;
     return { iconName, size, color: iconColor };
   }
 
-  // 📱 Méthode rapide pour les icons d'interface
   static getUIIcon(name: string, size: number = 24, color?: string) {
     const iconName = this.getUIIconName(name);
     const iconColor = color || colors.text;

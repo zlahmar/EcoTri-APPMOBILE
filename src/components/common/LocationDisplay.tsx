@@ -51,7 +51,7 @@ const LocationDisplay: React.FC<LocationDisplayProps> = ({
         color={colors.primary} 
       />
       <Text style={[styles.locationText, { fontSize: textSize }]}>
-        {isLoading ? '📍 Localisation...' : `📍 ${city}`}
+        {isLoading ? ' Localisation...' : `📍 ${city}`}
       </Text>
       {showRefreshButton && onRefresh && (
         <TouchableOpacity 
