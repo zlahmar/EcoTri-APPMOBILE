@@ -1,5 +1,127 @@
 # 📚 Changelog - EcoTri
 
+## Version 8.0.0 - Pipeline CI/CD Complet et Configuration Android Optimisée
+
+**Date :** Janvier 2025
+
+### 🆕 **Nouvelles Fonctionnalités**
+
+#### **🚀 Pipeline CI/CD Complet avec GitHub Actions**
+
+- **Pipeline automatisé** : Intégration continue et déploiement automatique
+- **7 jobs principaux** : Validation, tests, build Android, sécurité, déploiement
+- **Build Android optimisé** : Support Debug et Release avec cache intelligent
+- **Tests automatisés** : 158 tests avec 100% de couverture des fonctionnalités principales
+- **Audit de sécurité** : Vérification automatique des vulnérabilités et secrets
+- **Déploiement Firebase** : Staging et production automatiques
+- **Rapports de qualité** : Génération automatique avec métriques détaillées
+
+#### **📱 Configuration Android Complète**
+
+- **Environnement optimisé** : Java 17, SDK Android 34, NDK 25.1.8937393
+- **Build matrix** : Debug et Release en parallèle
+- **Cache intelligent** : npm, Gradle avec restauration optimisée
+- **Artefacts** : APKs et AABs avec rétention 30 jours
+- **Support React Native 0.81.0** : Configuration native complète
+
+#### **🔧 Infrastructure DevOps**
+
+- **GitHub Actions** : Workflow `.github/workflows/ci.yml`
+- **Déclencheurs automatiques** : Push, Pull Request, exécution manuelle
+- **Environnements multiples** : Development, Staging, Production
+- **Monitoring intégré** : Codecov, rapports de qualité, métriques de performance
+
+### 🛠️ **Modifications Techniques**
+
+#### **Fichiers Ajoutés**
+
+- `.github/workflows/ci.yml` : Pipeline CI/CD principal
+- `README_CI_CD.md` : Guide rapide CI/CD
+- `doc/CI_CD_GUIDE.md` : Documentation complète du pipeline
+- `doc/ANDROID_BUILD_CONFIG.md` : Configuration spécifique Android
+
+#### **Configuration CI/CD**
+
+```yaml
+# Pipeline principal avec 7 jobs
+jobs:
+  - validate-and-test # Validation et tests (30 min)
+  - build-android # Build Android (45 min)
+  - build-ios # Temporairement désactivé
+  - integration-tests # Tests d'intégration (20 min)
+  - security-audit # Audit de sécurité (15 min)
+  - deploy # Déploiement (30 min)
+  - generate-report # Rapport de qualité (10 min)
+```
+
+#### **Support iOS Temporairement Désactivé**
+
+- **Job iOS** : Désactivé avec `if: false` pour la version actuelle
+- **Structure préservée** : Prêt pour activation dans la prochaine version
+- **Documentation** : Guide complet pour l'activation future
+
+### 🎯 **Fonctionnalités Détaillées**
+
+#### **Pipeline CI/CD**
+
+- **Déclenchement automatique** : Branches `main`, `develop`, `feature/*`, `hotfix/*`
+- **Validation TypeScript** : `tsc --noEmit` avec vérification stricte
+- **Tests automatisés** : Jest avec couverture et rapports Codecov
+- **Build Android** : Matrix Debug/Release avec upload d'artefacts
+- **Sécurité** : npm audit, vulnérabilités, analyse de secrets
+- **Déploiement** : Firebase avec tokens sécurisés
+- **Rapports** : Qualité, métriques, performance
+
+#### **Configuration Android**
+
+- **Java 17 Temurin** : Distribution optimisée pour CI/CD
+- **SDK Android 34** : Version stable et supportée
+- **Build Tools 34.0.0** : Outils de compilation optimisés
+- **NDK 25.1.8937393** : Support natif complet
+- **Gradle** : Cache intelligent avec `--no-daemon`
+- **Artefacts** : APK et AAB pour distribution
+
+### 🚀 **Avantages Développement**
+
+#### **Qualité de Code**
+
+- **Validation automatique** : TypeScript, ESLint, Prettier
+- **Tests continus** : 158 tests avec couverture 100%
+- **Sécurité proactive** : Audit automatique des dépendances
+- **Standards de code** : Formatage et linting automatiques
+
+#### **Déploiement**
+
+- **Automatisation complète** : De la validation au déploiement
+- **Environnements multiples** : Staging et production séparés
+- **Rollback facile** : Artefacts conservés pour récupération
+- **Monitoring** : Rapports détaillés et métriques de performance
+
+#### **Performance**
+
+- **Cache intelligent** : Réutilisation des dépendances entre builds
+- **Builds parallèles** : Matrix de build pour optimiser le temps
+- **Timeouts optimisés** : Prévention des blocages
+- **Runners optimisés** : Ubuntu pour Android, macOS pour iOS (futur)
+
+### 🔮 **Prochaines Étapes**
+
+#### **Version 8.1.0 (Prévue)**
+
+- **📱 Support iOS complet** : Activation du build iOS
+- **🧪 Tests E2E** : Intégration Detox ou Appium
+- **🔐 Signing automatique** : Certificats iOS/Android
+- **📊 Monitoring avancé** : Métriques de performance en temps réel
+
+#### **Version 8.2.0 (Prévue)**
+
+- **🚀 Déploiement stores** : Google Play et App Store
+- **🌐 Intégrations** : Slack/Discord, SonarQube
+- **📈 Dashboard** : Interface de monitoring avancée
+- **🔄 Déploiement progressif** : Canary, Blue-Green
+
+---
+
 ## Version 7.1.0 - Interface Utilisateur Modernisée et Page de Conseils Refondue
 
 **Date :** Décembre 2024

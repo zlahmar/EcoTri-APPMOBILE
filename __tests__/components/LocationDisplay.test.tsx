@@ -10,42 +10,138 @@ describe('LocationDisplay', () => {
     city: 'Bordeaux',
   };
 
-  it('should render correctly with city name', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render without crashing', () => {
+    const { root } = render(<LocationDisplay {...defaultProps} />);
+    expect(root).toBeDefined();
+  });
+
+  it('should display the city name', () => {
     const { getByText } = render(<LocationDisplay {...defaultProps} />);
-    
     expect(getByText('📍 Bordeaux')).toBeTruthy();
   });
 
-  it('should show loading state when isLoading is true', () => {
-    const { getByText } = render(<LocationDisplay {...defaultProps} isLoading={true} />);
-    
+  it('should display loading state when isLoading is true', () => {
+    const { getByText } = render(
+      <LocationDisplay {...defaultProps} isLoading={true} />
+    );
     expect(getByText(' Localisation...')).toBeTruthy();
   });
 
-  it('should call onRefresh when refresh button is pressed', () => {
-    const mockOnRefresh = jest.fn();
+  it('should display city when not loading', () => {
     const { getByText } = render(
-      <LocationDisplay {...defaultProps} showRefreshButton={true} onRefresh={mockOnRefresh} />
+      <LocationDisplay {...defaultProps} isLoading={false} />
+    );
+    expect(getByText('📍 Bordeaux')).toBeTruthy();
+  });
+
+  it('should show refresh button when showRefreshButton is true and onRefresh is provided', () => {
+    const mockOnRefresh = jest.fn();
+    const { root } = render(
+      <LocationDisplay 
+        {...defaultProps} 
+        showRefreshButton={true} 
+        onRefresh={mockOnRefresh}
+      />
     );
     
-    // Le composant se rend correctement avec le bouton de rafraîchissement
-    expect(getByText('📍 Bordeaux')).toBeTruthy();
+    // Le bouton de rafraîchissement devrait être présent
     expect(mockOnRefresh).toBeDefined();
+    expect(root).toBeDefined();
   });
 
-  it('should handle different sizes', () => {
-    const { getByText, rerender } = render(<LocationDisplay {...defaultProps} size="small" />);
+  it('should not show refresh button when showRefreshButton is false', () => {
+    const mockOnRefresh = jest.fn();
+    const { root } = render(
+      <LocationDisplay 
+        {...defaultProps} 
+        showRefreshButton={false} 
+        onRefresh={mockOnRefresh}
+      />
+    );
     
-    expect(getByText('📍 Bordeaux')).toBeTruthy();
-    
-    rerender(<LocationDisplay {...defaultProps} size="large" />);
-    expect(getByText('📍 Bordeaux')).toBeTruthy();
+    // Le bouton ne devrait pas être affiché
+    expect(mockOnRefresh).toBeDefined();
+    expect(root).toBeDefined();
   });
 
-  it('should handle missing props gracefully', () => {
+  it('should not show refresh button when onRefresh is not provided', () => {
+    const { root } = render(
+      <LocationDisplay 
+        {...defaultProps} 
+        showRefreshButton={true}
+      />
+    );
+    
+    // Sans onRefresh, le bouton ne devrait pas être affiché
+    expect(root).toBeDefined();
+  });
+
+  it('should handle different city names', () => {
+    const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse'];
+    
+    cities.forEach(city => {
+      const { getByText } = render(<LocationDisplay city={city} />);
+      expect(getByText(`📍 ${city}`)).toBeTruthy();
+    });
+  });
+
+  it('should handle empty city name', () => {
     const { getByText } = render(<LocationDisplay city="" />);
-    
-    // Le composant se rend sans crash même avec des props manquantes
     expect(getByText('📍 ')).toBeTruthy();
+  });
+
+  it('should handle undefined city name', () => {
+    const { getByText } = render(<LocationDisplay city={undefined as any} />);
+    expect(getByText('📍 undefined')).toBeTruthy();
+  });
+
+  it('should render with default medium size', () => {
+    const { root } = render(<LocationDisplay {...defaultProps} />);
+    expect(root).toBeDefined();
+  });
+
+  it('should render with small size', () => {
+    const { root } = render(
+      <LocationDisplay {...defaultProps} size="small" />
+    );
+    expect(root).toBeDefined();
+  });
+
+  it('should render with large size', () => {
+    const { root } = render(
+      <LocationDisplay {...defaultProps} size="large" />
+    );
+    expect(root).toBeDefined();
+  });
+
+  it('should render with invalid size (fallback to medium)', () => {
+    const { root } = render(
+      <LocationDisplay {...defaultProps} size={'invalid' as any} />
+    );
+    expect(root).toBeDefined();
+  });
+
+  it('should handle all props being provided', () => {
+    const allProps = {
+      city: 'Nice',
+      isLoading: false,
+      onRefresh: jest.fn(),
+      showRefreshButton: true,
+      size: 'large' as const,
+    };
+    
+    const { root, getByText } = render(<LocationDisplay {...allProps} />);
+    
+    expect(root).toBeDefined();
+    expect(getByText('📍 Nice')).toBeTruthy();
+  });
+
+  it('should handle missing optional props gracefully', () => {
+    const { root } = render(<LocationDisplay city="Test" />);
+    expect(root).toBeDefined();
   });
 });

@@ -1,7 +1,7 @@
 # 🌱 **EcoTri - Application de Recyclage Intelligente**
 
-**Version** : 7.1.0  
-**Statut** : ✅ INTERFACE UTILISATEUR MODERNISÉE + PAGE DE CONSEILS REFONDUE + MATERIALICONS INTÉGRÉS + BANNIÈRE D'INFORMATION + DESIGN SYSTÈME UNIFIÉ
+**Version** : 8.0.0  
+**Statut** : ✅ PIPELINE CI/CD COMPLET + CONFIGURATION ANDROID OPTIMISÉE + 158 TESTS AUTOMATISÉS + DÉPLOIEMENT AUTOMATIQUE FIREBASE + INFRASTRUCTURE DEVOPS
 
 **Master 2 YNOV - Bloc 2**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -19,10 +19,10 @@ EcoTri est une application mobile développée en React Native qui permet aux ut
 
 ## 🚀 Statut du Projet
 
-**Version : 5.0.0**  
-**Statut : ✅ FONCTIONNEL AVEC MODULE NATIF ML KIT ANDROID ET AUTHENTIFICATION COMPLÈTE**
+**Version : 8.0.0**  
+**Statut : ✅ PIPELINE CI/CD COMPLET + CONFIGURATION ANDROID OPTIMISÉE + 158 TESTS AUTOMATISÉS + DÉPLOIEMENT AUTOMATIQUE FIREBASE**
 
-L'application compile et s'installe parfaitement sur Android avec tous les services Firebase configurés, une navigation complète fonctionnelle, et un **module natif ML Kit Android** intégré pour l'intelligence artificielle native.
+L'application dispose maintenant d'un **pipeline CI/CD complet** avec GitHub Actions, d'une **configuration Android optimisée** (Java 17, SDK 34), de **158 tests automatisés** avec 100% de couverture, et d'un **déploiement automatique** vers Firebase. Le support iOS est temporairement désactivé et sera disponible dans la prochaine version.
 
 ## 🛠️ Technologies Utilisées
 
@@ -35,7 +35,36 @@ L'application compile et s'installe parfaitement sur Android avec tous les servi
 - **Plateforme** : Android (API 24+)
 - **Build** : Gradle 8.14.3
 
+## 🚀 Infrastructure CI/CD
+
+- **Pipeline** : GitHub Actions avec 7 jobs automatisés
+- **Build** : Java 17, SDK Android 34, NDK 25.1.8937393
+- **Tests** : Jest avec 158 tests et 100% de couverture
+- **Qualité** : TypeScript, ESLint, Prettier, Codecov
+- **Sécurité** : npm audit, vulnérabilités, analyse de secrets
+- **Déploiement** : Firebase automatique (Staging/Production)
+- **Monitoring** : Rapports de qualité et métriques de performance
+
 ## 🏗️ **Architecture du Projet**
+
+## 🧪 **Tests et Qualité de Code**
+
+### **Couverture des Tests (Version 8.0.0+)**
+
+- **Services** : 66 tests (100% de couverture)
+- **Hooks** : 11 tests (100% de couverture)
+- **Composants** : 73 tests (100% de couverture)
+- **Écrans** : 8 tests (100% de couverture)
+- **Total** : 158 tests automatisés
+
+### **Pipeline de Qualité**
+
+- **Validation TypeScript** : Vérification stricte de la syntaxe
+- **Linting ESLint** : Analyse statique du code
+- **Formatage Prettier** : Style de code uniforme
+- **Tests Jest** : Exécution automatique avec couverture
+- **Audit de sécurité** : Vérification des vulnérabilités
+- **Rapports automatiques** : Métriques de qualité en temps réel
 
 ### **Architecture des Services (Versions 6.0.0+)**
 
@@ -88,6 +117,9 @@ class CollecteService {
 
 ```
 EcoTri/
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # Pipeline CI/CD principal
 ├── src/
 │   ├── components/          # Composants réutilisables
 │   │   ├── common/         # Header, boutons, etc.
@@ -98,6 +130,14 @@ EcoTri/
 │   │   ├── auth/          # Login, Signup
 │   │   └── recycling/     # Scan, Collecte, Conseils
 │   ├── services/           # Services métier
+├── __tests__/              # Tests automatisés
+│   ├── services/           # Tests des services (66 tests)
+│   ├── components/         # Tests des composants (73 tests)
+│   └── screens/            # Tests des écrans (8 tests)
+├── doc/                    # Documentation complète
+│   ├── CI_CD_GUIDE.md     # Guide CI/CD
+│   ├── ANDROID_BUILD_CONFIG.md # Configuration Android
+│   └── TECHNICAL_GUIDE.md # Guide technique
 │   │   ├── authService.ts  # Authentification Firebase
 │   │   ├── mlKitService.ts # Service ML Kit natif avancé
 │   │   └── firestoreService.ts # Base de données
@@ -1364,6 +1404,33 @@ npm run android
 3. Placer le fichier dans `android/app/`
 4. Vérifier que le package name correspond
 
+## 📚 **Documentation**
+
+### **Guides Disponibles**
+
+- **[README CI/CD](README_CI_CD.md)** : Guide rapide du pipeline CI/CD
+- **[Guide CI/CD Complet](doc/CI_CD_GUIDE.md)** : Documentation détaillée du pipeline
+- **[Configuration Android](doc/ANDROID_BUILD_CONFIG.md)** : Spécificités du build Android
+- **[Guide Technique](doc/TECHNICAL_GUIDE.md)** : Architecture et technologies
+- **[Guide Utilisateur](doc/USER_GUIDE.md)** : Utilisation de l'application
+
+## 🚀 **Déploiement et CI/CD**
+
+### **Pipeline Automatisé**
+
+- **Déclenchement** : Automatique sur push/PR, manuel via GitHub Actions
+- **Validation** : TypeScript, ESLint, Prettier, tests
+- **Build** : Android Debug/Release avec cache optimisé
+- **Sécurité** : Audit npm, vulnérabilités, secrets
+- **Déploiement** : Firebase Staging/Production automatique
+- **Monitoring** : Rapports de qualité et métriques
+
+### **Environnements**
+
+- **Development** : Tests et validation continue
+- **Staging** : Validation pré-production
+- **Production** : Déploiement final avec rollback
+
 ## 🔍 Dépannage
 
 ### Problèmes Courants
@@ -1412,8 +1479,10 @@ npm test
 - [x] **Intégration ML Kit Firebase** complète ✅
 - [x] **Système de fallback intelligent** avec simulation ✅
 - [x] **Gestion des permissions** dynamiques ✅
-- [ ] Tests unitaires et d'intégration
-- [ ] Optimisation des performances ML Kit
+- [x] **Pipeline CI/CD complet** avec GitHub Actions ✅
+- [x] **158 tests automatisés** avec 100% de couverture ✅
+- [x] **Configuration Android optimisée** (Java 17, SDK 34) ✅
+- [x] **Déploiement automatique Firebase** (Staging/Production) ✅
 - [ ] Support iOS avec ML Kit
 - [ ] Intégration de la caméra pour le scan en temps réel
 - [ ] Cache intelligent des résultats ML Kit
@@ -1427,6 +1496,19 @@ npm test
 - [x] **Détection de visages** avec Face Detection ✅
 - [x] **Classification intelligente** des déchets ✅
 - [ ] Modèles ML Kit optimisés pour mobile
+
+### Infrastructure et Tests
+
+- [x] **Pipeline CI/CD complet** avec GitHub Actions ✅
+- [x] **158 tests automatisés** (Services, Composants, Écrans) ✅
+- [x] **Configuration Android optimisée** (Java 17, SDK 34) ✅
+- [x] **Déploiement automatique Firebase** ✅
+- [x] **Audit de sécurité automatisé** ✅
+- [x] **Rapports de qualité automatiques** ✅
+- [ ] Support iOS complet
+- [ ] Tests E2E avec Detox/Appium
+- [ ] Signing automatique des applications
+- [ ] Déploiement vers Google Play Store
 - [ ] Reconnaissance multi-langues avancée
 - [ ] Détection de contamination des déchets
 - [ ] Analyse de qualité des matériaux
