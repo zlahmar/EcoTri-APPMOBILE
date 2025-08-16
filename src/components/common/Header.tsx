@@ -10,36 +10,33 @@ interface HeaderProps {
   onProfilePress?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  title, 
-  showProfileIcon = false, 
-  isAuthenticated = false, 
-  onProfilePress 
+const Header: React.FC<HeaderProps> = ({
+  title,
+  showProfileIcon = false,
+  isAuthenticated = false,
+  onProfilePress,
 }) => {
   return (
     <View style={styles.header}>
       <View style={styles.leftSection}>
-        <Image 
-          source={require('../../assets/logo.png')} 
-          style={styles.logo} 
+        <Image
+          source={require('../../assets/logo.png')}
+          style={styles.logo}
           resizeMode="contain"
         />
       </View>
-      
+
       <View style={styles.centerSection}>
         <Text style={styles.title}>{title}</Text>
       </View>
-      
+
       <View style={styles.rightSection}>
         {showProfileIcon && (
-          <TouchableOpacity 
-            style={styles.profileIcon} 
-            onPress={onProfilePress}
-          >
-            <MaterialIcons 
-              name={isAuthenticated ? "account-circle" : "person-outline"} 
-              size={28} 
-              color={colors.primary} 
+          <TouchableOpacity style={styles.profileIcon} onPress={onProfilePress}>
+            <MaterialIcons
+              name={isAuthenticated ? 'account-circle' : 'person-outline'}
+              size={28}
+              color={colors.primary}
             />
           </TouchableOpacity>
         )}

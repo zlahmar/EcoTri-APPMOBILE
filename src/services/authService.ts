@@ -76,8 +76,24 @@ class AuthService {
 
   async signOut(): Promise<void> {
     try {
+      // Vérifier si l'utilisateur est connecté avant de se déconnecter
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        console.log('Aucun utilisateur connecté, déconnexion ignorée');
+        return;
+      }
+      
       await auth().signOut();
+      console.log('Déconnexion réussie');
     } catch (error: any) {
+      console.error('Erreur lors de la déconnexion Firebase:', error);
+      
+      // Si l'erreur est "no-current-user", c'est normal après déconnexion
+      if (error.code === 'auth/no-current-user') {
+        console.log('Utilisateur déjà déconnecté');
+        return;
+      }
+      
       throw this.handleAuthError(error);
     }
   }
@@ -144,6 +160,9 @@ class AuthService {
         break;
       case 'auth/network-request-failed':
         userFriendlyMessage = 'Erreur de connexion réseau';
+        break;
+      case 'auth/no-current-user':
+        userFriendlyMessage = 'Aucun utilisateur connecté';
         break;
       default:
         userFriendlyMessage = error.message || 'Une erreur inattendue est survenue';

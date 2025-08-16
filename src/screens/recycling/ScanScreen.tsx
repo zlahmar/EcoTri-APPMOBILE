@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  Alert, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
   ActivityIndicator,
   ScrollView,
   Image,
   PermissionsAndroid,
-  Platform
+  Platform,
 } from 'react-native';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -19,23 +19,25 @@ import Header from '../../components/common/Header';
 import mlKitService, { ScanResult } from '../../services/mlKitService';
 import statsService from '../../services/localStatsService';
 
-const ScanScreen = ({ 
-  isAuthenticated = false, 
-  onProfilePress, 
-  userInfo: _userInfo 
-}: { 
-  isAuthenticated?: boolean; 
-  onProfilePress?: () => void; 
-  userInfo?: any; 
+const ScanScreen = ({
+  isAuthenticated = false,
+  onProfilePress,
+  userInfo: _userInfo,
+}: {
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
+  userInfo?: any;
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  
+
   const [isScanning, setIsScanning] = useState(false);
   const [wasteClassification, setWasteClassification] = useState<any>(null);
 
   const [pointsEarned, setPointsEarned] = useState<number | null>(null);
-  const [motivationalMessage, setMotivationalMessage] = useState<string | null>(null);
+  const [motivationalMessage, setMotivationalMessage] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     requestPermissions();
@@ -49,26 +51,30 @@ const ScanScreen = ({
           PermissionsAndroid.PERMISSIONS.CAMERA,
           {
             title: 'Permission Caméra',
-            message: 'L\'application a besoin d\'accéder à votre caméra pour scanner les déchets',
+            message:
+              "L'application a besoin d'accéder à votre caméra pour scanner les déchets",
             buttonNeutral: 'Demander plus tard',
             buttonNegative: 'Annuler',
             buttonPositive: 'OK',
-          }
+          },
         );
 
         const storagePermission = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           {
             title: 'Permission Stockage',
-            message: 'L\'application a besoin d\'accéder à votre galerie pour sélectionner des images',
+            message:
+              "L'application a besoin d'accéder à votre galerie pour sélectionner des images",
             buttonNeutral: 'Demander plus tard',
             buttonNegative: 'Annuler',
             buttonPositive: 'OK',
-          }
+          },
         );
 
-        if (cameraPermission === PermissionsAndroid.RESULTS.GRANTED && 
-            storagePermission === PermissionsAndroid.RESULTS.GRANTED) {
+        if (
+          cameraPermission === PermissionsAndroid.RESULTS.GRANTED &&
+          storagePermission === PermissionsAndroid.RESULTS.GRANTED
+        ) {
           console.log(' Permissions accordées');
         } else {
           console.log(' Permissions refusées');
@@ -120,7 +126,7 @@ const ScanScreen = ({
         await analyzeImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Erreur lors de la sélection d\'image:', error);
+      console.error("Erreur lors de la sélection d'image:", error);
       Alert.alert('Erreur', 'Impossible de sélectionner une image');
     }
   };
@@ -132,7 +138,7 @@ const ScanScreen = ({
       const result = await mlKitService.analyzeImage(imageUri);
       setScanResult(result);
       console.log('Analyse ML Kit réussie:', result);
-      
+
       try {
         const classification = await mlKitService.classifyWaste(result);
         setWasteClassification(classification);
@@ -144,33 +150,45 @@ const ScanScreen = ({
             const confidence = classification.confidence || 0.5;
             const statsResult = await statsService.addScan(
               classification.type,
-              confidence
+              confidence,
             );
-            
+
             if (statsResult) {
               setPointsEarned(statsResult.pointsEarned);
               setMotivationalMessage(statsResult.message);
               console.log(' Points gagnés:', statsResult.pointsEarned);
             } else {
               setPointsEarned(0);
-              setMotivationalMessage(' Connectez-vous pour enregistrer vos statistiques et gagner des points !');
+              setMotivationalMessage(
+                ' Connectez-vous pour enregistrer vos statistiques et gagner des points !',
+              );
               console.log(' Utilisateur non connecté - Stats non enregistrées');
               setPointsEarned(0);
-              setMotivationalMessage(' Connectez-vous pour enregistrer vos statistiques et gagner des points !');
+              setMotivationalMessage(
+                ' Connectez-vous pour enregistrer vos statistiques et gagner des points !',
+              );
             }
           } catch (statsError) {
-            console.warn(' Erreur lors de l\'ajout des statistiques:', statsError);
+            console.warn(
+              " Erreur lors de l'ajout des statistiques:",
+              statsError,
+            );
             setPointsEarned(0);
-            setMotivationalMessage(' Erreur lors de l\'enregistrement des statistiques');
+            setMotivationalMessage(
+              " Erreur lors de l'enregistrement des statistiques",
+            );
           }
         }
       } catch (classificationError) {
-        console.warn(' Erreur lors de la classification automatique:', classificationError);
+        console.warn(
+          ' Erreur lors de la classification automatique:',
+          classificationError,
+        );
         setWasteClassification(null);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'analyse:', error);
-      Alert.alert('Erreur', 'Impossible d\'analyser l\'image');
+      console.error("Erreur lors de l'analyse:", error);
+      Alert.alert('Erreur', "Impossible d'analyser l'image");
     } finally {
       setIsScanning(false);
     }
@@ -194,14 +212,24 @@ const ScanScreen = ({
     return (
       <View style={styles.resultsContainer}>
         <Text style={styles.resultsTitle}>
-          <MaterialIcons name="search" size={20} color={colors.primary} style={styles.resultIcon} />
+          <MaterialIcons
+            name="search"
+            size={20}
+            color={colors.primary}
+            style={styles.resultIcon}
+          />
           Résultats de l'analyse ML Kit
         </Text>
-        
+
         {objects.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons name="target" size={18} color={colors.primary} style={styles.resultIcon} />
+              <MaterialIcons
+                name="target"
+                size={18}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
               Objets détectés:
             </Text>
             {objects.map((obj, index) => (
@@ -210,7 +238,16 @@ const ScanScreen = ({
                   <Text style={styles.resultLabel}>
                     {obj?.labels?.[0]?.text || 'Objet non identifié'}
                   </Text>
-                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(obj?.labels?.[0]?.confidence || 0) }]}>
+                  <View
+                    style={[
+                      styles.confidenceBadge,
+                      {
+                        backgroundColor: getConfidenceColor(
+                          obj?.labels?.[0]?.confidence || 0,
+                        ),
+                      },
+                    ]}
+                  >
                     <Text style={styles.confidenceText}>
                       {Math.round((obj?.labels?.[0]?.confidence || 0) * 100)}%
                     </Text>
@@ -218,7 +255,11 @@ const ScanScreen = ({
                 </View>
                 {obj?.labels && obj.labels.length > 1 && (
                   <Text style={styles.resultSubtext}>
-                    Autres détections: {obj.labels.slice(1).map(l => l?.text || 'N/A').join(', ')}
+                    Autres détections:{' '}
+                    {obj.labels
+                      .slice(1)
+                      .map(l => l?.text || 'N/A')
+                      .join(', ')}
                   </Text>
                 )}
               </View>
@@ -229,15 +270,27 @@ const ScanScreen = ({
         {barcodes.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons name="bar-chart" size={18} color={colors.primary} style={styles.resultIcon} />
+              <MaterialIcons
+                name="bar-chart"
+                size={18}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
               Codes-barres:
             </Text>
             {barcodes.map((barcode, index) => (
-              <View key={barcode?.rawValue || `barcode_${index}`} style={styles.resultItem}>
+              <View
+                key={barcode?.rawValue || `barcode_${index}`}
+                style={styles.resultItem}
+              >
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>{barcode?.displayValue || 'Code non lisible'}</Text>
+                  <Text style={styles.resultLabel}>
+                    {barcode?.displayValue || 'Code non lisible'}
+                  </Text>
                   <View style={styles.formatBadge}>
-                    <Text style={styles.formatText}>{barcode?.format || 'Inconnu'}</Text>
+                    <Text style={styles.formatText}>
+                      {barcode?.format || 'Inconnu'}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -248,14 +301,33 @@ const ScanScreen = ({
         {text.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons name="file-text" size={18} color={colors.primary} style={styles.resultIcon} />
+              <MaterialIcons
+                name="file-text"
+                size={18}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
               Texte détecté:
             </Text>
             {text.map((textItem, index) => (
-              <View key={textItem?.text || `text_${index}`} style={styles.resultItem}>
+              <View
+                key={textItem?.text || `text_${index}`}
+                style={styles.resultItem}
+              >
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>{textItem?.text || 'Texte non lisible'}</Text>
-                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(textItem?.confidence || 0) }]}>
+                  <Text style={styles.resultLabel}>
+                    {textItem?.text || 'Texte non lisible'}
+                  </Text>
+                  <View
+                    style={[
+                      styles.confidenceBadge,
+                      {
+                        backgroundColor: getConfidenceColor(
+                          textItem?.confidence || 0,
+                        ),
+                      },
+                    ]}
+                  >
                     <Text style={styles.confidenceText}>
                       {Math.round((textItem?.confidence || 0) * 100)}%
                     </Text>
@@ -269,14 +341,30 @@ const ScanScreen = ({
         {faces.length > 0 && (
           <View style={styles.resultSection}>
             <Text style={styles.resultSectionTitle}>
-              <MaterialIcons name="face" size={18} color={colors.primary} style={styles.resultIcon} />
+              <MaterialIcons
+                name="face"
+                size={18}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
               Visages détectés:
             </Text>
             {faces.map((face, index) => (
               <View key={face?.id || `face_${index}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>Visage #{face?.id || index + 1}</Text>
-                  <View style={[styles.confidenceBadge, { backgroundColor: getConfidenceColor(face?.confidence || 0) }]}>
+                  <Text style={styles.resultLabel}>
+                    Visage #{face?.id || index + 1}
+                  </Text>
+                  <View
+                    style={[
+                      styles.confidenceBadge,
+                      {
+                        backgroundColor: getConfidenceColor(
+                          face?.confidence || 0,
+                        ),
+                      },
+                    ]}
+                  >
                     <Text style={styles.confidenceText}>
                       {Math.round((face?.confidence || 0) * 100)}%
                     </Text>
@@ -289,49 +377,88 @@ const ScanScreen = ({
 
         <View style={styles.debugSection}>
           <Text style={styles.debugTitle}>
-            <MaterialIcons name="info" size={18} color={colors.warning} style={styles.resultIcon} />
+            <MaterialIcons
+              name="info"
+              size={18}
+              color={colors.warning}
+              style={styles.resultIcon}
+            />
             Debug - Structure des données:
           </Text>
           <Text style={styles.debugText}>
-            Objets: {JSON.stringify(objects.length)} | 
-            Codes: {JSON.stringify(barcodes.length)} | 
-            Texte: {JSON.stringify(text.length)} | 
-            Visages: {JSON.stringify(faces.length)}
+            Objets: {JSON.stringify(objects.length)} | Codes:{' '}
+            {JSON.stringify(barcodes.length)} | Texte:{' '}
+            {JSON.stringify(text.length)} | Visages:{' '}
+            {JSON.stringify(faces.length)}
           </Text>
           <Text style={styles.debugText}>
-            Timestamp: {scanResult.timestamp ? new Date(scanResult.timestamp).toLocaleTimeString() : 'N/A'}
+            Timestamp:{' '}
+            {scanResult.timestamp
+              ? new Date(scanResult.timestamp).toLocaleTimeString()
+              : 'N/A'}
           </Text>
         </View>
 
         {wasteClassification && (
           <View style={styles.classificationSection}>
             <Text style={styles.classificationTitle}>
-              <MaterialIcons name="auto-awesome" size={20} color={colors.primary} style={styles.resultIcon} />
+              <MaterialIcons
+                name="auto-awesome"
+                size={20}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
               Classification Automatique du Déchet
             </Text>
-            
-            <View style={[styles.classificationCard, { borderColor: wasteClassification.color }]}>
+
+            <View
+              style={[
+                styles.classificationCard,
+                { borderColor: wasteClassification.color },
+              ]}
+            >
               <View style={styles.classificationHeader}>
-                <Text style={[styles.classificationType, { color: wasteClassification.color }]}>
+                <Text
+                  style={[
+                    styles.classificationType,
+                    { color: wasteClassification.color },
+                  ]}
+                >
                   {wasteClassification.type.toUpperCase()}
                 </Text>
-                <View style={[styles.confidenceBadge, { backgroundColor: wasteClassification.color }]}>
+                <View
+                  style={[
+                    styles.confidenceBadge,
+                    { backgroundColor: wasteClassification.color },
+                  ]}
+                >
                   <Text style={styles.confidenceText}>
                     {Math.round(wasteClassification.confidence * 100)}%
                   </Text>
                 </View>
               </View>
-              
-              <Text style={styles.recyclingInfo}>{wasteClassification.recyclingInfo}</Text>
-              <Text style={styles.environmentalImpact}>{wasteClassification.environmentalImpact}</Text>
-              
+
+              <Text style={styles.recyclingInfo}>
+                {wasteClassification.recyclingInfo}
+              </Text>
+              <Text style={styles.environmentalImpact}>
+                {wasteClassification.environmentalImpact}
+              </Text>
+
               <View style={styles.tipsContainer}>
                 <Text style={styles.tipsTitle}>
-                  <MaterialIcons name="lightbulb" size={16} color={colors.warning} style={styles.resultIcon} />
+                  <MaterialIcons
+                    name="lightbulb"
+                    size={16}
+                    color={colors.warning}
+                    style={styles.resultIcon}
+                  />
                   Conseils pratiques :
                 </Text>
                 {wasteClassification.tips.map((tip: string, index: number) => (
-                  <Text key={index} style={styles.tipText}>• {tip}</Text>
+                  <Text key={index} style={styles.tipText}>
+                    • {tip}
+                  </Text>
                 ))}
               </View>
             </View>
@@ -340,20 +467,40 @@ const ScanScreen = ({
               <View style={styles.pointsSection}>
                 {pointsEarned > 0 ? (
                   <View style={styles.pointsCard}>
-                    <MaterialIcons name="stars" size={24} color={colors.warning} style={styles.pointsIcon} />
+                    <MaterialIcons
+                      name="stars"
+                      size={24}
+                      color={colors.warning}
+                      style={styles.pointsIcon}
+                    />
                     <Text style={styles.pointsText}>
                       +{pointsEarned} points gagnés !
                     </Text>
                   </View>
                 ) : (
-                  <View style={[styles.pointsCard, { borderColor: colors.primary, backgroundColor: colors.surface }]}>
-                    <MaterialIcons name="info" size={24} color={colors.primary} style={styles.pointsIcon} />
-                    <Text style={[styles.pointsText, { color: colors.primary }]}>
+                  <View
+                    style={[
+                      styles.pointsCard,
+                      {
+                        borderColor: colors.primary,
+                        backgroundColor: colors.surface,
+                      },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="info"
+                      size={24}
+                      color={colors.primary}
+                      style={styles.pointsIcon}
+                    />
+                    <Text
+                      style={[styles.pointsText, { color: colors.primary }]}
+                    >
                       Connectez-vous pour gagner des points !
                     </Text>
                   </View>
                 )}
-                
+
                 {motivationalMessage && (
                   <Text style={styles.motivationalText}>
                     {motivationalMessage}
@@ -366,7 +513,12 @@ const ScanScreen = ({
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.resetButton} onPress={resetScan}>
-            <MaterialIcons name="refresh" size={20} color={colors.textInverse} style={styles.resetButtonIcon} />
+            <MaterialIcons
+              name="refresh"
+              size={20}
+              color={colors.textInverse}
+              style={styles.resetButtonIcon}
+            />
             <Text style={styles.resetButtonText}>Nouveau scan</Text>
           </TouchableOpacity>
         </View>
@@ -382,15 +534,15 @@ const ScanScreen = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header 
-        title="Scanner Éco" 
+      <Header
+        title="Scanner Éco"
         showProfileIcon={true}
-        isAuthenticated={isAuthenticated} 
+        isAuthenticated={isAuthenticated}
         onProfilePress={onProfilePress}
       />
-      
-      <ScrollView 
-        style={styles.content} 
+
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         bounces={true}
@@ -400,7 +552,12 @@ const ScanScreen = ({
           <>
             <View style={styles.scanArea}>
               <View style={styles.scanFrame}>
-                <MaterialIcons name="smartphone" size={60} color={colors.primary} style={styles.scanIcon} />
+                <MaterialIcons
+                  name="smartphone"
+                  size={60}
+                  color={colors.primary}
+                  style={styles.scanIcon}
+                />
                 <Text style={styles.scanText}>Scanner un déchet</Text>
                 <Text style={styles.scanSubtext}>
                   Pointez votre caméra vers le code-barres ou l'objet
@@ -410,19 +567,35 @@ const ScanScreen = ({
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.scanButton} onPress={takePhoto}>
-                <MaterialIcons name="camera-alt" size={24} color={colors.textInverse} style={styles.buttonIcon} />
+                <MaterialIcons
+                  name="camera-alt"
+                  size={24}
+                  color={colors.textInverse}
+                  style={styles.buttonIcon}
+                />
                 <Text style={styles.scanButtonText}>Prendre une photo</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.galleryButton} onPress={selectImage}>
-                <MaterialIcons name="photo-library" size={24} color={colors.primary} style={styles.buttonIcon} />
+
+              <TouchableOpacity
+                style={styles.galleryButton}
+                onPress={selectImage}
+              >
+                <MaterialIcons
+                  name="photo-library"
+                  size={24}
+                  color={colors.primary}
+                  style={styles.buttonIcon}
+                />
                 <Text style={styles.galleryButtonText}>Choisir une image</Text>
               </TouchableOpacity>
             </View>
           </>
         ) : (
           <View style={styles.imagePreviewContainer}>
-            <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.imagePreview}
+            />
             {isScanning && (
               <View style={styles.scanningOverlay}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -442,12 +615,23 @@ const ScanScreen = ({
             3. Notre IA analysera et classera automatiquement{'\n'}
             4. Suivez les instructions de recyclage
           </Text>
-          
+
           <View style={styles.authInfo}>
-            <MaterialIcons name="info" size={16} color={colors.textLight} style={styles.authIcon} />
+            <MaterialIcons
+              name="info"
+              size={16}
+              color={colors.textLight}
+              style={styles.authIcon}
+            />
             <Text style={styles.authText}>
-              <MaterialIcons name="lightbulb" size={14} color={colors.primary} style={styles.resultIcon} />
-              Connectez-vous pour enregistrer vos statistiques et gagner des points !
+              <MaterialIcons
+                name="lightbulb"
+                size={14}
+                color={colors.primary}
+                style={styles.resultIcon}
+              />
+              Connectez-vous pour enregistrer vos statistiques et gagner des
+              points !
             </Text>
           </View>
         </View>

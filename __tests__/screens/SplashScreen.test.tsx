@@ -24,7 +24,7 @@ describe('SplashScreen', () => {
     
     expect(getByText('EcoTri')).toBeTruthy();
     expect(getByText('Recyclage Intelligent')).toBeTruthy();
-    expect(getByText('Version 7.1.0')).toBeTruthy();
+    expect(getByText('Version 8.0.0')).toBeTruthy();
     expect(getByText('© 2025 EcoTri - Master 2 YNOV')).toBeTruthy();
   });
 
@@ -53,7 +53,7 @@ describe('SplashScreen', () => {
   it('should display footer information', () => {
     const { getByText } = render(<SplashScreen {...defaultProps} />);
     
-    expect(getByText('Version 7.1.0')).toBeTruthy();
+    expect(getByText('Version 8.0.0')).toBeTruthy();
     expect(getByText('© 2025 EcoTri - Master 2 YNOV')).toBeTruthy();
   });
 

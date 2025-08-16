@@ -35,35 +35,51 @@ const CollecteInfoComponent: React.FC<CollecteInfoProps> = ({
 
   const getNextCollecte = (jours: string[]) => {
     if (jours.length === 0) return null;
-    
+
     const today = new Date();
-    const todayName = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'][today.getDay()];
-    
+    const todayName = [
+      'DIMANCHE',
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+    ][today.getDay()];
+
     if (jours.includes(todayName)) {
-      return 'Aujourd\'hui';
+      return "Aujourd'hui";
     }
-    
-    const joursOrdre = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
+
+    const joursOrdre = [
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+      'DIMANCHE',
+    ];
     const todayIndex = joursOrdre.indexOf(todayName);
-    
+
     for (let i = 1; i <= 7; i++) {
       const nextIndex = (todayIndex + i) % 7;
       const nextDay = joursOrdre[nextIndex];
-      
+
       if (jours.includes(nextDay)) {
         const traductions: { [key: string]: string } = {
-          'LUNDI': 'Lundi',
-          'MARDI': 'Mardi',
-          'MERCREDI': 'Mercredi',
-          'JEUDI': 'Jeudi',
-          'VENDREDI': 'Vendredi',
-          'SAMEDI': 'Samedi',
-          'DIMANCHE': 'Dimanche'
+          LUNDI: 'Lundi',
+          MARDI: 'Mardi',
+          MERCREDI: 'Mercredi',
+          JEUDI: 'Jeudi',
+          VENDREDI: 'Vendredi',
+          SAMEDI: 'Samedi',
+          DIMANCHE: 'Dimanche',
         };
         return traductions[nextDay];
       }
     }
-    
+
     return null;
   };
 
@@ -73,8 +89,15 @@ const CollecteInfoComponent: React.FC<CollecteInfoProps> = ({
         <MaterialIcons name="delete" size={24} color={colors.primary} />
         <Text style={styles.title}>Collecte des déchets</Text>
         {showCommuneSelector && onCommuneChange && (
-          <TouchableOpacity onPress={onCommuneChange} style={styles.changeButton}>
-            <MaterialIcons name="edit-location" size={20} color={colors.primary} />
+          <TouchableOpacity
+            onPress={onCommuneChange}
+            style={styles.changeButton}
+          >
+            <MaterialIcons
+              name="edit-location"
+              size={20}
+              color={colors.primary}
+            />
             <Text style={styles.changeButtonText}>Changer</Text>
           </TouchableOpacity>
         )}
@@ -92,37 +115,46 @@ const CollecteInfoComponent: React.FC<CollecteInfoProps> = ({
             <MaterialIcons name="delete" size={20} color={colors.error} />
             <Text style={styles.typeTitle}>Ordures Ménagères</Text>
           </View>
-          
+
           {collecteInfo.orduresMenageres.jours.length > 0 ? (
             <>
               <Text style={styles.daysText}>
-                {collecteInfo.orduresMenageres.jours.map(jour => {
-                  const traductions: { [key: string]: string } = {
-                    'LUNDI': 'Lundi',
-                    'MARDI': 'Mardi',
-                    'MERCREDI': 'Mercredi',
-                    'JEUDI': 'Jeudi',
-                    'VENDREDI': 'Vendredi',
-                    'SAMEDI': 'Samedi',
-                    'DIMANCHE': 'Dimanche'
-                  };
-                  return traductions[jour] || jour;
-                }).join(', ')}
+                {collecteInfo.orduresMenageres.jours
+                  .map(jour => {
+                    const traductions: { [key: string]: string } = {
+                      LUNDI: 'Lundi',
+                      MARDI: 'Mardi',
+                      MERCREDI: 'Mercredi',
+                      JEUDI: 'Jeudi',
+                      VENDREDI: 'Vendredi',
+                      SAMEDI: 'Samedi',
+                      DIMANCHE: 'Dimanche',
+                    };
+                    return traductions[jour] || jour;
+                  })
+                  .join(', ')}
               </Text>
               <Text style={styles.passageText}>
                 {formatPassage(collecteInfo.orduresMenageres.passage)}
               </Text>
               {getNextCollecte(collecteInfo.orduresMenageres.jours) && (
                 <View style={styles.nextCollecte}>
-                  <MaterialIcons name="schedule" size={16} color={colors.success} />
+                  <MaterialIcons
+                    name="schedule"
+                    size={16}
+                    color={colors.success}
+                  />
                   <Text style={styles.nextCollecteText}>
-                    Prochaine collecte : {getNextCollecte(collecteInfo.orduresMenageres.jours)}
+                    Prochaine collecte :{' '}
+                    {getNextCollecte(collecteInfo.orduresMenageres.jours)}
                   </Text>
                 </View>
               )}
             </>
           ) : (
-            <Text style={styles.noCollecteText}>Aucune collecte programmée</Text>
+            <Text style={styles.noCollecteText}>
+              Aucune collecte programmée
+            </Text>
           )}
         </View>
 
@@ -132,37 +164,46 @@ const CollecteInfoComponent: React.FC<CollecteInfoProps> = ({
             <MaterialIcons name="recycling" size={20} color={colors.success} />
             <Text style={styles.typeTitle}>Tri et Recyclage</Text>
           </View>
-          
+
           {collecteInfo.triRecyclage.jours.length > 0 ? (
             <>
               <Text style={styles.daysText}>
-                {collecteInfo.triRecyclage.jours.map(jour => {
-                  const traductions: { [key: string]: string } = {
-                    'LUNDI': 'Lundi',
-                    'MARDI': 'Mardi',
-                    'MERCREDI': 'Mercredi',
-                    'JEUDI': 'Jeudi',
-                    'VENDREDI': 'Vendredi',
-                    'SAMEDI': 'Samedi',
-                    'DIMANCHE': 'Dimanche'
-                  };
-                  return traductions[jour] || jour;
-                }).join(', ')}
+                {collecteInfo.triRecyclage.jours
+                  .map(jour => {
+                    const traductions: { [key: string]: string } = {
+                      LUNDI: 'Lundi',
+                      MARDI: 'Mardi',
+                      MERCREDI: 'Mercredi',
+                      JEUDI: 'Jeudi',
+                      VENDREDI: 'Vendredi',
+                      SAMEDI: 'Samedi',
+                      DIMANCHE: 'Dimanche',
+                    };
+                    return traductions[jour] || jour;
+                  })
+                  .join(', ')}
               </Text>
               <Text style={styles.passageText}>
                 {formatPassage(collecteInfo.triRecyclage.passage)}
               </Text>
               {getNextCollecte(collecteInfo.triRecyclage.jours) && (
                 <View style={styles.nextCollecte}>
-                  <MaterialIcons name="schedule" size={16} color={colors.success} />
+                  <MaterialIcons
+                    name="schedule"
+                    size={16}
+                    color={colors.success}
+                  />
                   <Text style={styles.nextCollecteText}>
-                    Prochaine collecte : {getNextCollecte(collecteInfo.triRecyclage.jours)}
+                    Prochaine collecte :{' '}
+                    {getNextCollecte(collecteInfo.triRecyclage.jours)}
                   </Text>
                 </View>
               )}
             </>
           ) : (
-            <Text style={styles.noCollecteText}>Aucune collecte programmée</Text>
+            <Text style={styles.noCollecteText}>
+              Aucune collecte programmée
+            </Text>
           )}
         </View>
       </View>

@@ -25,13 +25,13 @@ interface ProfileScreenProps {
   userInfo?: any;
 }
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ 
-  navigation: _navigation, 
-  isAuthenticated: _isAuthenticated, 
-  onLoginPress, 
-  onLogout, 
+const ProfileScreen: React.FC<ProfileScreenProps> = ({
+  navigation: _navigation,
+  isAuthenticated: _isAuthenticated,
+  onLoginPress,
+  onLogout,
   onCloseModal,
-  userInfo: _userInfo 
+  userInfo: _userInfo,
 }) => {
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -40,13 +40,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   //  Utilisation du service de géolocalisation
   const { city, getCurrentLocation } = useLocation({
-    onError: (error) => console.error('Erreur de localisation:', error),
+    onError: error => console.error('Erreur de localisation:', error),
     onPermissionDenied: () => console.log('Permission de localisation refusée'),
   });
 
   //  Écoute des changements d'authentification Firebase
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth().onAuthStateChanged(currentUser => {
       setUser(currentUser);
       if (currentUser) {
         loadUserStats();
@@ -83,7 +83,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       if (onCloseModal) {
         onCloseModal();
       }
-      Alert.alert('Déconnexion', 'Vous avez été déconnecté avec succès');
     } catch (error) {
       Alert.alert('Erreur', 'Erreur lors de la déconnexion');
     }
@@ -96,25 +95,38 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       'Êtes-vous sûr de vouloir supprimer définitivement votre profil ? Cette action est irréversible.',
       [
         { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
+        {
+          text: 'Supprimer',
           style: 'destructive',
           onPress: async () => {
             try {
               await localStatsService.resetStats();
               await user.delete();
-              Alert.alert('Profil supprimé', 'Votre profil a été supprimé avec succès');
+              Alert.alert(
+                'Profil supprimé',
+                'Votre profil a été supprimé avec succès',
+              );
             } catch (error) {
               Alert.alert('Erreur', 'Erreur lors de la suppression du profil');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
-  }
+  };
 
   //  Composant StatCard
-  const StatCard = ({ icon, value, label, color }: { icon: string; value: string | number; label: string; color: string }) => (
+  const StatCard = ({
+    icon,
+    value,
+    label,
+    color,
+  }: {
+    icon: string;
+    value: string | number;
+    label: string;
+    color: string;
+  }) => (
     <View style={[styles.statCard, { borderLeftColor: color }]}>
       <MaterialIcons name={icon as any} size={28} color={color} />
       <Text style={styles.statValue}>{value}</Text>
@@ -124,11 +136,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   const getMotivationalQuote = (_totalPoints: number) => {
     const quotes = [
-      "Chaque geste compte 🌍",
+      'Chaque geste compte 🌍',
       "Le recyclage, c'est l'avenir ♻️",
-      "Tu fais la différence 💪",
-      "Continue comme ça ! 🚀",
-      "Un champion du recyclage ! 🏆"
+      'Tu fais la différence 💪',
+      'Continue comme ça ! 🚀',
+      'Un champion du recyclage ! 🏆',
     ];
     return quotes[Math.floor(Math.random() * quotes.length)];
   };
@@ -165,37 +177,76 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <Text style={styles.userStatus}>Membre EcoTri</Text>
               <View style={styles.pointsRow}>
                 <MaterialIcons name="star" size={16} color={colors.warning} />
-                <Text style={styles.pointsText}>{stats.totalPoints} points</Text>
+                <Text style={styles.pointsText}>
+                  {stats.totalPoints} points
+                </Text>
               </View>
               <View style={styles.locationRow}>
-                <MaterialIcons name="location-on" size={16} color={colors.textLight} />
-                <Text style={styles.locationText}>{city || 'Localisation...'}</Text>
+                <MaterialIcons
+                  name="location-on"
+                  size={16}
+                  color={colors.textLight}
+                />
+                <Text style={styles.locationText}>
+                  {city || 'Localisation...'}
+                </Text>
               </View>
             </View>
           </View>
           <View style={styles.userActions}>
-            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <TouchableOpacity
+              style={styles.signOutButton}
+              onPress={handleSignOut}
+            >
               <MaterialIcons name="logout" size={20} color={colors.error} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile}>
-              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteProfile}
+            >
+              <MaterialIcons
+                name="delete-forever"
+                size={20}
+                color={colors.error}
+              />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.mainStats}>
-          <StatCard icon="camera-alt" value={stats.totalScans} label="Scans Totaux" color={colors.primary} />
-          
-          <StatCard icon="local-fire-department" value={stats.recyclingStreak} label="Jours Consécutifs" color={colors.warning} />
-          
-          <StatCard icon="trending-up" value={stats.accuracyScore + "%"} label="Précision" color={colors.success} />
+          <StatCard
+            icon="camera-alt"
+            value={stats.totalScans}
+            label="Scans Totaux"
+            color={colors.primary}
+          />
+
+          <StatCard
+            icon="local-fire-department"
+            value={stats.recyclingStreak}
+            label="Jours Consécutifs"
+            color={colors.warning}
+          />
+
+          <StatCard
+            icon="trending-up"
+            value={stats.accuracyScore + '%'}
+            label="Précision"
+            color={colors.success}
+          />
         </View>
 
         <View style={styles.recyclingSearchSection}>
-          <StatCard icon="search" value={stats.recyclingPointSearches || 0} label="Recherches de Points" color={colors.info} />
+          <StatCard
+            icon="search"
+            value={stats.recyclingPointSearches || 0}
+            label="Recherches de Points"
+            color={colors.info}
+          />
           {stats.lastRecyclingSearch && (
             <Text style={styles.lastSearchText}>
-              Dernière: {new Date(stats.lastRecyclingSearch).toLocaleDateString('fr-FR')}
+              Dernière:{' '}
+              {new Date(stats.lastRecyclingSearch).toLocaleDateString('fr-FR')}
             </Text>
           )}
         </View>
@@ -205,28 +256,49 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <Text style={styles.motivationText}>
             {stats.totalPoints > 100 ? (
               <>
-                <MaterialIcons name="emoji-events" size={20} color={colors.warning} style={styles.inlineIcon} />
+                <MaterialIcons
+                  name="emoji-events"
+                  size={20}
+                  color={colors.warning}
+                  style={styles.inlineIcon}
+                />
                 Champion du recyclage !
               </>
             ) : stats.totalPoints > 50 ? (
               <>
-                <MaterialIcons name="local-fire-department" size={20} color={colors.warning} style={styles.inlineIcon} />
+                <MaterialIcons
+                  name="local-fire-department"
+                  size={20}
+                  color={colors.warning}
+                  style={styles.inlineIcon}
+                />
                 Excellent travail !
               </>
             ) : (
               <>
-                <MaterialIcons name="rocket-launch" size={20} color={colors.primary} style={styles.inlineIcon} />
+                <MaterialIcons
+                  name="rocket-launch"
+                  size={20}
+                  color={colors.primary}
+                  style={styles.inlineIcon}
+                />
                 Continuez comme ça !
               </>
             )}
           </Text>
-          <Text style={styles.quoteText}>{getMotivationalQuote(stats.totalPoints)}</Text>
-          
-          <TouchableOpacity 
-            style={styles.guideButton} 
+          <Text style={styles.quoteText}>
+            {getMotivationalQuote(stats.totalPoints)}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.guideButton}
             onPress={() => setShowUserGuide(true)}
           >
-            <MaterialIcons name="help-outline" size={20} color={colors.primary} />
+            <MaterialIcons
+              name="help-outline"
+              size={20}
+              color={colors.primary}
+            />
             <Text style={styles.guideButtonText}>Guide d'Utilisation</Text>
           </TouchableOpacity>
         </View>
@@ -238,20 +310,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
     <View style={styles.container}>
       <Header title="Mon Profil" />
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         {loading ? (
           <View style={styles.loadingContainer}>
-            <MaterialIcons name="hourglass-empty" size={40} color={colors.primary} />
+            <MaterialIcons
+              name="hourglass-empty"
+              size={40}
+              color={colors.primary}
+            />
             <Text style={styles.loadingText}>Chargement...</Text>
           </View>
         ) : user ? (
-          <>
-            {renderStats()}
-          </>
+          <>{renderStats()}</>
         ) : (
           <View style={styles.authContainer}>
-            <Image 
-              source={require('../../assets/logo.png')} 
+            <Image
+              source={require('../../assets/logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -260,8 +337,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               Connectez-vous pour voir vos statistiques !
             </Text>
             {onLoginPress && (
-              <TouchableOpacity 
-                style={styles.loginButton} 
+              <TouchableOpacity
+                style={styles.loginButton}
                 onPress={onLoginPress}
               >
                 <MaterialIcons name="login" size={20} color="white" />
@@ -271,7 +348,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         )}
       </ScrollView>
-      {showUserGuide && <UserGuide isVisible={showUserGuide} onClose={() => setShowUserGuide(false)} />}
+      {showUserGuide && (
+        <UserGuide
+          isVisible={showUserGuide}
+          onClose={() => setShowUserGuide(false)}
+        />
+      )}
     </View>
   );
 };
@@ -369,7 +451,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginTop: 2,
   },
-  
+
   signOutButton: {
     marginLeft: 6,
     padding: 6,
@@ -600,7 +682,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginLeft: 8,
   },
-
 });
 
 export default ProfileScreen;

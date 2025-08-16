@@ -22,7 +22,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ collecteInfo }) => {
   const getCollecteType = (jourCode: string) => {
     const hasOrdures = collecteInfo.orduresMenageres.jours.includes(jourCode);
     const hasTri = collecteInfo.triRecyclage.jours.includes(jourCode);
-    
+
     if (hasOrdures && hasTri) {
       return { type: 'both', text: 'OM + TRI' };
     } else if (hasOrdures) {
@@ -36,38 +36,54 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ collecteInfo }) => {
 
   const isToday = (jourCode: string) => {
     const today = new Date();
-    const todayName = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'][today.getDay()];
+    const todayName = [
+      'DIMANCHE',
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+    ][today.getDay()];
     return jourCode === todayName;
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <MaterialIcons name="calendar-today" size={20} color={colors.text} style={styles.titleIcon} />
+        <MaterialIcons
+          name="calendar-today"
+          size={20}
+          color={colors.text}
+          style={styles.titleIcon}
+        />
         <Text style={styles.title}>Calendrier de la Semaine</Text>
       </View>
-      
+
       <View style={styles.calendarGrid}>
-        {joursSemaine.map((jour) => {
+        {joursSemaine.map(jour => {
           const collecte = getCollecteType(jour.code);
           const today = isToday(jour.code);
-          
+
           return (
-            <View key={jour.code} style={[styles.dayCell, today && styles.todayCell]}>
+            <View
+              key={jour.code}
+              style={[styles.dayCell, today && styles.todayCell]}
+            >
               <Text style={[styles.dayName, today && styles.todayText]}>
                 {jour.nom}
               </Text>
-              
+
               {collecte.type !== 'none' ? (
-                <View style={[
-                  styles.collecteBadge,
-                  collecte.type === 'both' && styles.bothBadge,
-                  collecte.type === 'om' && styles.omBadge,
-                  collecte.type === 'tri' && styles.triBadge,
-                ]}>
-                  <Text style={styles.collecteText}>
-                    {collecte.text}
-                  </Text>
+                <View
+                  style={[
+                    styles.collecteBadge,
+                    collecte.type === 'both' && styles.bothBadge,
+                    collecte.type === 'om' && styles.omBadge,
+                    collecte.type === 'tri' && styles.triBadge,
+                  ]}
+                >
+                  <Text style={styles.collecteText}>{collecte.text}</Text>
                 </View>
               ) : (
                 <View style={styles.noCollecteBadge}>
@@ -86,14 +102,14 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({ collecteInfo }) => {
           </View>
           <Text style={styles.legendLabel}>Ordures Ménagères</Text>
         </View>
-        
+
         <View style={styles.legendItem}>
           <View style={[styles.legendBadge, styles.triBadge]}>
             <Text style={styles.legendText}>TRI</Text>
           </View>
           <Text style={styles.legendLabel}>Tri & Recyclage</Text>
         </View>
-        
+
         <View style={styles.legendItem}>
           <View style={[styles.legendBadge, styles.bothBadge]}>
             <Text style={styles.legendText}>OM+TRI</Text>

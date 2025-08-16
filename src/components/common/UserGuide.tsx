@@ -29,22 +29,22 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
       content: [
         '• Ouvrez la page de scan',
         '• Pointez votre caméra vers le déchet',
-        '• L\'IA identifie automatiquement le type',
+        "• L'IA identifie automatiquement le type",
         '• Confirmez la classification',
-        '• Gagnez des points de recyclage !'
-      ]
+        '• Gagnez des points de recyclage !',
+      ],
     },
     {
       id: 'recycling-points',
       title: 'Trouver des Points de Recyclage',
       icon: 'location-on',
       content: [
-        '• Allez sur la page d\'accueil',
+        "• Allez sur la page d'accueil",
         '• Votre position est détectée automatiquement',
-        '• Les points proches s\'affichent sur la carte',
+        "• Les points proches s'affichent sur la carte",
         '• Cliquez sur un point pour voir les détails',
-        '• Utilisez le bouton de navigation pour y aller'
-      ]
+        '• Utilisez le bouton de navigation pour y aller',
+      ],
     },
     {
       id: 'collecte',
@@ -55,8 +55,8 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
         '• Changez de commune si nécessaire',
         '• Voir le planning des bacs gris et verts',
         '• Calendrier hebdomadaire visuel',
-        '• Informations spécifiques à Bordeaux Métropole'
-      ]
+        '• Informations spécifiques à Bordeaux Métropole',
+      ],
     },
     {
       id: 'stats',
@@ -67,8 +67,8 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
         '• Suivez vos points et votre niveau',
         '• Voir votre série de recyclage',
         '• Précision de vos scans',
-        '• Historique de vos recherches'
-      ]
+        '• Historique de vos recherches',
+      ],
     },
     {
       id: 'tips',
@@ -79,9 +79,9 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
         '• Vérifiez les consignes de votre commune',
         '• Utilisez les bons bacs (gris/vert)',
         '• Évitez les déchets contaminés',
-        '• Privilégiez la réduction des déchets'
-      ]
-    }
+        '• Privilégiez la réduction des déchets',
+      ],
+    },
   ];
 
   if (!isVisible) return null;
@@ -91,7 +91,12 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
       <View style={styles.modal}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            <MaterialIcons name="menu-book" size={24} color={colors.primary} style={styles.titleIcon} />
+            <MaterialIcons
+              name="menu-book"
+              size={24}
+              color={colors.primary}
+              style={styles.titleIcon}
+            />
             Guide d'Utilisation EcoTri
           </Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -101,10 +106,11 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.intro}>
-            Bienvenue sur EcoTri ! Voici comment utiliser l'application pour recycler efficacement :
+            Bienvenue sur EcoTri ! Voici comment utiliser l'application pour
+            recycler efficacement :
           </Text>
 
-          {guideSections.map((section) => (
+          {guideSections.map(section => (
             <View key={section.id} style={styles.section}>
               <TouchableOpacity
                 style={styles.sectionHeader}
@@ -112,11 +118,19 @@ const UserGuide: React.FC<UserGuideProps> = ({ isVisible, onClose }) => {
                 activeOpacity={0.7}
               >
                 <View style={styles.sectionTitleRow}>
-                  <MaterialIcons name={section.icon as any} size={24} color={colors.primary} />
+                  <MaterialIcons
+                    name={section.icon as any}
+                    size={24}
+                    color={colors.primary}
+                  />
                   <Text style={styles.sectionTitle}>{section.title}</Text>
                 </View>
                 <MaterialIcons
-                  name={expandedSection === section.id ? 'expand-less' : 'expand-more'}
+                  name={
+                    expandedSection === section.id
+                      ? 'expand-less'
+                      : 'expand-more'
+                  }
                   size={24}
                   color={colors.textLight}
                 />
@@ -186,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleIcon: {
-    marginRight: 12, 
+    marginRight: 12,
   },
   closeButton: {
     padding: 8,

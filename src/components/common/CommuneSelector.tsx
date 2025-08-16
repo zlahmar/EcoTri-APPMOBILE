@@ -29,7 +29,7 @@ const CommuneSelector: React.FC<CommuneSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredCommunes = availableCommunes.filter(commune =>
-    commune.toLowerCase().includes(searchQuery.toLowerCase())
+    commune.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleCommuneSelect = (commune: string) => {
@@ -67,12 +67,12 @@ const CommuneSelector: React.FC<CommuneSelectorProps> = ({
 
           <View style={styles.communesListContainer}>
             {/* Liste des communes à sélectionner */}
-            <ScrollView 
+            <ScrollView
               style={styles.communesList}
               showsVerticalScrollIndicator={true}
               contentContainerStyle={styles.communesListContent}
             >
-              {filteredCommunes.map((commune) => (
+              {filteredCommunes.map(commune => (
                 <TouchableOpacity
                   key={commune}
                   style={[

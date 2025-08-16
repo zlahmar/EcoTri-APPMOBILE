@@ -45,23 +45,20 @@ const LocationDisplay: React.FC<LocationDisplayProps> = ({
 
   return (
     <View style={[styles.container, { marginTop: containerMargin }]}>
-      <MaterialIcons 
-        name="location-on" 
-        size={iconSize} 
-        color={colors.primary} 
+      <MaterialIcons
+        name="location-on"
+        size={iconSize}
+        color={colors.primary}
       />
       <Text style={[styles.locationText, { fontSize: textSize }]}>
         {isLoading ? ' Localisation...' : `📍 ${city}`}
       </Text>
       {showRefreshButton && onRefresh && (
-        <TouchableOpacity 
-          style={styles.refreshButton} 
-          onPress={onRefresh}
-        >
-          <MaterialIcons 
-            name="refresh" 
-            size={iconSize - 2} 
-            color={colors.primary} 
+        <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
+          <MaterialIcons
+            name="refresh"
+            size={iconSize - 2}
+            color={colors.primary}
           />
         </TouchableOpacity>
       )}

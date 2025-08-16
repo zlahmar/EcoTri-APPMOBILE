@@ -10,6 +10,11 @@
 6. [Interface Utilisateur](#interface-utilisateur)
 7. [Gestion des Données](#gestion-des-données)
 8. [Sécurité et Authentification](#sécurité-et-authentification)
+   - [Authentification Firebase](#authentification-firebase)
+   - [Gestion des Permissions](#gestion-des-permissions)
+   - [Protection des Données](#protection-des-données)
+   - [Protection OWASP](#protection-owasp)
+   - [Accessibilité](#accessibilité)
 9. [Tests et Qualité](#tests-et-qualité)
 10. [Performance et Optimisation](#performance-et-optimisation)
 11. [Déploiement et Build](#déploiement-et-build)
@@ -114,10 +119,14 @@ Les composants sont organisés selon une hiérarchie claire :
 
 Gère la géolocalisation et les permissions utilisateur :
 
-- Détection automatique de la position
-- Gestion des permissions Android/iOS
-- Reverse geocoding avec Nominatim
-- Calculs de distance et zones
+- **Singleton pattern** : Instance unique partagée dans l'application
+- **Détection automatique** : Position GPS avec précision élevée
+- **Permissions intelligentes** : Gestion automatique Android/iOS
+- **Reverse geocoding** : Conversion coordonnées → ville via Nominatim
+- **Cache intelligent** : Évite les requêtes GPS inutiles (1 minute)
+- **Hook React** : `useLocation` pour intégration facile
+- **Callbacks** : Notifications automatiques des changements
+- **Fallback robuste** : Gestion des erreurs et timeouts
 
 #### CollecteService
 
@@ -189,6 +198,36 @@ Tous les services utilisent le pattern Singleton pour assurer une instance uniqu
 - **Tab Navigation** : Navigation principale de l'application
 - **Modal Navigation** : Affichage des composants overlay
 - **Deep Linking** : Navigation directe vers des fonctionnalités
+
+### Fonctionnalités Avancées
+
+#### Système de Filtrage Intelligent
+
+- **8 types de filtres** : Verre, plastique, papier, métal, électronique, textile, piles, organique
+- **Mots-clés multiples** : Recherche étendue avec synonymes et variations
+- **Interface adaptative** : Boutons visuels avec icônes Material Design distinctes
+- **Filtrage en temps réel** : Résultats instantanés sans délai réseau
+
+#### Sélection de Rayon Dynamique
+
+- **5 rayons configurables** : 500m à 10km selon les besoins
+- **Interface compacte** : Dropdown modal avec sélection intuitive
+- **Mise à jour automatique** : Recherche immédiate lors du changement
+- **Intégration Overpass** : Rayon appliqué directement aux requêtes API
+
+#### Géolocalisation et Recherche
+
+- **API Overpass primaire** : Points de recyclage officiels OpenStreetMap
+- **Fallback Nominatim** : Recherche élargie si Overpass échoue
+- **Permissions intelligentes** : Gestion automatique Android/iOS
+- **Précision GPS** : Combinaison GPS + réseau cellulaire
+
+#### Navigation Intelligente
+
+- **Détection automatique** : 10+ applications de navigation supportées
+- **Interface adaptative** : Seuls les boutons des apps installées affichés
+- **Fallback web** : Google Maps dans le navigateur si aucune app
+- **Performance optimale** : Vérification en quelques millisecondes
 
 ---
 
@@ -265,6 +304,44 @@ interface UserData {
 - **Audit des accès** : Logs de connexion et modifications
 - **Conformité RGPD** : Gestion des données personnelles
 
+### Protection OWASP
+
+Les mesures de sécurité implémentées couvrent les 10 failles principales décrites par l'OWASP :
+
+- **Injection** : Validation et sanitisation des entrées utilisateur
+- **Authentification cassée** : Firebase Auth avec gestion sécurisée des sessions
+- **Exposition de données sensibles** : Chiffrement des communications HTTPS
+- **Contrôle d'accès défaillant** : Permissions utilisateur granulaires
+- **Configuration de sécurité défaillante** : Variables d'environnement sécurisées
+- **XSS** : Validation des données d'entrée et sortie
+- **Injection de dépendances** : Audit automatique des vulnérabilités npm
+- **Logs et monitoring insuffisants** : Traçabilité complète des actions
+- **SSRF** : Validation des URLs et domaines autorisés
+- **Vulnérabilités des composants** : Mise à jour automatique des dépendances
+
+### Accessibilité
+
+#### Référentiel Choisi : RGAA (Référentiel Général d'Amélioration de l'Accessibilité)
+
+**Justification du choix :**
+
+- **Standard français** : Conformité aux exigences nationales
+- **Complétude** : Couvre tous les aspects d'accessibilité numérique
+- **Mise à jour régulière** : Version 4.1 conforme aux standards internationaux
+- **Certification officielle** : Reconnaissance par les autorités publiques
+
+#### Implémentation des Exigences RGAA
+
+Le prototype répond aux exigences du référentiel RGAA :
+
+- **Navigation clavier** : Tous les composants accessibles au clavier
+- **Contraste des couleurs** : Ratio minimum de 4.5:1 respecté
+- **Taille des textes** : Scalabilité jusqu'à 200% sans perte d'information
+- **Alternatives textuelles** : Images et icônes avec descriptions
+- **Structure sémantique** : Hiérarchie des titres et landmarks
+- **Formulaires accessibles** : Labels associés et messages d'erreur clairs
+- **Multimédia** : Sous-titres et transcriptions pour le contenu audio/vidéo
+
 ---
 
 ## Tests et Qualité
@@ -323,19 +400,119 @@ L'application dispose d'un harnais de test complet couvrant 100% des fonctionnal
 
 ## Déploiement et Build
 
-### Configuration EAS Build
+### Infrastructure CI/CD
 
-- **Build automatique** : Intégration continue
-- **Environnements** : Development, Staging, Production
-- **Signing automatique** : Certificats de signature
-- **Tests automatisés** : Validation avant déploiement
+#### **Pipeline GitHub Actions**
+
+L'application EcoTri dispose d'un pipeline CI/CD complet configuré avec GitHub Actions, comprenant 7 jobs automatisés :
+
+```yaml
+# Pipeline principal avec 7 jobs
+jobs:
+  - validate-and-test # Validation et tests (30 min)
+  - build-android # Build Android (45 min)
+  - build-ios # Temporairement désactivé
+  - integration-tests # Tests d'intégration (20 min)
+  - security-audit # Audit de sécurité (15 min)
+  - deploy # Déploiement (30 min)
+  - generate-report # Rapport de qualité (10 min)
+```
+
+#### **Environnements Supportés**
+
+- **Development** : Tests et validation en cours de développement
+- **Staging** : Tests d'intégration et validation pré-production
+- **Production** : Déploiement final vers l'environnement de production
+
+#### **Déclencheurs Automatiques**
+
+- **Push automatique** : Sur les branches `main`, `develop`, `feature/*`, `hotfix/*`
+- **Pull Request** : Sur les branches `main` et `develop`
+- **Déclenchement manuel** : Via l'interface GitHub Actions avec sélection d'environnement
+
+### Configuration de Build
+
+#### **Environnement Android Optimisé**
+
+- **Java** : Version 17 (Temurin) - Distribution optimisée pour CI/CD
+- **SDK Android** : Version 34
+- **Build Tools** : Version 34.0.0
+- **NDK** : Version 25.1.8937393
+- **Node.js** : Version 18
+
+#### **Build Matrix Android**
+
+```yaml
+strategy:
+  matrix:
+    build-type: [debug, release]
+```
+
+- **Debug** : Version de développement avec logs et debugging
+- **Release** : Version de production optimisée
+- **Formats de sortie** : APK et AAB (Android App Bundle)
+
+#### **Cache Intelligent**
+
+- **Cache Gradle** : `~/.gradle/caches` et `~/.gradle/wrapper`
+- **Cache npm** : `node_modules` et `~/.npm`
+- **Restauration optimisée** : Clés partielles pour optimiser les builds
 
 ### Processus de Déploiement
 
-1. **Validation des tests** : Exécution de la suite de tests
-2. **Build de production** : Compilation optimisée
-3. **Tests de régression** : Validation des fonctionnalités
-4. **Déploiement progressif** : Rollout par étapes
+#### **Validation Automatique**
+
+- **TypeScript** : `tsc --noEmit` avec vérification stricte
+- **ESLint** : Analyse statique du code
+- **Prettier** : Vérification du formatage
+- **Tests** : Exécution automatique avec couverture
+
+#### **Build et Tests**
+
+- **Build Android** : Matrix Debug/Release avec upload d'artefacts
+- **Tests d'intégration** : Services, composants, écrans
+- **Audit de sécurité** : npm audit, vulnérabilités, analyse de secrets
+
+#### **Déploiement Firebase**
+
+- **Staging** : Branche `develop` ou `main` + environnement `staging`
+- **Production** : Branche `main` + environnement `production`
+- **Artefacts** : APKs et AABs conservés 30 jours
+- **Rapports** : Qualité et métriques conservés 90 jours
+
+### Monitoring et Rapports
+
+#### **Codecov Integration**
+
+- **Fichier de couverture** : `./coverage/lcov.info`
+- **Flags** : `unittests`
+- **Nom** : `codecov-umbrella`
+- **Gestion d'erreur** : Non-bloquant
+
+#### **Rapports de Qualité Automatiques**
+
+Le pipeline génère automatiquement un rapport de qualité incluant :
+
+- Résultats des tests et métriques de couverture
+- Statut des builds (Android Debug/Release)
+- Métriques de l'application (composants, services, écrans)
+- Audit de sécurité et vérification des vulnérabilités
+
+### Support iOS Temporaire
+
+#### **Configuration Préservée**
+
+- **Job iOS** : Désactivé avec `if: false` pour la version actuelle
+- **Structure préservée** : Prêt pour activation dans la prochaine version
+- **Runner macOS** : Optimisation des performances pour iOS
+- **CocoaPods** : Gestion des dépendances iOS
+
+#### **Activation Future**
+
+- **Prochaine version** : Support iOS complet
+- **Configuration** : Xcode, CocoaPods, certificats de signature
+- **Build** : Applications iOS (Debug et Release)
+- **Deployment** : App Store Connect
 
 ### Gestion des Versions
 

@@ -1,37 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 
-const ConseilsScreen = ({ 
-  isAuthenticated = false, 
-  onProfilePress, 
-  userInfo: _userInfo 
-}: { 
-  isAuthenticated?: boolean; 
-  onProfilePress?: () => void; 
-  userInfo?: any; 
+const ConseilsScreen = ({
+  isAuthenticated = false,
+  onProfilePress,
+  userInfo: _userInfo,
+}: {
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
+  userInfo?: any;
 }) => {
   return (
     <SafeAreaView style={styles.container}>
-      <Header 
-        title="Conseils & Astuces" 
+      <Header
+        title="Conseils & Astuces"
         showProfileIcon={true}
-        isAuthenticated={isAuthenticated} 
+        isAuthenticated={isAuthenticated}
         onProfilePress={onProfilePress}
       />
-      
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.infoBanner}>
-          <MaterialIcons name="info" size={20} color={colors.primaryDark} style={styles.infoBannerIcon} />
+          <MaterialIcons
+            name="info"
+            size={20}
+            color={colors.primaryDark}
+            style={styles.infoBannerIcon}
+          />
           <View style={styles.infoBannerContent}>
             <View style={styles.infoBannerTitleRow}>
-              <MaterialIcons name="rocket-launch" size={18} color={colors.primary} style={styles.infoBannerTitleIcon} />
-              <Text style={styles.infoBannerTitle}>Prochainement disponible !</Text>
+              <MaterialIcons
+                name="rocket-launch"
+                size={18}
+                color={colors.primary}
+                style={styles.infoBannerTitleIcon}
+              />
+              <Text style={styles.infoBannerTitle}>
+                Prochainement disponible !
+              </Text>
             </View>
             <Text style={styles.infoBannerText}>
-              Cette page sera entièrement fonctionnelle dans la prochaine mise à jour avec des conseils personnalisés et des données en temps réel.
+              Cette page sera entièrement fonctionnelle dans la prochaine mise à
+              jour avec des conseils personnalisés et des données en temps réel.
             </Text>
           </View>
         </View>
@@ -39,22 +59,40 @@ const ConseilsScreen = ({
         {/* Conseils du jour */}
         <View style={styles.dailyTipSection}>
           <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="lightbulb" size={24} color={colors.primary} style={styles.sectionIcon} />
+            <MaterialIcons
+              name="lightbulb"
+              size={24}
+              color={colors.primary}
+              style={styles.sectionIcon}
+            />
             <Text style={styles.sectionTitle}>Conseil du Jour</Text>
           </View>
           <View style={styles.tipCard}>
-            <Text style={styles.tipTitle}>Rincer vos emballages avant recyclage</Text>
+            <Text style={styles.tipTitle}>
+              Rincer vos emballages avant recyclage
+            </Text>
             <Text style={styles.tipDescription}>
-              Un simple rinçage à l'eau froide suffit pour éliminer les résidus alimentaires. 
-              Cela améliore la qualité du recyclage et évite la contamination des autres matériaux.
+              Un simple rinçage à l'eau froide suffit pour éliminer les résidus
+              alimentaires. Cela améliore la qualité du recyclage et évite la
+              contamination des autres matériaux.
             </Text>
             <View style={styles.tipStats}>
               <View style={styles.tipStatRow}>
-                <MaterialIcons name="recycling" size={16} color={colors.primaryDark} style={styles.tipStatIcon} />
+                <MaterialIcons
+                  name="recycling"
+                  size={16}
+                  color={colors.primaryDark}
+                  style={styles.tipStatIcon}
+                />
                 <Text style={styles.tipStat}>Impact: +15% de recyclage</Text>
               </View>
               <View style={styles.tipStatRow}>
-                <MaterialIcons name="eco" size={16} color={colors.primaryDark} style={styles.tipStatIcon} />
+                <MaterialIcons
+                  name="eco"
+                  size={16}
+                  color={colors.primaryDark}
+                  style={styles.tipStatIcon}
+                />
                 <Text style={styles.tipStat}>CO2 économisé: 2.3kg/mois</Text>
               </View>
             </View>
@@ -64,109 +102,214 @@ const ConseilsScreen = ({
         {/* Catégories de conseils */}
         <View style={styles.categoriesSection}>
           <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="category" size={24} color={colors.primary} style={styles.sectionIcon} />
+            <MaterialIcons
+              name="category"
+              size={24}
+              color={colors.primary}
+              style={styles.sectionIcon}
+            />
             <Text style={styles.sectionTitle}>Par Catégorie</Text>
           </View>
-          
+
           <TouchableOpacity style={styles.categoryCard}>
-            <View style={[styles.categoryIcon, { backgroundColor: colors.plastic }]}>
-              <MaterialIcons name="local-drink" size={24} color={colors.primaryDark} />
+            <View
+              style={[styles.categoryIcon, { backgroundColor: colors.plastic }]}
+            >
+              <MaterialIcons
+                name="local-drink"
+                size={24}
+                color={colors.primaryDark}
+              />
             </View>
             <View style={styles.categoryInfo}>
               <Text style={styles.categoryName}>Plastique</Text>
               <Text style={styles.categoryCount}>12 conseils</Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={24} color={colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.categoryCard}>
-            <View style={[styles.categoryIcon, { backgroundColor: colors.paper }]}>
-              <MaterialIcons name="description" size={24} color={colors.primaryDark} />
+            <View
+              style={[styles.categoryIcon, { backgroundColor: colors.paper }]}
+            >
+              <MaterialIcons
+                name="description"
+                size={24}
+                color={colors.primaryDark}
+              />
             </View>
             <View style={styles.categoryInfo}>
               <Text style={styles.categoryName}>Papier & Carton</Text>
               <Text style={styles.categoryCount}>8 conseils</Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={24} color={colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.categoryCard}>
-            <View style={[styles.categoryIcon, { backgroundColor: colors.glass }]}>
-              <MaterialIcons name="wine-bar" size={24} color={colors.primaryDark} />
+            <View
+              style={[styles.categoryIcon, { backgroundColor: colors.glass }]}
+            >
+              <MaterialIcons
+                name="wine-bar"
+                size={24}
+                color={colors.primaryDark}
+              />
             </View>
             <View style={styles.categoryInfo}>
               <Text style={styles.categoryName}>Verre</Text>
               <Text style={styles.categoryCount}>6 conseils</Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={24} color={colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.categoryCard}>
-            <View style={[styles.categoryIcon, { backgroundColor: colors.metal }]}>
-              <MaterialIcons name="restaurant" size={24} color={colors.primaryDark} />
+            <View
+              style={[styles.categoryIcon, { backgroundColor: colors.metal }]}
+            >
+              <MaterialIcons
+                name="restaurant"
+                size={24}
+                color={colors.primaryDark}
+              />
             </View>
             <View style={styles.categoryInfo}>
               <Text style={styles.categoryName}>Métal</Text>
               <Text style={styles.categoryCount}>10 conseils</Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={24} color={colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
         </View>
 
         {/* Conseils rapides */}
         <View style={styles.quickTipsSection}>
           <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="flash-on" size={24} color={colors.primary} style={styles.sectionIcon} />
+            <MaterialIcons
+              name="flash-on"
+              size={24}
+              color={colors.primary}
+              style={styles.sectionIcon}
+            />
             <Text style={styles.sectionTitle}>Conseils Rapides</Text>
           </View>
-          
+
           <View style={styles.quickTipItem}>
-            <MaterialIcons name="check-circle" size={18} color={colors.primary} style={styles.quickTipIcon} />
-            <Text style={styles.quickTipText}>Pliez les cartons pour gagner de l'espace</Text>
+            <MaterialIcons
+              name="check-circle"
+              size={18}
+              color={colors.primary}
+              style={styles.quickTipIcon}
+            />
+            <Text style={styles.quickTipText}>
+              Pliez les cartons pour gagner de l'espace
+            </Text>
           </View>
-          
+
           <View style={styles.quickTipItem}>
-            <MaterialIcons name="check-circle" size={18} color={colors.primary} style={styles.quickTipIcon} />
-            <Text style={styles.quickTipText}>Retirez les bouchons des bouteilles en plastique</Text>
+            <MaterialIcons
+              name="check-circle"
+              size={18}
+              color={colors.primary}
+              style={styles.quickTipIcon}
+            />
+            <Text style={styles.quickTipText}>
+              Retirez les bouchons des bouteilles en plastique
+            </Text>
           </View>
-          
+
           <View style={styles.quickTipItem}>
-            <MaterialIcons name="check-circle" size={18} color={colors.primary} style={styles.quickTipIcon} />
-            <Text style={styles.quickTipText}>Vérifiez les symboles de recyclage</Text>
+            <MaterialIcons
+              name="check-circle"
+              size={18}
+              color={colors.primary}
+              style={styles.quickTipIcon}
+            />
+            <Text style={styles.quickTipText}>
+              Vérifiez les symboles de recyclage
+            </Text>
           </View>
-          
+
           <View style={styles.quickTipItem}>
-            <MaterialIcons name="check-circle" size={18} color={colors.primary} style={styles.quickTipIcon} />
-            <Text style={styles.quickTipText}>Utilisez des sacs réutilisables</Text>
+            <MaterialIcons
+              name="check-circle"
+              size={18}
+              color={colors.primary}
+              style={styles.quickTipIcon}
+            />
+            <Text style={styles.quickTipText}>
+              Utilisez des sacs réutilisables
+            </Text>
           </View>
         </View>
 
         {/* Impact environnemental */}
         <View style={styles.impactSection}>
           <View style={styles.sectionTitleRow}>
-            <MaterialIcons name="public" size={24} color={colors.primary} style={styles.sectionIcon} />
+            <MaterialIcons
+              name="public"
+              size={24}
+              color={colors.primary}
+              style={styles.sectionIcon}
+            />
             <Text style={styles.sectionTitle}>Votre Impact</Text>
           </View>
           <View style={styles.impactCard}>
             <Text style={styles.impactTitle}>Ce mois-ci, vous avez :</Text>
             <View style={styles.impactItem}>
-              <MaterialIcons name="eco" size={20} color={colors.primary} style={styles.impactIcon} />
+              <MaterialIcons
+                name="eco"
+                size={20}
+                color={colors.primary}
+                style={styles.impactIcon}
+              />
               <Text style={styles.impactText}>Économisé 12.5 kg de CO2</Text>
             </View>
             <View style={styles.impactItem}>
-              <MaterialIcons name="water-drop" size={20} color={colors.primary} style={styles.impactIcon} />
+              <MaterialIcons
+                name="water-drop"
+                size={20}
+                color={colors.primary}
+                style={styles.impactIcon}
+              />
               <Text style={styles.impactText}>Épargné 45 litres d'eau</Text>
             </View>
             <View style={styles.impactItem}>
-              <MaterialIcons name="flash-on" size={20} color={colors.primary} style={styles.impactIcon} />
-              <Text style={styles.impactText}>Sauvegardé 8.2 kWh d'énergie</Text>
+              <MaterialIcons
+                name="flash-on"
+                size={20}
+                color={colors.primary}
+                style={styles.impactIcon}
+              />
+              <Text style={styles.impactText}>
+                Sauvegardé 8.2 kWh d'énergie
+              </Text>
             </View>
           </View>
         </View>
 
         <TouchableOpacity style={styles.actionButton}>
           <View style={styles.actionButtonContent}>
-            <MaterialIcons name="menu-book" size={20} color={colors.textInverse} style={styles.actionButtonIcon} />
+            <MaterialIcons
+              name="menu-book"
+              size={20}
+              color={colors.textInverse}
+              style={styles.actionButtonIcon}
+            />
             <Text style={styles.actionButtonText}>Voir Tous les Conseils</Text>
           </View>
         </TouchableOpacity>

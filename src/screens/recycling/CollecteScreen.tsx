@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
-import { CollecteInfo, CommuneSelector, WeeklyCalendar } from '../../components/common';
+import {
+  CollecteInfoComponent as CollecteInfo,
+  CommuneSelector,
+  WeeklyCalendar,
+} from '../../components/common';
 import { useLocation, collecteService } from '../../services';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const CollecteScreen = ({ 
-  isAuthenticated = false, 
-  onProfilePress, 
-  userInfo: _userInfo 
-}: { 
-  isAuthenticated?: boolean; 
-  onProfilePress?: () => void; 
-  userInfo?: any; 
+const CollecteScreen = ({
+  isAuthenticated = false,
+  onProfilePress,
+  userInfo: _userInfo,
+}: {
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
+  userInfo?: any;
 }) => {
   const [selectedCommune, setSelectedCommune] = useState<string>('');
   const [collecteInfo, setCollecteInfo] = useState<any>(null);
@@ -22,13 +33,16 @@ const CollecteScreen = ({
 
   // Utilisation du service de géolocalisation
   const { city, location, getCurrentLocation } = useLocation({
-    onLocationUpdate: (locationData) => {
+    onLocationUpdate: locationData => {
       console.log('Nouvelle localisation dans CollecteScreen:', locationData);
       if (locationData) {
-        updateCollecteInfoByLocation(locationData.latitude, locationData.longitude);
+        updateCollecteInfoByLocation(
+          locationData.latitude,
+          locationData.longitude,
+        );
       }
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Erreur de localisation dans CollecteScreen:', error);
     },
   });
@@ -37,7 +51,7 @@ const CollecteScreen = ({
   useEffect(() => {
     console.log(' Début du chargement des communes...');
     console.log(' collecteService disponible:', !!collecteService);
-    
+
     try {
       console.log(' Test du service - getAvailableCommunes appelé');
       const communes = collecteService.getAvailableCommunes();
@@ -45,7 +59,7 @@ const CollecteScreen = ({
       console.log(' Nombre de communes:', communes.length);
       console.log(' Type des communes:', typeof communes);
       console.log(' Est-ce un array?', Array.isArray(communes));
-      
+
       if (Array.isArray(communes) && communes.length > 0) {
         console.log(' Premières communes:', communes.slice(0, 5));
         setAvailableCommunes(communes);
@@ -70,12 +84,17 @@ const CollecteScreen = ({
         setSelectedCommune(info.commune);
         console.log(' Informations de collecte trouvées pour:', info.commune);
       } else {
-        console.log(' Aucune information de collecte trouvée pour cette localisation');
+        console.log(
+          ' Aucune information de collecte trouvée pour cette localisation',
+        );
         setCollecteInfo(null);
         setSelectedCommune('');
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des informations de collecte:', error);
+      console.error(
+        'Erreur lors de la récupération des informations de collecte:',
+        error,
+      );
     }
   };
 
@@ -93,7 +112,10 @@ const CollecteScreen = ({
         setCollecteInfo(null);
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des informations de collecte:', error);
+      console.error(
+        'Erreur lors de la récupération des informations de collecte:',
+        error,
+      );
     }
   };
 
@@ -116,17 +138,16 @@ const CollecteScreen = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header 
-        title="Calendrier de Collecte" 
+      <Header
+        title="Calendrier de Collecte"
         showProfileIcon={true}
-        isAuthenticated={isAuthenticated} 
+        isAuthenticated={isAuthenticated}
         onProfilePress={onProfilePress}
       />
-      
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Informations de collecte */}
         <View style={styles.collecteSection}>
-          
           {collecteInfo ? (
             <>
               <CollecteInfo
@@ -134,13 +155,17 @@ const CollecteScreen = ({
                 onCommuneChange={() => setShowCommuneSelector(true)}
                 showCommuneSelector={true}
               />
-              
+
               {/* Calendrier hebdomadaire */}
               <WeeklyCalendar collecteInfo={collecteInfo} />
-              
+
               {/* Source des données */}
               <View style={styles.sourceContainer}>
-                <MaterialIcons name="info-outline" size={16} color={colors.textLight} />
+                <MaterialIcons
+                  name="info-outline"
+                  size={16}
+                  color={colors.textLight}
+                />
                 <Text style={styles.sourceText}>
                   Source : Bordeaux Métropole - Données de collecte des déchets
                 </Text>
@@ -149,13 +174,17 @@ const CollecteScreen = ({
           ) : (
             <View style={styles.noDataContainer}>
               <Text style={styles.noDataText}>
-                {city ? `Aucune information de collecte disponible pour ${city}` : 'Localisation en cours...'}
+                {city
+                  ? `Aucune information de collecte disponible pour ${city}`
+                  : 'Localisation en cours...'}
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.selectCommuneButton}
                 onPress={() => setShowCommuneSelector(true)}
               >
-                <Text style={styles.selectCommuneButtonText}>Sélectionner une commune</Text>
+                <Text style={styles.selectCommuneButtonText}>
+                  Sélectionner une commune
+                </Text>
               </TouchableOpacity>
             </View>
           )}
