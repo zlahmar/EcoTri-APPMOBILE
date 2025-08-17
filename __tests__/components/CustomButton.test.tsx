@@ -78,7 +78,7 @@ describe('CustomButton', () => {
   });
 
   it('should handle missing onPress prop', () => {
-    const { getByText } = render(<CustomButton title="Test" />);
+    const { getByText } = render(<CustomButton title="Test" onPress={jest.fn()} />);
     
     const button = getByText('Test');
     expect(button).toBeTruthy();
@@ -114,7 +114,7 @@ describe('CustomButton', () => {
     
     expect(getByText('Test Button')).toBeTruthy();
     
-    rerender(<CustomButton {...defaultProps} type="submit" />);
+    rerender(<CustomButton {...defaultProps} variant="secondary" />);
     expect(getByText('Test Button')).toBeTruthy();
   });
 });

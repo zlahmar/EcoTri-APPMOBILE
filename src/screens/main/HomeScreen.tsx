@@ -12,6 +12,7 @@ import {
   Linking,
   Image,
   Modal,
+  Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';

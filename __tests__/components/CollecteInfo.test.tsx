@@ -10,11 +10,11 @@ describe('CollecteInfo', () => {
     commune: 'Bordeaux',
     orduresMenageres: {
       jours: ['LUNDI', 'JEUDI'],
-      passage: 'JOUR',
+      passage: 'JOUR' as const,
     },
     triRecyclage: {
       jours: ['MARDI', 'VENDREDI'],
-      passage: 'APRES_MIDI',
+      passage: 'NUIT' as const,
     },
   };
 
@@ -70,8 +70,8 @@ describe('CollecteInfo', () => {
   it('should handle empty collecte info gracefully', () => {
     const emptyCollecteInfo = {
       commune: 'Test',
-      orduresMenageres: { jours: [], passage: 'JOUR' },
-      triRecyclage: { jours: [], passage: 'APRES_MIDI' },
+      orduresMenageres: { jours: [], passage: 'JOUR' as const },
+      triRecyclage: { jours: [], passage: 'NUIT' as const },
     };
     
     const { getByText } = render(

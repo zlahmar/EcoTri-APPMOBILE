@@ -55,13 +55,16 @@ class StatsService {
       await this.saveStats(defaultStats);
       return defaultStats;
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation des stats:', error);
+      console.error("Erreur lors de l'initialisation des stats:", error);
       throw error;
     }
   }
 
   // Ajout d'un scan et calcul des points
-  async addScan(wasteType: string, confidence: number): Promise<{
+  async addScan(
+    wasteType: string,
+    confidence: number,
+  ): Promise<{
     pointsEarned: number;
     newStats: UserStats;
     message: string;
@@ -76,13 +79,16 @@ class StatsService {
       const today = now.toISOString().split('T')[0];
 
       let pointsEarned = this.POINTS_PER_SCAN;
-    
+
       if (confidence > 0.8) {
         pointsEarned += this.BONUS_POINTS_HIGH_CONFIDENCE;
       }
 
       if (currentStats.recyclingStreak > 0) {
-        pointsEarned += Math.min(currentStats.recyclingStreak * this.STREAK_BONUS, 10);
+        pointsEarned += Math.min(
+          currentStats.recyclingStreak * this.STREAK_BONUS,
+          10,
+        );
       }
 
       const newStats: UserStats = {
@@ -99,7 +105,10 @@ class StatsService {
       newStats.scansThisWeek = await this.calculateWeeklyScans();
       newStats.scansThisMonth = await this.calculateMonthlyScans();
 
-      newStats.recyclingStreak = await this.calculateStreak(currentStats.lastScanDate, today);
+      newStats.recyclingStreak = await this.calculateStreak(
+        today,
+        currentStats.lastScanDate,
+      );
 
       newStats.accuracyScore = await this.calculateAccuracyScore();
 
@@ -108,10 +117,12 @@ class StatsService {
       return {
         pointsEarned,
         newStats,
-        message: `+${pointsEarned} points ! ${this.getStreakMessage(newStats.recyclingStreak)}`,
+        message: `+${pointsEarned} points ! ${this.getStreakMessage(
+          newStats.recyclingStreak,
+        )}`,
       };
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du scan:', error);
+      console.error("Erreur lors de l'ajout du scan:", error);
       throw error;
     }
   }
@@ -143,7 +154,7 @@ class StatsService {
         message: `Recherche de points de recyclage enregistrée ! Total: ${newStats.recyclingPointSearches}`,
       };
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement de la recherche:', error);
+      console.error("Erreur lors de l'enregistrement de la recherche:", error);
       throw error;
     }
   }
@@ -165,9 +176,8 @@ class StatsService {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneWeekAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneWeekAgo)
+        .length;
     } catch (error) {
       return 0;
     }
@@ -180,16 +190,18 @@ class StatsService {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneMonthAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneMonthAgo)
+        .length;
     } catch (error) {
       return 0;
     }
   }
 
   // Calcul du streak de recyclage
-  private async calculateStreak(today: string, lastScanDate: string | null): Promise<number> {
+  private async calculateStreak(
+    today: string,
+    lastScanDate: string | null,
+  ): Promise<number> {
     if (!lastScanDate) return 1;
 
     const lastScan = new Date(lastScanDate);
@@ -214,7 +226,10 @@ class StatsService {
       const history = await this.getScanHistory();
       if (history.length === 0) return 0;
 
-      const totalConfidence = history.reduce((sum, scan) => sum + scan.confidence, 0);
+      const totalConfidence = history.reduce(
+        (sum, scan) => sum + scan.confidence,
+        0,
+      );
       return Math.round((totalConfidence / history.length) * 100);
     } catch (error) {
       return 0;
@@ -235,12 +250,15 @@ class StatsService {
     try {
       const history = await this.getScanHistory();
       history.push(scan);
-      
+
       if (history.length > 100) {
         history.splice(0, history.length - 100);
       }
 
-      await AsyncStorage.setItem(this.SCAN_HISTORY_KEY, JSON.stringify(history));
+      await AsyncStorage.setItem(
+        this.SCAN_HISTORY_KEY,
+        JSON.stringify(history),
+      );
     } catch (error) {
       // Gestion silencieuse de l'erreur
     }
@@ -257,7 +275,10 @@ class StatsService {
   }
 
   // Génération d'un message de motivation
-  private generateMotivationalMessage(pointsEarned: number, stats: UserStats): string {
+  private generateMotivationalMessage(
+    pointsEarned: number,
+    stats: UserStats,
+  ): string {
     const messages = [
       `🎉 +${pointsEarned} points ! Excellent recyclage !`,
       `♻️ Bravo ! Vous avez maintenant ${stats.totalPoints} points !`,
@@ -277,7 +298,13 @@ class StatsService {
     accuracyScore: number;
   }> {
     const stats = await this.getStats();
-    if (!stats) return { totalPoints: 0, totalScans: 0, recyclingStreak: 0, accuracyScore: 0 };
+    if (!stats)
+      return {
+        totalPoints: 0,
+        totalScans: 0,
+        recyclingStreak: 0,
+        accuracyScore: 0,
+      };
 
     return {
       totalPoints: stats.totalPoints,

@@ -62,23 +62,23 @@ const MainNavigator = () => {
   const handleLogout = async () => {
     try {
       console.log('Début de la déconnexion...');
-      
+
       // Mettre à jour l'état local en premier
       setIsAuthenticated(false);
       setUserInfo(null);
-      
+
       // Puis déconnecter Firebase
       await authService.signOut();
-      
+
       console.log('Déconnexion terminée avec succès');
     } catch (error: any) {
       console.error('Erreur lors de la déconnexion:', error);
-      
+
       if (error.code === 'auth/no-current-user') {
         console.log('Utilisateur déjà déconnecté, déconnexion locale réussie');
         return;
       }
-      
+
       Alert.alert('Erreur', 'Impossible de se déconnecter complètement');
     }
   };

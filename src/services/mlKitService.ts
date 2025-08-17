@@ -129,57 +129,70 @@ class MLKitService {
   // Initialisation de ML Kit
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-    
+
     try {
       if (Platform.OS !== 'android') {
-        throw new Error('ML Kit n\'est supporté que sur Android');
+        throw new Error("ML Kit n'est supporté que sur Android");
       }
-      
+
       if (!this.mlKitModule) {
         throw new Error('Module ML Kit natif non disponible');
       }
-      
+
       this.isInitialized = true;
       console.log(' ML Kit natif Android initialisé avec succès !');
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de ML Kit natif:', error);
+      console.error("Erreur lors de l'initialisation de ML Kit natif:", error);
       throw error;
     }
   }
 
-    // Détection d'objets avec ML Kit natif
+  // Détection d'objets avec ML Kit natif
   async detectObjects(imageUri: string): Promise<DetectedObject[]> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
-        console.log(' Détection d\'objets avec ML Kit natif Android...');
-        
+        console.log(" Détection d'objets avec ML Kit natif Android...");
+
         try {
           const result = await this.mlKitModule.detectObjectsAdvanced(imageUri);
           console.log(' Objets détectés par ML Kit natif AVANCÉ:', result);
-          
+
           return result.map((obj: any, index: number) => ({
             id: obj.id || `obj_${index}`,
-            boundingBox: obj.boundingBox || { left: 0, top: 0, right: 0, bottom: 0 },
-            labels: obj.labels || [{ text: obj.text || 'Objet détecté', confidence: obj.confidence || 0.8 }]
+            boundingBox: obj.boundingBox || {
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0,
+            },
+            labels: obj.labels || [
+              {
+                text: obj.text || 'Objet détecté',
+                confidence: obj.confidence || 0.8,
+              },
+            ],
           }));
         } catch (mlError) {
-          console.warn(' Erreur ML Kit natif avancé, fallback vers standard:', mlError);
-          
+          console.warn(
+            ' Erreur ML Kit natif avancé, fallback vers standard:',
+            mlError,
+          );
+
           const fallbackResult = await this.mlKitModule.detectObjects(imageUri);
           console.log(' Fallback vers détection standard:', fallbackResult);
           return fallbackResult.map((label: any, _index: number) => ({
             id: `obj_${_index}`,
             boundingBox: { left: 0, top: 0, right: 0, bottom: 0 },
-            labels: [{ text: label.text, confidence: label.confidence }]
+            labels: [{ text: label.text, confidence: label.confidence }],
           }));
         }
       } else {
         throw new Error('ML Kit natif non activé');
       }
     } catch (error) {
-      console.error(' Erreur lors de la détection d\'objets:', error);
+      console.error(" Erreur lors de la détection d'objets:", error);
       throw error;
     }
   }
@@ -188,15 +201,15 @@ class MLKitService {
   async detectBarcodes(imageUri: string): Promise<DetectedBarcode[]> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
         console.log(' Détection de codes-barres avec ML Kit natif Android...');
-        
+
         try {
           const result = await this.mlKitModule.detectBarcodes(imageUri);
-          
+
           console.log(' Codes-barres détectés par ML Kit natif:', result);
-          
+
           return result.map((barcode: any, _index: number) => ({
             rawValue: barcode.rawValue,
             displayValue: barcode.displayValue,
@@ -205,8 +218,8 @@ class MLKitService {
               left: 0,
               top: 0,
               right: 0,
-              bottom: 0
-            }
+              bottom: 0,
+            },
           }));
         } catch (mlError) {
           console.warn(' Erreur ML Kit natif:', mlError);
@@ -225,15 +238,15 @@ class MLKitService {
   async detectText(imageUri: string): Promise<DetectedText[]> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
         console.log(' Détection de texte avec ML Kit natif Android...');
-        
+
         try {
           const result = await this.mlKitModule.detectText(imageUri);
-          
+
           console.log(' Texte détecté par ML Kit natif:', result);
-          
+
           return result.map((textItem: any, _index: number) => ({
             text: textItem.text,
             confidence: textItem.confidence || 0.8,
@@ -241,8 +254,8 @@ class MLKitService {
               left: 0,
               top: 0,
               right: 0,
-              bottom: 0
-            }
+              bottom: 0,
+            },
           }));
         } catch (mlError) {
           console.warn(' Erreur ML Kit natif:', mlError);
@@ -261,15 +274,15 @@ class MLKitService {
   async detectFaces(imageUri: string): Promise<DetectedFace[]> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
         console.log(' Détection de visages avec ML Kit natif Android...');
-        
+
         try {
           const result = await this.mlKitModule.detectFaces(imageUri);
-          
+
           console.log(' Visages détectés par ML Kit natif:', result);
-          
+
           return result.map((face: any, _index: number) => ({
             id: face.id || _index,
             confidence: face.confidence || 0.9,
@@ -277,8 +290,8 @@ class MLKitService {
               left: 0,
               top: 0,
               right: 0,
-              bottom: 0
-            }
+              bottom: 0,
+            },
           }));
         } catch (mlError) {
           console.warn(' Erreur ML Kit natif:', mlError);
@@ -296,13 +309,13 @@ class MLKitService {
   // Analyse complète d'une image avec ML Kit natif
   async analyzeImage(imageUri: string): Promise<ScanResult> {
     try {
-      console.log(' Début de l\'analyse ML Kit natif Android...');
-      
+      console.log(" Début de l'analyse ML Kit natif Android...");
+
       if (this.useRealMLKit && this.mlKitModule) {
         const result = await this.mlKitModule.analyzeImage(imageUri);
-        
+
         console.log(' Analyse ML Kit natif réussie:', result);
-        
+
         return {
           objects: result.objects || [],
           barcodes: result.barcodes || [],
@@ -312,7 +325,7 @@ class MLKitService {
           segmentedObjects: result.segmentedObjects || [],
           segmentationInfo: result.segmentationInfo,
           poses: result.poses || [],
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
       } else {
         // Fallback vers l'analyse séquentielle
@@ -320,7 +333,7 @@ class MLKitService {
           this.detectObjects(imageUri),
           this.detectBarcodes(imageUri),
           this.detectText(imageUri),
-          this.detectFaces(imageUri)
+          this.detectFaces(imageUri),
         ]);
 
         const scanResult = {
@@ -328,26 +341,31 @@ class MLKitService {
           barcodes,
           text,
           faces,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
 
-        console.log(' Analyse ML Kit natif réussie (séquentielle):', scanResult);
+        console.log(
+          ' Analyse ML Kit natif réussie (séquentielle):',
+          scanResult,
+        );
         return scanResult;
       }
     } catch (error) {
-      console.error(' Erreur lors de l\'analyse ML Kit natif:', error);
+      console.error(" Erreur lors de l'analyse ML Kit natif:", error);
       throw error;
     }
   }
 
   // Méthode de détection d'objets avancée
-  async detectObjectsAdvanced(imageUri: string): Promise<AdvancedDetectedObject[]> {
+  async detectObjectsAdvanced(
+    imageUri: string,
+  ): Promise<AdvancedDetectedObject[]> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
-        console.log(' Détection d\'objets avancée avec ML Kit natif Android...');
-        
+        console.log(" Détection d'objets avancée avec ML Kit natif Android...");
+
         try {
           const result = await this.mlKitModule.detectObjectsAdvanced(imageUri);
           console.log(' Objets avancés détectés par ML Kit natif:', result);
@@ -360,7 +378,7 @@ class MLKitService {
         throw new Error('ML Kit natif non activé');
       }
     } catch (error) {
-      console.error(' Erreur lors de la détection d\'objets avancés:', error);
+      console.error(" Erreur lors de la détection d'objets avancés:", error);
       throw error;
     }
   }
@@ -369,10 +387,10 @@ class MLKitService {
   async segmentImage(imageUri: string): Promise<SegmentationResult> {
     try {
       await this.initialize();
-      
+
       if (this.useRealMLKit && this.mlKitModule) {
-        console.log(' Segmentation d\'image avec ML Kit natif Android...');
-        
+        console.log(" Segmentation d'image avec ML Kit natif Android...");
+
         try {
           const result = await this.mlKitModule.segmentImage(imageUri);
           console.log(' Image segmentée par ML Kit natif:', result);
@@ -385,7 +403,7 @@ class MLKitService {
         throw new Error('ML Kit natif non activé');
       }
     } catch (error) {
-      console.error(' Erreur lors de la segmentation d\'image:', error);
+      console.error(" Erreur lors de la segmentation d'image:", error);
       throw error;
     }
   }
@@ -393,7 +411,7 @@ class MLKitService {
   // Simulation de détection d'objets
   private simulateObjectDetection(imageUri: string): DetectedObject[] {
     const simulatedObjects: DetectedObject[] = [];
-    
+
     // Détection des objets basés sur l'URI (simulation)
     if (imageUri.includes('bottle') || imageUri.includes('plastic')) {
       simulatedObjects.push({
@@ -401,30 +419,30 @@ class MLKitService {
         boundingBox: { left: 100, top: 100, right: 300, bottom: 400 },
         labels: [
           { text: 'Bouteille en plastique', confidence: 0.95 },
-          { text: 'Recyclable', confidence: 0.88 }
-        ]
+          { text: 'Recyclable', confidence: 0.88 },
+        ],
       });
     }
-    
+
     if (imageUri.includes('can') || imageUri.includes('metal')) {
       simulatedObjects.push({
         id: 'obj_2',
         boundingBox: { left: 350, top: 150, right: 450, bottom: 350 },
         labels: [
           { text: 'Canette métallique', confidence: 0.92 },
-          { text: 'Recyclable', confidence: 0.85 }
-        ]
+          { text: 'Recyclable', confidence: 0.85 },
+        ],
       });
     }
-    
+
     if (imageUri.includes('paper') || imageUri.includes('cardboard')) {
       simulatedObjects.push({
         id: 'obj_3',
         boundingBox: { left: 200, top: 200, right: 400, bottom: 300 },
         labels: [
           { text: 'Papier/Carton', confidence: 0.89 },
-          { text: 'Recyclable', confidence: 0.91 }
-        ]
+          { text: 'Recyclable', confidence: 0.91 },
+        ],
       });
     }
 
@@ -434,35 +452,33 @@ class MLKitService {
   // Simulation de détection de codes-barres
   private simulateBarcodeDetection(imageUri: string): DetectedBarcode[] {
     const simulatedBarcodes: DetectedBarcode[] = [];
-    
+
     if (imageUri.includes('barcode') || imageUri.includes('product')) {
       simulatedBarcodes.push({
         rawValue: '1234567890123',
         displayValue: '1234567890123',
         format: 'EAN_13',
-        boundingBox: { left: 150, top: 250, right: 350, bottom: 280 }
+        boundingBox: { left: 150, top: 250, right: 350, bottom: 280 },
       });
     }
 
     return simulatedBarcodes;
   }
 
-
   private simulateTextDetection(imageUri: string): DetectedText[] {
     const simulatedText: DetectedText[] = [];
-    
 
     if (imageUri.includes('label') || imageUri.includes('text')) {
       simulatedText.push({
         text: 'Recyclable',
         boundingBox: { left: 120, top: 180, right: 200, bottom: 200 },
-        confidence: 0.87
+        confidence: 0.87,
       });
-      
+
       simulatedText.push({
         text: 'PET 1',
         boundingBox: { left: 220, top: 180, right: 280, bottom: 200 },
-        confidence: 0.92
+        confidence: 0.92,
       });
     }
 
@@ -471,13 +487,12 @@ class MLKitService {
 
   private simulateFaceDetection(imageUri: string): DetectedFace[] {
     const simulatedFaces: DetectedFace[] = [];
-    
 
     if (imageUri.includes('person') || imageUri.includes('face')) {
       simulatedFaces.push({
         id: 1,
         confidence: 0.9,
-        boundingBox: { left: 100, top: 100, right: 300, bottom: 400 }
+        boundingBox: { left: 100, top: 100, right: 300, bottom: 400 },
       });
     }
 
@@ -486,7 +501,14 @@ class MLKitService {
 
   // Classification d'un déchet basé sur les détections
   async classifyWaste(scanResult: ScanResult): Promise<{
-    type: 'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronic' | 'unknown';
+    type:
+      | 'plastic'
+      | 'paper'
+      | 'glass'
+      | 'metal'
+      | 'organic'
+      | 'electronic'
+      | 'unknown';
     confidence: number;
     recyclingInfo: string;
     environmentalImpact: string;
@@ -496,17 +518,18 @@ class MLKitService {
   }> {
     try {
       console.log(' Début de la classification des déchets...');
-      console.log(' Structure du scanResult:', JSON.stringify(scanResult, null, 2));
-      
+      console.log(
+        ' Structure du scanResult:',
+        JSON.stringify(scanResult, null, 2),
+      );
 
       const objects = scanResult.objects || [];
       const textDetected = scanResult.text || [];
       const barcodeData = scanResult.barcodes || [];
-      
+
       console.log(' Objets détectés:', objects.length);
       console.log(' Texte détecté:', textDetected.length);
       console.log(' Codes-barres:', barcodeData.length);
-      
 
       const objectLabels: string[] = [];
       objects.forEach((obj, index) => {
@@ -517,7 +540,6 @@ class MLKitService {
             }
           });
         } else if (obj && typeof obj === 'object') {
-
           console.log(` Objet ${index} (structure native):`, obj);
 
           const nativeObj = obj as any;
@@ -526,7 +548,6 @@ class MLKitService {
           }
         }
       });
-      
 
       const textLabels: string[] = [];
       textDetected.forEach((textItem: any) => {
@@ -534,7 +555,6 @@ class MLKitService {
           textLabels.push(textItem.text.toLowerCase());
         }
       });
-      
 
       const barcodeLabels: string[] = [];
       barcodeData.forEach((barcode: any) => {
@@ -542,22 +562,29 @@ class MLKitService {
           barcodeLabels.push(barcode.displayValue.toLowerCase());
         }
       });
-      
 
-      const allText = [
-        ...objectLabels,
-        ...textLabels,
-        ...barcodeLabels
-      ].join(' ');
-      
+      const allText = [...objectLabels, ...textLabels, ...barcodeLabels].join(
+        ' ',
+      );
+
       console.log(' Texte combiné pour classification:', allText);
-      
 
-      if (allText.includes('plastique') || allText.includes('bouteille') || 
-          allText.includes('pet') || allText.includes('hdpe') || allText.includes('pp') ||
-          allText.includes('ps') || allText.includes('pvc') || allText.includes('ldpe') ||
-          allText.includes('bouteille') || allText.includes('flacon') || allText.includes('emballage') ||
-          allText.includes('plastic') || allText.includes('bottle') || allText.includes('container')) {
+      if (
+        allText.includes('plastique') ||
+        allText.includes('bouteille') ||
+        allText.includes('pet') ||
+        allText.includes('hdpe') ||
+        allText.includes('pp') ||
+        allText.includes('ps') ||
+        allText.includes('pvc') ||
+        allText.includes('ldpe') ||
+        allText.includes('bouteille') ||
+        allText.includes('flacon') ||
+        allText.includes('emballage') ||
+        allText.includes('plastic') ||
+        allText.includes('bottle') ||
+        allText.includes('container')
+      ) {
         console.log(' Classification: PLASTIQUE');
         return {
           type: 'plastic',
@@ -569,18 +596,26 @@ class MLKitService {
           tips: [
             'Rincez le contenant avant de le jeter',
             'Retirez les bouchons et étiquettes',
-            'Aplatissez pour économiser l\'espace',
-            'Vérifiez le symbole de recyclage'
-          ]
+            "Aplatissez pour économiser l'espace",
+            'Vérifiez le symbole de recyclage',
+          ],
         };
       }
-      
+
       // Classification PAPIER/CARTON
-      if (allText.includes('papier') || allText.includes('carton') || 
-          allText.includes('journal') || allText.includes('magazine') ||
-          allText.includes('emballage') || allText.includes('boîte') ||
-          allText.includes('caisse') || allText.includes('enveloppe') ||
-          allText.includes('paper') || allText.includes('cardboard') || allText.includes('box')) {
+      if (
+        allText.includes('papier') ||
+        allText.includes('carton') ||
+        allText.includes('journal') ||
+        allText.includes('magazine') ||
+        allText.includes('emballage') ||
+        allText.includes('boîte') ||
+        allText.includes('caisse') ||
+        allText.includes('enveloppe') ||
+        allText.includes('paper') ||
+        allText.includes('cardboard') ||
+        allText.includes('box')
+      ) {
         console.log(' Classification: PAPIER/CARTON');
         return {
           type: 'paper',
@@ -593,16 +628,23 @@ class MLKitService {
             'Retirez le film plastique',
             'Aplatissez les cartons',
             'Évitez le papier gras ou souillé',
-            'Séparez le carton du papier'
-          ]
+            'Séparez le carton du papier',
+          ],
         };
       }
-      
+
       // Classification VERRE
-      if (allText.includes('verre') || allText.includes('bouteille') || 
-          allText.includes('pot') || allText.includes('conserve') ||
-          allText.includes('bocal') || allText.includes('flacon') ||
-          allText.includes('glass') || allText.includes('jar') || allText.includes('bottle')) {
+      if (
+        allText.includes('verre') ||
+        allText.includes('bouteille') ||
+        allText.includes('pot') ||
+        allText.includes('conserve') ||
+        allText.includes('bocal') ||
+        allText.includes('flacon') ||
+        allText.includes('glass') ||
+        allText.includes('jar') ||
+        allText.includes('bottle')
+      ) {
         console.log('Classification: VERRE');
         return {
           type: 'glass',
@@ -615,18 +657,27 @@ class MLKitService {
             'Rincez bien le contenant',
             'Retirez les bouchons métalliques',
             'Ne cassez pas le verre',
-            'Séparez par couleur si possible'
-          ]
+            'Séparez par couleur si possible',
+          ],
         };
       }
-      
+
       // Classification MÉTAL
-      if (allText.includes('métal') || allText.includes('canette') || 
-          allText.includes('aluminium') || allText.includes('fer') ||
-          allText.includes('acier') || allText.includes('boîte') ||
-          allText.includes('conserve') || allText.includes('dose') ||
-          allText.includes('metal') || allText.includes('can') || allText.includes('aluminum') ||
-          allText.includes('steel') || allText.includes('tin')) {
+      if (
+        allText.includes('métal') ||
+        allText.includes('canette') ||
+        allText.includes('aluminium') ||
+        allText.includes('fer') ||
+        allText.includes('acier') ||
+        allText.includes('boîte') ||
+        allText.includes('conserve') ||
+        allText.includes('dose') ||
+        allText.includes('metal') ||
+        allText.includes('can') ||
+        allText.includes('aluminum') ||
+        allText.includes('steel') ||
+        allText.includes('tin')
+      ) {
         console.log(' Classification: MÉTAL');
         return {
           type: 'metal',
@@ -639,15 +690,20 @@ class MLKitService {
             'Rincez bien les conserves',
             'Aplatissez les canettes',
             'Retirez les étiquettes',
-            'Séparez l\'aluminium de l\'acier'
-          ]
+            "Séparez l'aluminium de l'acier",
+          ],
         };
       }
 
       // Classification ÉLECTRONIQUE
-      if (allText.includes('électronique') || allText.includes('batterie') || 
-          allText.includes('pile') || allText.includes('téléphone') ||
-          allText.includes('ordinateur') || allText.includes('écran')) {
+      if (
+        allText.includes('électronique') ||
+        allText.includes('batterie') ||
+        allText.includes('pile') ||
+        allText.includes('téléphone') ||
+        allText.includes('ordinateur') ||
+        allText.includes('écran')
+      ) {
         return {
           type: 'electronic',
           confidence: 0.87,
@@ -659,15 +715,20 @@ class MLKitService {
             'Ne jetez jamais à la poubelle',
             'Déposez en déchetterie',
             'Utilisez les points de collecte',
-            'Retirez les batteries si possible'
-          ]
+            'Retirez les batteries si possible',
+          ],
         };
       }
 
       // Classification ORGANIQUE
-      if (allText.includes('organique') || allText.includes('compost') || 
-          allText.includes('déchet') || allText.includes('alimentaire') ||
-          allText.includes('restes') || allText.includes('épluchures')) {
+      if (
+        allText.includes('organique') ||
+        allText.includes('compost') ||
+        allText.includes('déchet') ||
+        allText.includes('alimentaire') ||
+        allText.includes('restes') ||
+        allText.includes('épluchures')
+      ) {
         return {
           type: 'organic',
           confidence: 0.85,
@@ -679,11 +740,11 @@ class MLKitService {
             'Évitez les produits gras',
             'Coupez en petits morceaux',
             'Mélangez avec des matières sèches',
-            'Aérez régulièrement le compost'
-          ]
+            'Aérez régulièrement le compost',
+          ],
         };
       }
-      
+
       // Si on a des détections mais pas de classification claire, essayons de deviner
       if (scanResult.objects.length > 0 || scanResult.text.length > 0) {
         const bestGuess = this.makeEducatedGuess(allText);
@@ -694,10 +755,10 @@ class MLKitService {
           environmentalImpact: bestGuess.environmentalImpact,
           icon: bestGuess.icon,
           color: bestGuess.color,
-          tips: bestGuess.tips
+          tips: bestGuess.tips,
         };
       }
-      
+
       // Par défaut - aucune détection
       return {
         type: 'unknown',
@@ -708,10 +769,10 @@ class MLKitService {
         color: '#9E9E9E',
         tips: [
           'Essayez de prendre une photo plus claire',
-          'Vérifiez les symboles sur l\'emballage',
+          "Vérifiez les symboles sur l'emballage",
           'Consultez les consignes de votre commune',
-          'Utilisez l\'application de votre collectivité'
-        ]
+          "Utilisez l'application de votre collectivité",
+        ],
       };
     } catch (error) {
       console.error('Erreur lors de la classification du déchet:', error);
@@ -721,7 +782,14 @@ class MLKitService {
 
   // Faire une supposition éduquée basée sur le contexte
   private makeEducatedGuess(text: string): {
-    type: 'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronic' | 'unknown';
+    type:
+      | 'plastic'
+      | 'paper'
+      | 'glass'
+      | 'metal'
+      | 'organic'
+      | 'electronic'
+      | 'unknown';
     confidence: number;
     recyclingInfo: string;
     environmentalImpact: string;
@@ -729,14 +797,13 @@ class MLKitService {
     color: string;
     tips: string[];
   } {
-
     const keywords = {
       plastic: ['bouteille', 'flacon', 'emballage', 'sachet', 'film', 'sac'],
       paper: ['emballage', 'boîte', 'caisse', 'enveloppe', 'papier'],
       glass: ['bouteille', 'pot', 'bocal', 'flacon'],
       metal: ['canette', 'boîte', 'conserve', 'dose'],
       organic: ['déchet', 'alimentaire', 'restes', 'épluchures'],
-      electronic: ['batterie', 'pile', 'téléphone', 'ordinateur']
+      electronic: ['batterie', 'pile', 'téléphone', 'ordinateur'],
     };
 
     let bestMatch = 'unknown';
@@ -750,7 +817,6 @@ class MLKitService {
       }
     });
 
-
     switch (bestMatch) {
       case 'plastic':
         return {
@@ -760,7 +826,7 @@ class MLKitService {
           environmentalImpact: '🌱 Économise 2.5kg de CO2 par kg recyclé',
           icon: '🥤',
           color: '#FFD700',
-          tips: ['Vérifiez le symbole de recyclage', 'Rincez avant de jeter']
+          tips: ['Vérifiez le symbole de recyclage', 'Rincez avant de jeter'],
         };
       case 'paper':
         return {
@@ -770,7 +836,7 @@ class MLKitService {
           environmentalImpact: '🌱 Économise 1.8kg de CO2 par kg recyclé',
           icon: '📦',
           color: '#4A90E2',
-          tips: ['Retirez le film plastique', 'Aplatissez les cartons']
+          tips: ['Retirez le film plastique', 'Aplatissez les cartons'],
         };
       default:
         return {
@@ -780,7 +846,7 @@ class MLKitService {
           environmentalImpact: '🌱 Impact environnemental variable',
           icon: '❓',
           color: '#9E9E9E',
-          tips: ['Consultez les consignes locales', 'Vérifiez les symboles']
+          tips: ['Consultez les consignes locales', 'Vérifiez les symboles'],
         };
     }
   }
