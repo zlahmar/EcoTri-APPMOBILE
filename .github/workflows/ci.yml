@@ -164,6 +164,7 @@ jobs:
         if: matrix.build-type == 'debug'
         run: |
           cd android
+          chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
           echo "✅ Build Android Debug réussi"
 
@@ -171,6 +172,7 @@ jobs:
         if: matrix.build-type == 'release'
         run: |
           cd android
+          chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon
           echo "✅ Build Android Release réussi"
 
