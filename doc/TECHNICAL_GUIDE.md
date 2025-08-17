@@ -719,8 +719,11 @@ L'application EcoTri dispose d'un **pipeline CI/CD complet** configuré avec Git
 **APKs du pipeline CI/CD :**
 
 - **GitHub Actions** : [Actions](https://github.com/zineblahmar/EcoTri/actions) → Workflow "EcoTri CI/CD Pipeline" → Artifacts
+- **APK FONCTIONNEL DISPONIBLE** : Pipeline #20 réussi (Pull Request #10)
 - **APK Debug** : `android-build-debug` (toutes les branches)
 - **APK Release** : `android-build-release` (branche `main` uniquement)
+
+**⚠ Note** : Les pipelines récents échouent à cause de la sécurisation Firebase, mais le Pipeline #20 contient des APKs 100% fonctionnels !
 
 **APKs locaux (développement) :**
 
