@@ -112,7 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     { key: 'organic', label: 'Organique', icon: 'eco', color: colors.success },
   ];
 
-  // Calculer la distance entre deux points (formule de Haversine)
+  // Calcul de la distance entre deux points (formule de Haversine)
   const calculateDistance = useCallback(
     (lat1: number, lon1: number, lat2: number, lon2: number): number => {
       const R = 6371;

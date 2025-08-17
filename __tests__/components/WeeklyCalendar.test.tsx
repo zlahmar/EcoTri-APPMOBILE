@@ -43,7 +43,6 @@ describe('WeeklyCalendar', () => {
   });
 
   it('should handle null collecteInfo gracefully', () => {
-    // Le composant ne gère pas collecteInfo null, testons plutôt avec des données vides
     const emptyCollecteInfo = {
       commune: 'Test',
       orduresMenageres: { jours: [], passage: 'JOUR' },
@@ -54,7 +53,6 @@ describe('WeeklyCalendar', () => {
       <WeeklyCalendar collecteInfo={emptyCollecteInfo} />
     );
     
-    // Le composant se rend sans crash même avec des données vides
     expect(getByText('Calendrier de la Semaine')).toBeTruthy();
   });
 
@@ -69,14 +67,12 @@ describe('WeeklyCalendar', () => {
       <WeeklyCalendar collecteInfo={emptyCollecteInfo} />
     );
     
-    // Le composant se rend sans crash même avec des données vides
     expect(getByText('Calendrier de la Semaine')).toBeTruthy();
   });
 
   it('should display calendar icon in title', () => {
     const { getByText } = render(<WeeklyCalendar {...defaultProps} />);
     
-    // Le composant se rend correctement avec le titre
     expect(getByText('Calendrier de la Semaine')).toBeTruthy();
   });
 });

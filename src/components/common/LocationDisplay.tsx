@@ -32,7 +32,7 @@ const LocationDisplay: React.FC<LocationDisplayProps> = ({
           textSize: 16,
           containerMargin: 12,
         };
-      default: // medium
+      default:
         return {
           iconSize: 16,
           textSize: 14,

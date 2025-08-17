@@ -117,7 +117,6 @@ describe('CommuneSelector', () => {
       <CommuneSelector {...defaultProps} onClose={mockOnClose} />
     );
     
-    // Sélectionner une commune
     const communeItem = getByText('Talence');
     fireEvent.press(communeItem);
     
@@ -130,7 +129,6 @@ describe('CommuneSelector', () => {
       <CommuneSelector {...defaultProps} onClose={mockOnClose} />
     );
     
-    // Le bouton de fermeture devrait être présent
     expect(mockOnClose).toBeDefined();
     expect(root).toBeDefined();
   });

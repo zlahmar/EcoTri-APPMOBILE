@@ -30,7 +30,6 @@ describe('AuthScreen', () => {
   it('should render with default props', () => {
     render(<AuthScreen {...defaultProps} />);
     
-    // Le composant se rend sans erreur
     expect(defaultProps.onAuthSuccess).toBeDefined();
   });
 });

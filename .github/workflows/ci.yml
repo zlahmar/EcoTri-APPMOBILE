@@ -199,7 +199,7 @@ jobs:
     steps:
       - name: Build iOS Désactivé
         run: |
-          echo "🚧 Build iOS temporairement désactivé"
+          echo "Build iOS temporairement désactivé"
           echo "Cette fonctionnalité sera disponible dans la prochaine version"
           echo "Le pipeline continue avec Android uniquement"
 
@@ -263,19 +263,19 @@ jobs:
 
       - name: Audit de sécurité npm
         run: |
-          echo "🔒 Audit de sécurité des dépendances..."
+          echo "Audit de sécurité des dépendances..."
           npm audit --audit-level=moderate
           echo "✅ Audit de sécurité terminé"
 
       - name: Vérification des vulnérabilités connues
         run: |
-          echo "🔍 Vérification des vulnérabilités..."
+          echo "Vérification des vulnérabilités..."
           npx audit-ci --moderate
           echo "✅ Vérification des vulnérabilités terminée"
 
       - name: Analyse des secrets dans le code
         run: |
-          echo "🔐 Analyse des secrets dans le code..."
+          echo "Analyse des secrets dans le code..."
           npx detect-secrets scan --baseline .secrets.baseline || true
           echo "✅ Analyse des secrets terminée"
 
@@ -303,7 +303,7 @@ jobs:
 
       - name: Validation de la configuration de déploiement
         run: |
-          echo "🚀 Validation de la configuration de déploiement..."
+          echo "Validation de la configuration de déploiement..."
           echo "  - Environnement : ${{ github.event.inputs.environment || 'staging' }}"
           echo "  - Branche : ${{ github.ref_name }}"
           echo "  - Commit : ${{ github.sha }}"
@@ -312,7 +312,7 @@ jobs:
       - name: Déploiement vers Firebase (Staging)
         if: github.ref == 'refs/heads/develop' || (github.ref == 'refs/heads/main' && github.event.inputs.environment == 'staging')
         run: |
-          echo "🚀 Déploiement vers l'environnement de staging..."
+          echo "Déploiement vers l'environnement de staging..."
           # Ici vous pouvez ajouter vos commandes de déploiement Firebase
           echo "✅ Déploiement staging terminé"
         env:
@@ -321,7 +321,7 @@ jobs:
       - name: Déploiement vers Firebase (Production)
         if: github.ref == 'refs/heads/main' && github.event.inputs.environment == 'production'
         run: |
-          echo "🚀 Déploiement vers l'environnement de production..."
+          echo "Déploiement vers l'environnement de production..."
           # Ici vous pouvez ajouter vos commandes de déploiement Firebase
           echo "✅ Déploiement production terminé"
         env:
@@ -329,7 +329,7 @@ jobs:
 
       - name: Notification de déploiement
         run: |
-          echo "📢 Notification de déploiement..."
+          echo "Notification de déploiement..."
           echo "  - Statut : Succès"
           echo "  - Environnement : ${{ github.event.inputs.environment || 'staging' }}"
           echo "  - URL : https://ecotri-app.web.app"
@@ -358,7 +358,7 @@ jobs:
 
       - name: Génération du rapport de qualité
         run: |
-          echo "📊 Génération du rapport de qualité..."
+          echo "Génération du rapport de qualité..."
 
           # Récupération des résultats des tests
           echo "## 📋 Rapport de Qualité EcoTri" > quality-report.md
@@ -367,25 +367,25 @@ jobs:
           echo "**Branche :** ${{ github.ref_name }}" >> quality-report.md
           echo "" >> quality-report.md
 
-          echo "### 🧪 Résultats des Tests" >> quality-report.md
+          echo "### Résultats des Tests" >> quality-report.md
           echo "- Tests unitaires : ✅ Réussis" >> quality-report.md
           echo "- Tests d'intégration : ✅ Réussis" >> quality-report.md
           echo "- Couverture de code : $(grep -o 'All files[^%]*' coverage/lcov.info | tail -1 || 'N/A')" >> quality-report.md
           echo "" >> quality-report.md
 
-          echo "### 🔒 Audit de Sécurité" >> quality-report.md
+          echo "### Audit de Sécurité" >> quality-report.md
           echo "- Audit npm : ✅ Terminé" >> quality-report.md
           echo "- Vérification des vulnérabilités : ✅ Terminée" >> quality-report.md
           echo "- Analyse des secrets : ✅ Terminée" >> quality-report.md
           echo "" >> quality-report.md
 
-                     echo "### 🚀 Builds" >> quality-report.md
+                     echo "### Builds" >> quality-report.md
            echo "- Android Debug : ✅ Réussi" >> quality-report.md
            echo "- Android Release : ✅ Réussi" >> quality-report.md
-           echo "- iOS : 🚧 Temporairement désactivé (prochaine version)" >> quality-report.md
+           echo "- iOS : Temporairement désactivé (prochaine version)" >> quality-report.md
           echo "" >> quality-report.md
 
-          echo "### 📱 Métriques de l'Application" >> quality-report.md
+          echo "### Métriques de l'Application" >> quality-report.md
           echo "- Composants React : $(find src/components -name "*.tsx" | wc -l)" >> quality-report.md
           echo "- Services : $(find src/services -name "*.ts" | wc -l)" >> quality-report.md
           echo "- Écrans : $(find src/screens -name "*.tsx" | wc -l)" >> quality-report.md

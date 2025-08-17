@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 
-  // Variants
   primary: {
     backgroundColor: colors.primary,
   },
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
 
-  // Sizes
   small: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -103,7 +101,6 @@ const styles = StyleSheet.create({
     minHeight: 56,
   },
 
-  // Text styles
   text: {
     fontWeight: '600',
     textAlign: 'center',
@@ -128,7 +125,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 
-  // States
   disabled: {
     opacity: 0.6,
   },

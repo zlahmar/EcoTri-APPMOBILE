@@ -48,7 +48,6 @@ describe('LocationDisplay', () => {
       />
     );
     
-    // Le bouton de rafraîchissement devrait être présent
     expect(mockOnRefresh).toBeDefined();
     expect(root).toBeDefined();
   });
@@ -63,7 +62,6 @@ describe('LocationDisplay', () => {
       />
     );
     
-    // Le bouton ne devrait pas être affiché
     expect(mockOnRefresh).toBeDefined();
     expect(root).toBeDefined();
   });
@@ -76,7 +74,6 @@ describe('LocationDisplay', () => {
       />
     );
     
-    // Sans onRefresh, le bouton ne devrait pas être affiché
     expect(root).toBeDefined();
   });
 

@@ -74,13 +74,11 @@ const MainNavigator = () => {
     } catch (error: any) {
       console.error('Erreur lors de la déconnexion:', error);
       
-      // Si c'est une erreur "no-current-user", c'est normal
       if (error.code === 'auth/no-current-user') {
         console.log('Utilisateur déjà déconnecté, déconnexion locale réussie');
         return;
       }
       
-      // Pour les autres erreurs, afficher une alerte
       Alert.alert('Erreur', 'Impossible de se déconnecter complètement');
     }
   };

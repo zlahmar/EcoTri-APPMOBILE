@@ -65,7 +65,6 @@ describe('AuthService', () => {
     mockCurrentUser = null;
   });
 
-  // ✅ Tests qui fonctionnent - Gestion des erreurs d'authentification
   describe('handleAuthError', () => {
     it('should handle auth/user-not-found error', () => {
       const mockError = { code: 'auth/user-not-found', message: 'User not found' };
@@ -100,7 +99,6 @@ describe('AuthService', () => {
     });
   });
 
-  // ✅ Tests simples qui peuvent passer facilement
   describe('Service Instance', () => {
     it('should be a singleton instance', () => {
       expect(authService).toBeDefined();
@@ -117,7 +115,6 @@ describe('AuthService', () => {
     });
   });
 
-  // ✅ Tests de validation d'email (sans Firebase)
   describe('Email Validation', () => {
     it('should validate email format', () => {
       const validEmails = [
@@ -127,7 +124,6 @@ describe('AuthService', () => {
       ];
 
       validEmails.forEach(email => {
-        // Test simple de format email basique
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         expect(emailRegex.test(email)).toBe(true);
       });
@@ -148,7 +144,6 @@ describe('AuthService', () => {
     });
   });
 
-  // ✅ Tests de gestion des mots de passe (sans Firebase)
   describe('Password Validation', () => {
     it('should validate password length', () => {
       const validPasswords = ['password123', 'securePass', '123456789'];

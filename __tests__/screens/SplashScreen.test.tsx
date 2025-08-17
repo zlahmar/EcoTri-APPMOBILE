@@ -32,8 +32,8 @@ describe('SplashScreen', () => {
     const mockOnFinish = jest.fn();
     render(<SplashScreen {...defaultProps} onFinish={mockOnFinish} />);
 
-    // Avancer le temps pour simuler la fin des animations
-    jest.advanceTimersByTime(3000); // 800 + 600 + 1000 + 500
+    // Avancement du temps pour simuler la fin des animations
+    jest.advanceTimersByTime(3000);
 
     await waitFor(() => {
       expect(mockOnFinish).toHaveBeenCalledTimes(1);
@@ -60,7 +60,6 @@ describe('SplashScreen', () => {
   it('should handle missing onFinish prop gracefully', () => {
     const { getByText } = render(<SplashScreen onFinish={jest.fn()} />);
     
-    // Le composant se rend sans crash avec une fonction valide
     expect(getByText('EcoTri')).toBeTruthy();
   });
 });

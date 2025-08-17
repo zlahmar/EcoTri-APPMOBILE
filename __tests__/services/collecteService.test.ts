@@ -43,7 +43,6 @@ const mockZones: CollecteZone[] = [
 describe('CollecteService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset du singleton avec les données de test
     (collecteService as any).zones = mockZones;
   });
 
@@ -86,7 +85,7 @@ describe('CollecteService', () => {
     it('should handle case-insensitive commune names', () => {
       const info = collecteService.getCollecteInfo('bordeaux');
       expect(info).toBeDefined();
-      expect(info?.commune).toBe('bordeaux'); // Le service retourne la commune exactement comme elle est passée
+      expect(info?.commune).toBe('bordeaux');
     });
   });
 
@@ -121,7 +120,6 @@ describe('CollecteService', () => {
 
     it('should return collecte info even for distant coordinates', () => {
       const info = collecteService.getCollecteInfoByLocation(0, 0); // Coordonnées très éloignées
-      // Le service retourne toujours la zone la plus proche, même si elle est très éloignée
       expect(info).toBeDefined();
       expect(info?.commune).toBeDefined();
     });

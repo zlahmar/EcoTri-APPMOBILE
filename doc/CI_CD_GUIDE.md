@@ -10,8 +10,8 @@ Ce document décrit la configuration complète du pipeline d'intégration contin
 
 Le pipeline CI/CD se déclenche automatiquement dans les situations suivantes :
 
-- **Push automatique** : Sur les branches `main`, `develop`, `feature/*`, `hotfix/*`
-- **Pull Request** : Sur les branches `main` et `develop`
+- **Push automatique** : Sur les branches `main`, `dev`, `feature/*`
+- **Pull Request** : Sur les branches `main` et `dev`
 - **Déclenchement manuel** : Via l'interface GitHub Actions avec sélection d'environnement
 
 ### Environnements Supportés
@@ -118,7 +118,7 @@ Le pipeline CI/CD se déclenche automatiquement dans les situations suivantes :
 **Durée estimée** : 30 minutes
 **Runner** : `ubuntu-latest`
 **Dépendances** : Tous les jobs précédents
-**Conditions** : Branches `main` ou `develop`
+**Conditions** : Branches `main` ou `dev`
 
 ### 7. Génération de Rapport (`generate-report`)
 
@@ -202,7 +202,7 @@ strategy:
 
 ### Conditions de Déploiement
 
-- **Staging** : Branche `develop` ou `main` avec environnement `staging`
+- **Staging** : Branche `dev` ou `main` avec environnement `staging`
 - **Production** : Branche `main` avec environnement `production`
 
 ## Monitoring et Rapports
@@ -305,6 +305,6 @@ Les artefacts suivants sont générés et conservés :
 ---
 
 **Version du document** : 1.0  
-**Dernière mise à jour** : Janvier 2025  
+**Dernière mise à jour** : Août 2025  
 **Maintenu par** : Équipe DevOps EcoTri  
 **Statut** : Approuvé et en production

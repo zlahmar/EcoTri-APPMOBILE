@@ -111,7 +111,6 @@ describe('useLocation', () => {
   it('should have async methods', () => {
     const { result } = renderHook(() => useLocation());
 
-    // Vérifier que les méthodes sont des fonctions
     expect(typeof result.current.getCurrentLocation).toBe('function');
     expect(typeof result.current.refreshLocation).toBe('function');
   });
@@ -128,7 +127,6 @@ describe('useLocation', () => {
 
     const { result } = renderHook(() => useLocation());
 
-    // Test que la méthode peut être appelée
     await act(async () => {
       await result.current.getCurrentLocation();
     });
@@ -148,7 +146,6 @@ describe('useLocation', () => {
 
     const { result } = renderHook(() => useLocation());
 
-    // Test que la méthode peut être appelée
     await act(async () => {
       await result.current.refreshLocation();
     });
@@ -175,20 +172,16 @@ describe('useLocation', () => {
 
     renderHook(() => useLocation(mockCallbacks));
 
-    // Vérifier que les callbacks sont configurés
     expect(mockLocationService.setCallbacks).toHaveBeenCalled();
   });
 
   it('should handle multiple hook calls', () => {
-    // Premier appel
     const { result: result1 } = renderHook(() => useLocation());
     expect(result1.current).toBeDefined();
     
-    // Deuxième appel
     const { result: result2 } = renderHook(() => useLocation());
     expect(result2.current).toBeDefined();
     
-    // Les deux appels devraient retourner des objets valides
     expect(typeof result1.current.city).toBe('string');
     expect(typeof result2.current.city).toBe('string');
   });

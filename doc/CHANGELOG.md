@@ -1,22 +1,38 @@
-# 📚 Changelog - EcoTri
+# Changelog - EcoTri
+
+## **Sommaire des Versions**
+
+| Version   | Date          | Titre                                                         | Statut       |
+| --------- | ------------- | ------------------------------------------------------------- | ------------ |
+| **8.0.0** | Août 2025     | Pipeline CI/CD Complet et Configuration Android Optimisée     | **Actuelle** |
+| **7.1.0** | Juillet 2025  | Interface Utilisateur Modernisée et Page de Conseils Refondue | **Stable**   |
+| **7.0.0** | Mars 2025     | Système de Filtrage Avancé et Page de Collecte Intelligente   | **Stable**   |
+| **6.0.0** | Janvier 2025  | Page d'Accueil Intelligente et Navigation Automatique         | **Stable**   |
+| **5.4.0** | Décembre 2024 | Navigation Modernisée et Interface Cohérente                  | **Stable**   |
+| **5.3.0** | Décembre 2024 | Système de Statistiques et Gamification                       | **Stable**   |
+| **5.2.0** | Novembre 2024 | Interface Utilisateur Modernisée                              | **Stable**   |
+| **5.1.0** | Novembre 2024 | Intégration ML Kit Native                                     | **Stable**   |
+| **5.0.0** | Novembre 2024 | Architecture de Base                                          | **Stable**   |
+
+---
 
 ## Version 8.0.0 - Pipeline CI/CD Complet et Configuration Android Optimisée
 
-**Date :** Janvier 2025
+**Date :** Août 2025
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
-#### **🚀 Pipeline CI/CD Complet avec GitHub Actions**
+#### **Pipeline CI/CD Complet avec GitHub Actions**
 
 - **Pipeline automatisé** : Intégration continue et déploiement automatique
 - **7 jobs principaux** : Validation, tests, build Android, sécurité, déploiement
 - **Build Android optimisé** : Support Debug et Release avec cache intelligent
-- **Tests automatisés** : 158 tests avec 100% de couverture des fonctionnalités principales
+- **Tests automatisés** : 161 tests avec 95% de couverture des fonctionnalités principales
 - **Audit de sécurité** : Vérification automatique des vulnérabilités et secrets
 - **Déploiement Firebase** : Staging et production automatiques
 - **Rapports de qualité** : Génération automatique avec métriques détaillées
 
-#### **📱 Configuration Android Complète**
+#### **Configuration Android Complète**
 
 - **Environnement optimisé** : Java 17, SDK Android 34, NDK 25.1.8937393
 - **Build matrix** : Debug et Release en parallèle
@@ -24,21 +40,19 @@
 - **Artefacts** : APKs et AABs avec rétention 30 jours
 - **Support React Native 0.81.0** : Configuration native complète
 
-#### **🔧 Infrastructure DevOps**
+#### **Infrastructure DevOps**
 
 - **GitHub Actions** : Workflow `.github/workflows/ci.yml`
 - **Déclencheurs automatiques** : Push, Pull Request, exécution manuelle
 - **Environnements multiples** : Development, Staging, Production
 - **Monitoring intégré** : Codecov, rapports de qualité, métriques de performance
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Ajoutés**
 
 - `.github/workflows/ci.yml` : Pipeline CI/CD principal
-- `README_CI_CD.md` : Guide rapide CI/CD
 - `doc/CI_CD_GUIDE.md` : Documentation complète du pipeline
-- `doc/ANDROID_BUILD_CONFIG.md` : Configuration spécifique Android
 
 #### **Configuration CI/CD**
 
@@ -60,11 +74,11 @@ jobs:
 - **Structure préservée** : Prêt pour activation dans la prochaine version
 - **Documentation** : Guide complet pour l'activation future
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Pipeline CI/CD**
 
-- **Déclenchement automatique** : Branches `main`, `develop`, `feature/*`, `hotfix/*`
+- **Déclenchement automatique** : Branches `main`, `dev`, `feature/*`
 - **Validation TypeScript** : `tsc --noEmit` avec vérification stricte
 - **Tests automatisés** : Jest avec couverture et rapports Codecov
 - **Build Android** : Matrix Debug/Release avec upload d'artefacts
@@ -81,12 +95,12 @@ jobs:
 - **Gradle** : Cache intelligent avec `--no-daemon`
 - **Artefacts** : APK et AAB pour distribution
 
-### 🚀 **Avantages Développement**
+### **Avantages Développement**
 
 #### **Qualité de Code**
 
 - **Validation automatique** : TypeScript, ESLint, Prettier
-- **Tests continus** : 158 tests avec couverture 100%
+- **Tests continus** : 161 tests avec couverture 95%
 - **Sécurité proactive** : Audit automatique des dépendances
 - **Standards de code** : Formatage et linting automatiques
 
@@ -104,59 +118,52 @@ jobs:
 - **Timeouts optimisés** : Prévention des blocages
 - **Runners optimisés** : Ubuntu pour Android, macOS pour iOS (futur)
 
-### 🔮 **Prochaines Étapes**
+### **Prochaines Étapes**
 
 #### **Version 8.1.0 (Prévue)**
 
-- **📱 Support iOS complet** : Activation du build iOS
-- **🧪 Tests E2E** : Intégration Detox ou Appium
-- **🔐 Signing automatique** : Certificats iOS/Android
-- **📊 Monitoring avancé** : Métriques de performance en temps réel
+- **Support iOS complet** : Activation du build iOS
+- **Tests E2E** : Intégration Detox ou Appium
+- **Signing automatique** : Certificats iOS/Android
+- **Monitoring avancé** : Métriques de performance en temps réel
 
 #### **Version 8.2.0 (Prévue)**
 
-- **🚀 Déploiement stores** : Google Play et App Store
-- **🌐 Intégrations** : Slack/Discord, SonarQube
-- **📈 Dashboard** : Interface de monitoring avancée
-- **🔄 Déploiement progressif** : Canary, Blue-Green
+- **Déploiement stores** : Google Play et App Store
+- **Intégrations** : Slack/Discord, SonarQube
+- **Dashboard** : Interface de monitoring avancée
+- **Déploiement progressif** : Canary, Blue-Green
 
 ---
 
 ## Version 7.1.0 - Interface Utilisateur Modernisée et Page de Conseils Refondue
 
-**Date :** Décembre 2024
+**Date :** Juillet 2025
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
-#### **🎨 Modernisation Complète de l'Interface Utilisateur**
+#### **Modernisation Complète de l'Interface Utilisateur**
 
 - **Remplacement des emojis** : Tous les emojis remplacés par des icônes MaterialIcons professionnelles
 - **Cohérence visuelle** : Interface uniforme sur tous les écrans de l'application
 - **Design system unifié** : Palette de couleurs EcoTri appliquée partout
 - **Composants stylés** : Ombres, bordures arrondies, espacement harmonieux
 
-#### **💡 Page de Conseils Complètement Refondue**
+#### **Page de Conseils Complètement Refondue**
 
 - **Interface modernisée** : Remplacement de tous les emojis par MaterialIcons
 - **Bannière d'information** : Indication "Prochainement disponible" pour la prochaine mise à jour
 - **Icônes thématiques** :
-  - 💡 Conseil du Jour : `lightbulb`
-  - 📚 Par Catégorie : `category`
-  - ⚡ Conseils Rapides : `flash-on`
-  - 🌍 Votre Impact : `public`
-  - 📖 Voir Tous les Conseils : `menu-book`
+  - Conseil du Jour : `lightbulb`
+  - Par Catégorie : `category`
+  - Conseils Rapides : `flash-on`
+  - Votre Impact : `public`
+  - Voir Tous les Conseils : `menu-book`
 - **Catégories visuelles** : Icônes distinctes pour chaque type de matériau
 - **Conseils rapides** : Icônes de validation `check-circle` pour chaque conseil
 - **Impact environnemental** : Icônes thématiques pour CO2, eau, énergie
 
-#### **🔧 Améliorations Techniques**
-
-- **Import MaterialIcons** : `react-native-vector-icons/MaterialIcons` intégré
-- **Styles optimisés** : Espacement et alignement des icônes avec le texte
-- **Composants réutilisables** : Structure modulaire pour la maintenance
-- **Performance** : Icônes vectorielles plus légères et rapides
-
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -170,7 +177,7 @@ jobs:
 react-native-vector-icons
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Remplacement des Emojis par MaterialIcons**
 
@@ -189,17 +196,16 @@ react-native-vector-icons
 
 - **Position** : En haut de la page, juste après le header
 - **Design** : Fond avec ombre, icône d'information, texte explicatif
-- **Contenu** : "🚀 Prochainement disponible ! Cette page sera entièrement fonctionnelle dans la prochaine mise à jour avec des conseils personnalisés et des données en temps réel."
+- **Contenu** : "Prochainement disponible ! Cette page sera entièrement fonctionnelle dans la prochaine mise à jour avec des conseils personnalisés et des données en temps réel."
 - **Icône** : `info` MaterialIcons avec couleur `primaryDark`
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Interface Professionnelle**
 
 - **Look moderne** : Icônes vectorielles professionnelles
 - **Cohérence visuelle** : Même style sur tous les écrans
 - **Lisibilité améliorée** : Icônes plus claires que les emojis
-- **Performance** : Chargement plus rapide des icônes
 
 #### **Expérience Utilisateur**
 
@@ -208,69 +214,110 @@ react-native-vector-icons
 - **Accessibilité** : Icônes Material Design standards
 - **Responsive** : Adaptation à toutes les tailles d'écran
 
-### 🔮 **Prochaines Étapes**
+### **Prochaines Étapes**
 
 #### **Version 7.2.0 (Prévue)**
 
-- **🎨 Animations** : Transitions fluides entre les sections
-- **🌙 Mode sombre** : Thème adaptatif pour l'interface
-- **📱 Tests finaux** : Validation sur différents appareils
-- **🎯 Préparation jury** : Documentation et démonstration finale
-
-#### **Version 7.3.0 (Prévue)**
-
-- **🤖 IA avancée** : Conseils personnalisés basés sur l'historique
-- **📊 Statistiques** : Suivi détaillé de l'impact environnemental
-- **🔔 Notifications** : Rappels de recyclage personnalisés
-- **🌍 Mode hors ligne** : Synchronisation des conseils
+- **Animations** : Transitions fluides entre les sections
+- **Mode sombre** : Thème adaptatif pour l'interface
+- **Tests finaux** : Validation sur différents appareils
+- **Préparation jury** : Documentation et démonstration finale
 
 ---
 
-## Version 7.0.0 - Système de Filtrage Avancé et Sélection de Rayon Dynamique
+## Version 7.0.0 - Système de Filtrage Avancé et Page de Collecte Intelligente
 
-**Date :** Décembre 2024
+**Date :** Mars 2025
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
-#### 🔍 **Système de Filtrage Avancé par Type de Recyclage**
+#### **Page de Collecte Intelligente avec Données Officielles**
 
-- **🍷 Filtre Verre** : Bouteilles, contenants, verre en général
-- **🥤 Filtre Plastique** : Bouteilles, emballages, sacs plastique
-- **📄 Filtre Papier** : Papier, carton, livres, magazines, journaux
-- **🔩 Filtre Métal** : Aluminium, acier, boîtes de conserve, canettes
-- **📱 Filtre Électronique** : Téléphones, ordinateurs, électroménager, petits appareils
-- **👕 Filtre Textile** : Vêtements, chaussures, tissus
-- **🔋 Filtre Piles** : Piles, batteries, ampoules, tubes fluorescents
-- **🌱 Filtre Organique** : Compost, déchets verts, biodégradables, jardin
-- **🎯 Filtrage intelligent** : Recherche dans le type ET le nom du point
-- **🔍 Mots-clés multiples** : Chaque filtre utilise plusieurs termes de recherche
-- **📊 Interface de filtrage** : Boutons horizontaux scrollables avec états actifs/inactifs
-- **🧹 Bouton "Effacer"** : Suppression rapide de tous les filtres actifs
+- **Intégration des données Bordeaux Métropole** : Fichier `en_frcol_s.json` avec fréquences de collecte officielles
+- **Service de collecte intelligent** : `CollecteService` singleton pour la gestion des données
+- **Géolocalisation automatique** : Détection de la ville et affichage des informations de collecte
+- **Sélecteur de commune** : Choix parmi les 21 villes disponibles dans le dataset officiel
+- **Calendrier hebdomadaire visuel** : Vue d'ensemble de la semaine avec types de collecte (OM/TRI)
+- **Informations détaillées** : Jours de passage, prochaine collecte, types de déchets
 
-#### 📏 **Sélection de Rayon de Recherche Dynamique**
+#### **Composants Réutilisables Créés**
 
-- **⚙️ Rayons configurables** : 500m, 1km, 2km, 5km, 10km
-- **🎛️ Interface dropdown** : Sélecteur compact avec menu flottant
-- **🔄 Mise à jour automatique** : Recherche immédiate lors du changement de rayon
-- **📱 Modal overlay** : Menu toujours visible au premier plan (z-index élevé)
-- **🎨 Design moderne** : Interface épurée et intuitive
+- **`CollecteInfo`** : Affichage détaillé des informations de collecte
+- **`CommuneSelector`** : Modal de sélection de commune avec recherche et filtrage
+- **`WeeklyCalendar`** : Calendrier visuel de la semaine avec badges colorés et légende
 
-#### 🎨 **Améliorations de l'Interface Utilisateur**
+#### **Système de Filtrage Avancé par Type de Recyclage**
 
-- **🏠 Page d'accueil optimisée** : Layout compact et élégant
-- **📍 Indicateur de localisation** : Emoji 📍 à gauche du nom de la ville
-- **🔄 Bouton de rafraîchissement unique** : Interface simplifiée et centrée
-- **🎯 Filtres visuels** : Icônes Material Design avec couleurs distinctes
-- **📱 Responsive design** : Adaptation automatique à toutes les tailles d'écran
+- **Filtre Verre** : Bouteilles, contenants, verre en général
+- **Filtre Plastique** : Bouteilles, emballages, sacs plastique
+- **Filtre Papier** : Papier, carton, livres, magazines, journaux
+- **Filtre Métal** : Aluminium, acier, boîtes de conserve, canettes
+- **Filtre Électronique** : Téléphones, ordinateurs, électroménager, petits appareils
+- **Filtre Textile** : Vêtements, chaussures, tissus
+- **Filtre Piles** : Piles, batteries, ampoules, tubes fluorescents
+- **Filtre Organique** : Compost, déchets verts, biodégradables, jardin
+- **Mots-clés multiples** : Chaque filtre utilise plusieurs termes de recherche
+- **Interface de filtrage** : Boutons horizontaux scrollables avec états actifs/inactifs
+- **Bouton "Effacer"** : Suppression rapide de tous les filtres actifs
 
-### 🛠️ **Modifications Techniques**
+#### **Sélection de Rayon de Recherche Dynamique**
+
+- **Rayons configurables** : 500m, 1km, 2km, 5km, 10km
+- **Interface dropdown** : Sélecteur compact avec menu flottant
+- **Mise à jour automatique** : Recherche immédiate lors du changement de rayon
+- **Modal overlay** : Menu toujours visible au premier plan (z-index élevé)
+- **Design moderne** : Interface épurée et intuitive
+
+#### **Améliorations de l'Interface Utilisateur**
+
+- **Page d'accueil optimisée** : Layout compact et élégant
+- **Indicateur de localisation** : Icône 📍 à gauche du nom de la ville
+- **Bouton de rafraîchissement unique** : Interface simplifiée et centrée
+- **Filtres visuels** : Icônes Material Design avec couleurs distinctes
+- **Responsive design** : Adaptation automatique à toutes les tailles d'écran
+
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
 - `src/screens/main/HomeScreen.tsx` : Ajout du système de filtrage et sélection de rayon
-- **Nouvelle logique de filtrage** : Fonction `getFilterKeywords()` avec mots-clés multiples
-- **Interface de sélection de rayon** : Composant Modal avec overlay
-- **Système de debug** : Logs détaillés pour le débogage des filtres
+- `src/screens/recycling/CollecteScreen.tsx` : Refactoring complet avec données Bordeaux Métropole
+- `src/services/collecteService.ts` : Service singleton pour la gestion des données de collecte
+- `src/components/common/CollecteInfo.tsx` : Composant d'affichage des informations de collecte
+- `src/components/common/CommuneSelector.tsx` : Sélecteur de commune avec recherche
+- `src/components/common/WeeklyCalendar.tsx` : Calendrier hebdomadaire visuel
+
+#### **Nouvelles Dépendances**
+
+```bash
+# Données officielles Bordeaux Métropole
+assets/data/en_frcol_s.json
+```
+
+#### **Service de Collecte Intelligent**
+
+```typescript
+// Service singleton pour la gestion des données de collecte
+class CollecteService {
+  // Trouver la zone la plus proche d'une localisation
+  findNearestZone(lat: number, lon: number): CollecteZone | null;
+
+  // Obtenir les informations de collecte par commune
+  getCollecteInfo(commune: string): CollecteInfo | null;
+
+  // Obtenir les informations par localisation GPS
+  getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null;
+
+  // Lister toutes les communes disponibles
+  getAvailableCommunes(): string[];
+}
+```
+
+#### **Nouvelle logique de filtrage** : Fonction `getFilterKeywords()` avec mots-clés multiples
+
+#### **Interface de sélection de rayon** : Composant Modal avec overlay
+
+#### **Système de debug** : Logs détaillés pour le débogage des filtres
 
 #### **Nouvelles Fonctions**
 
@@ -309,33 +356,16 @@ const applyFilters = useCallback(() => {
 - **Menu dropdown** : Interface compacte avec Modal overlay
 - **Z-index élevé** : Affichage toujours au premier plan
 - **Mise à jour automatique** : Recherche immédiate des points de recyclage
-- **Design responsive** : Adaptation à toutes les tailles d'écran
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Avantages Utilisateur**
 
-#### **Système de Filtrage Intelligent**
+#### **Page de Collecte Intelligente**
 
-- **Recherche multi-critères** : Type du point + nom/description
-- **Mots-clés étendus** : Chaque filtre utilise 5-8 termes de recherche
-- **Filtrage en temps réel** : Mise à jour immédiate lors de la sélection
-- **Gestion des cas limites** : Fallback sur "Recyclage général" si pas de type spécifique
-- **Performance optimisée** : Filtrage client-side pour une réactivité maximale
-
-#### **Sélection de Rayon Dynamique**
-
-- **Rayons prédéfinis** : 500m, 1km, 2km, 5km, 10km
-- **Interface intuitive** : Menu flottant avec sélection visuelle
-- **Mise à jour automatique** : Recherche immédiate via Overpass API
-- **Gestion des erreurs** : Fallback sur le rayon précédent en cas d'échec
-
-#### **Interface Utilisateur Modernisée**
-
-- **Design épuré** : Suppression des éléments redondants
-- **Indicateurs visuels** : Emoji 📍 pour la localisation
-- **Boutons uniques** : Interface simplifiée et centrée
-- **Responsive design** : Adaptation automatique à toutes les tailles
-
-### 🚀 **Avantages Utilisateur**
+- **Données officielles** : Informations de collecte réelles et à jour
+- **Géolocalisation automatique** : Détection de la ville de l'utilisateur
+- **21 communes supportées** : Couverture complète de Bordeaux Métropole
+- **Calendrier visuel** : Vue d'ensemble claire des jours de collecte
+- **Informations détaillées** : Jours de passage, prochaine collecte, types de déchets
 
 #### **Expérience de Filtrage**
 
@@ -358,54 +388,47 @@ const applyFilters = useCallback(() => {
 - **Design cohérent** : Style uniforme avec le reste de l'application
 - **Responsive** : Fonctionne sur tous les appareils
 
-### 🔮 **Prochaines Étapes**
+### **Prochaines Étapes**
 
 #### **Version 7.1.0 (Prévue)**
 
-- **🗺️ Carte interactive** : Affichage des points filtrés sur une carte
-- **💾 Sauvegarde des préférences** : Mémorisation des filtres et rayon favoris
-- **🔔 Notifications** : Rappels de recyclage personnalisés
-- **📊 Statistiques de filtrage** : Historique des recherches populaires
-
-#### **Version 7.2.0 (Prévue)**
-
-- **🤖 IA de recommandation** : Suggestions de points selon l'historique
-- **🌍 Mode hors ligne** : Synchronisation des données de recyclage
-- **📱 Widgets** : Accès rapide aux filtres depuis l'écran d'accueil
-- **🌙 Mode sombre** : Thème adaptatif pour l'interface
+- **Carte interactive** : Affichage des points filtrés sur une carte
+- **Sauvegarde des préférences** : Mémorisation des filtres et rayon favoris
+- **Notifications** : Rappels de recyclage personnalisés
+- **Statistiques de filtrage** : Historique des recherches populaires
 
 ---
 
 ## Version 6.0.0 - Page d'Accueil Intelligente et Navigation Automatique
 
-**Date :** Décembre 2024
+**Date :** Janvier 2025
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
-#### 🏠 **Page d'Accueil Intelligente avec Géolocalisation**
+#### **Page d'Accueil Intelligente avec Géolocalisation**
 
-- **📍 Géolocalisation automatique** : Intégration de `react-native-geolocation-service`
-- **🌍 Détection de la ville** : Affichage du nom de la ville au lieu des coordonnées GPS
-- **🗺️ API Overpass intégrée** : Recherche ultra-précise des points de recyclage officiels
-- **🔄 Système de fallback intelligent** : Overpass → Nominatim si aucun résultat
-- **📱 Interface moderne** : MaterialIcons, cards design, pull-to-refresh
+- **Géolocalisation automatique** : Intégration de `react-native-geolocation-service`
+- **Détection de la ville** : Affichage du nom de la ville au lieu des coordonnées GPS
+- **API Overpass intégrée** : Recherche ultra-précise des points de recyclage officiels
+- **Système de fallback intelligent** : Overpass → Nominatim si aucun résultat
+- **Interface moderne** : MaterialIcons, cards design, pull-to-refresh
 
-#### 🧭 **Navigation Intelligente et Automatique**
+#### **Navigation Intelligente et Automatique**
 
-- **🔍 Détection automatique** des applications de navigation installées
-- **📱 Support étendu** : 10+ apps (Google Maps, Waze, Apple Maps, HERE WeGo, Sygic, TomTom, Maps.me, OsmAnd, Bing Maps, Yandex Maps)
-- **⚡ Vérification rapide** : Utilisation de `Linking.canOpenURL()` pour la détection
-- **🌐 Fallback automatique** : Google Maps web si aucune app n'est installée
-- **🎯 Interface adaptative** : Boutons dynamiques selon les apps disponibles
+- **Détection automatique** des applications de navigation installées
+- **Support étendu** : 10+ apps (Google Maps, Waze, Apple Maps, HERE WeGo, Sygic, TomTom, Maps.me, OsmAnd, Bing Maps, Yandex Maps)
+- **Vérification rapide** : Utilisation de `Linking.canOpenURL()` pour la détection
+- **Fallback automatique** : Google Maps web si aucune app n'est installée
+- **Interface adaptative** : Boutons dynamiques selon les apps disponibles
 
-#### 🔧 **Améliorations Techniques**
+#### **Améliorations Techniques**
 
-- **📱 Permissions Android** : Gestion automatique des permissions de géolocalisation
-- **🌐 APIs multiples** : Intégration Overpass + Nominatim + fallback
-- **📊 Logs détaillés** : Console logging pour le débogage
-- **🔄 Gestion d'erreurs** : Try-catch avec messages utilisateur clairs
+- **Permissions Android** : Gestion automatique des permissions de géolocalisation
+- **APIs multiples** : Intégration Overpass + Nominatim + fallback
+- **Logs détaillés** : Console logging pour le débogage
+- **Gestion d'erreurs** : Try-catch avec messages utilisateur clairs
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -429,7 +452,7 @@ npm install react-native-geolocation-service
 <uses-feature android:name="android.hardware.location.network" android:required="false" />
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Géolocalisation Intelligente**
 
@@ -452,7 +475,7 @@ npm install react-native-geolocation-service
 - **URLs optimisées** : Chaque app a sa propre syntaxe d'URL
 - **Gestion d'erreurs** : Messages clairs si l'app ne peut pas être ouverte
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Expérience Utilisateur**
 
@@ -468,45 +491,45 @@ npm install react-native-geolocation-service
 - **Gestion d'erreurs** : Messages clairs et solutions de contournement
 - **Stockage local** : Fonctionne hors ligne pour les données utilisateur
 
-### 🔮 **Prochaines Étapes**
+### **Prochaines Étapes**
 
 #### **Version 6.1.0 (Prévue)**
 
-- **🗺️ Carte interactive** : Affichage des points sur une carte
-- **🔔 Notifications** : Rappels de recyclage et collecte
-- **📊 Graphiques avancés** : Visualisations des statistiques
-- **🌍 Mode hors ligne** : Synchronisation différée
+- **Carte interactive** : Affichage des points sur une carte
+- **Notifications** : Rappels de recyclage et collecte
+- **Graphiques avancés** : Visualisations des statistiques
+- **Mode hors ligne** : Synchronisation différée
 
 #### **Version 6.2.0 (Prévue)**
 
-- **🤖 IA avancée** : Segmentation d'images et détection de pose
-- **📱 Widgets** : Accès rapide depuis l'écran d'accueil
-- **🌙 Mode sombre** : Thème adaptatif
-- **🔊 Accessibilité** : Support des lecteurs d'écran
+- **IA avancée** : Segmentation d'images et détection de pose
+- **Widgets** : Accès rapide depuis l'écran d'accueil
+- **Mode sombre** : Thème adaptatif
+- **Accessibilité** : Support des lecteurs d'écran
 
 ---
 
 ## Version 5.4.0 - Navigation Modernisée et Interface Cohérente
 
-**Date :** Décembre 2024
+**Date :** Novembre 2024
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
 #### **Navigation Principale Modernisée**
 
-- **📱 3 onglets principaux** : Accueil, Scan, Collecte, Conseils
-- **👤 Accès profil unifié** : Icône dans le header de tous les écrans
-- **🎨 Icônes MaterialIcons** : Remplacement des emojis manuels
-- **📱 Interface responsive** : Adaptation automatique aux tailles d'écran
+- **3 onglets principaux** : Accueil, Scan, Collecte, Conseils
+- **Accès profil unifié** : Icône dans le header de tous les écrans
+- **Icônes MaterialIcons** : Remplacement des emojis manuels
+- **Interface responsive** : Adaptation automatique aux tailles d'écran
 
 #### **Architecture Technique Améliorée**
 
-- **🔧 Props pour authentification** : Passage des états entre composants
-- **📊 Gestion d'état centralisée** : MainNavigator comme point central
-- **🎯 Modals intelligents** : Authentification et profil en overlay
-- **🔄 Navigation fluide** : Transitions entre écrans optimisées
+- **Props pour authentification** : Passage des états entre composants
+- **Gestion d'état centralisée** : MainNavigator comme point central
+- **Modals intelligents** : Authentification et profil en overlay
+- **Navigation fluide** : Transitions entre écrans optimisées
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -523,7 +546,7 @@ npm install react-native-geolocation-service
 npm install react-native-vector-icons
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Navigation par Onglets**
 
@@ -539,7 +562,7 @@ npm install react-native-vector-icons
 - **Authentification intégrée** : Connexion/déconnexion fluide
 - **Statistiques complètes** : Tablees de bord utilisateur
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Interface Cohérente**
 
@@ -555,38 +578,38 @@ npm install react-native-vector-icons
 - **Modals intelligents** : Authentification et profil en overlay
 - **État persistant** : Données utilisateur conservées entre écrans
 
-### 🔮 **Prochaines Étapes**
+### **Prochaines Étapes**
 
 #### **Version 5.5.0 (Prévue)**
 
-- **🎨 Animations** : Transitions fluides entre écrans
-- **🌙 Mode sombre** : Thème adaptatif
-- **📱 Tests finaux** : Validation avant présentation jury
-- **🎯 Préparation jury** : Documentation et démonstration
+- **Animations** : Transitions fluides entre écrans
+- **Mode sombre** : Thème adaptatif
+- **Tests finaux** : Validation avant présentation jury
+- **Préparation jury** : Documentation et démonstration
 
 ---
 
 ## Version 5.3.0 - Système de Statistiques et Gamification
 
-**Date :** Décembre 2024
+**Date :** Novembre 2024
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
 #### **Système de Points et Niveaux**
 
-- **🏆 Points par scan** : +10 points pour chaque déchet scanné
-- **📈 Niveaux progressifs** : Système de progression basé sur les points
-- **🔥 Suivi des streaks** : Consecutive days de recyclage
-- **📊 Tableau de bord complet** : Visualisation des progrès
+- **Points par scan** : +10 points pour chaque déchet scanné
+- **Niveaux progressifs** : Système de progression basé sur les points
+- **Suivi des streaks** : Consecutive days de recyclage
+- **Tableau de bord complet** : Visualisation des progrès
 
 #### **Statistiques Détaillées**
 
-- **📱 Total des scans** : Nombre de déchets recyclés
-- **🎯 Score de précision** : Pourcentage de bonnes classifications
-- **♻️ Types de déchets** : Répartition par catégorie
-- **📅 Historique** : Suivi temporel des activités
+- **Total des scans** : Nombre de déchets recyclés
+- **Score de précision** : Pourcentage de bonnes classifications
+- **Types de déchets** : Répartition par catégorie
+- **Historique** : Suivi temporel des activités
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -600,7 +623,7 @@ npm install react-native-vector-icons
 npm install @react-native-async-storage/async-storage
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Gamification**
 
@@ -615,7 +638,7 @@ npm install @react-native-async-storage/async-storage
 - **Synchronisation** : Prévue avec Firebase pour la production
 - **Mode hors ligne** : Fonctionnement sans connexion internet
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Engagement**
 
@@ -635,25 +658,25 @@ npm install @react-native-async-storage/async-storage
 
 ## Version 5.2.0 - Interface Utilisateur Modernisée
 
-**Date :** Décembre 2024
+**Date :** Novembre 2024
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
 #### **Design System Cohérent**
 
-- **🎨 Icônes MaterialIcons** : Remplacement des emojis manuels
-- **🌈 Palette de couleurs** : Système de couleurs harmonieux
-- **📱 Composants réutilisables** : Header, boutons, cards
-- **🔄 Thème adaptatif** : Support des modes clair/sombre
+- **Icônes MaterialIcons** : Remplacement des emojis manuels
+- **Palette de couleurs** : Système de couleurs harmonieux
+- **Composants réutilisables** : Header, boutons, cards
+- **Thème adaptatif** : Support des modes clair/sombre
 
 #### **Navigation Améliorée**
 
-- **📱 Bottom tabs** : Navigation intuitive entre sections
-- **👤 Profil intégré** : Accès rapide aux statistiques
-- **🔍 Recherche** : Fonctionnalité de recherche globale
-- **📱 Responsive design** : Adaptation aux différentes tailles d'écran
+- **Bottom tabs** : Navigation intuitive entre sections
+- **Profil intégré** : Accès rapide aux statistiques
+- **Recherche** : Fonctionnalité de recherche globale
+- **Responsive design** : Adaptation aux différentes tailles d'écran
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -668,7 +691,7 @@ npm install react-native-vector-icons
 npm install react-native-elements
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Composants UI**
 
@@ -684,7 +707,7 @@ npm install react-native-elements
 - **Couleurs de statut** : Succès, warning, erreur
 - **Couleurs de fond** : Surface et background
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Expérience Utilisateur**
 
@@ -704,26 +727,26 @@ npm install react-native-elements
 
 ## Version 5.1.0 - Intégration ML Kit Native
 
-**Date :** Décembre 2024
+**Date :** Novembre 2024
 
-### 🆕 **Nouvelles Fonctionnalités**
+### **Nouvelles Fonctionnalités**
 
 #### **Module Natif Android (Kotlin)**
 
-- **🤖 Intelligence artificielle** : Reconnaissance automatique des déchets
-- **📱 Performance native** : Optimisations Android spécifiques
-- **🔍 Fonctionnalités avancées** : Object Detection, Image Labeling, Barcode Scanning
-- **📊 Résultats en temps réel** : Classification immédiate
+- **Intelligence artificielle** : Reconnaissance automatique des déchets
+- **Performance native** : Optimisations Android spécifiques
+- **Fonctionnalités avancées** : Object Detection, Image Labeling, Barcode Scanning
+- **Résultats en temps réel** : Classification immédiate
 
 #### **Fonctionnalités ML Kit**
 
-- **🖼️ Image Labeling** : Identification des types de déchets
-- **📦 Object Detection** : Localisation des objets dans l'image
-- **📱 Barcode Scanning** : Lecture des codes-barres
-- **📝 Text Recognition** : Extraction de texte des images
-- **👤 Face Detection** : Détection de visages (sécurité)
+- **Image Labeling** : Identification des types de déchets
+- **Object Detection** : Localisation des objets dans l'image
+- **Barcode Scanning** : Lecture des codes-barres
+- **Text Recognition** : Extraction de texte des images
+- **Face Detection** : Détection de visages (sécurité)
 
-### 🛠️ **Modifications Techniques**
+### **Modifications Techniques**
 
 #### **Fichiers Modifiés**
 
@@ -741,7 +764,7 @@ implementation 'com.google.mlkit:text-recognition:16.0.0'
 implementation 'com.google.mlkit:face-detection:16.1.5'
 ```
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Reconnaissance d'Images**
 
@@ -757,7 +780,7 @@ implementation 'com.google.mlkit:face-detection:16.1.5'
 - **Mode hors ligne** : Modèles pré-téléchargés
 - **Mise à jour** : Synchronisation des modèles
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Précision**
 
@@ -777,25 +800,25 @@ implementation 'com.google.mlkit:face-detection:16.1.5'
 
 ## Version 5.0.0 - Architecture de Base
 
-**Date :** Décembre 2024
+**Date :** Novembre 2024
 
-### 🆕 **Fonctionnalités de Base**
+### **Fonctionnalités de Base**
 
 #### **Authentification Firebase**
 
-- **🔐 Connexion/Inscription** : Email et mot de passe
-- **👤 Profils utilisateur** : Données personnalisées
-- **🔒 Sécurité** : Authentification sécurisée
-- **📱 Persistance** : Connexion maintenue entre sessions
+- **Connexion/Inscription** : Email et mot de passe
+- **Profils utilisateur** : Données personnalisées
+- **Sécurité** : Authentification sécurisée
+- **Persistance** : Connexion maintenue entre sessions
 
 #### **Navigation de Base**
 
-- **📱 Écrans principaux** : Scan, Collecte, Conseils, Profil
-- **🧭 Navigation par tabs** : Interface intuitive
-- **🔄 Modals** : Authentification et actions importantes
-- **📱 Responsive** : Adaptation aux différentes tailles d'écran
+- **Écrans principaux** : Scan, Collecte, Conseils, Profil
+- **Navigation par tabs** : Interface intuitive
+- **Modals** : Authentification et actions importantes
+- **Responsive** : Adaptation aux différentes tailles d'écran
 
-### 🛠️ **Architecture Technique**
+### **Architecture Technique**
 
 #### **Structure du Projet**
 
@@ -815,7 +838,7 @@ src/
 - **Firebase** : Backend et authentification
 - **React Navigation** : Navigation entre écrans
 
-### 🎯 **Fonctionnalités Détaillées**
+### **Fonctionnalités Détaillées**
 
 #### **Écrans Principaux**
 
@@ -827,11 +850,11 @@ src/
 #### **Services Intégrés**
 
 - **Firebase Auth** : Gestion des utilisateurs
-- **Firestore** : Base de données en temps réel
+- **Firebase Firestore** : Base de données en temps réel
 - **Storage** : Stockage des images et données
 - **Analytics** : Suivi de l'utilisation
 
-### 🚀 **Avantages Utilisateur**
+### **Avantages Utilisateur**
 
 #### **Fonctionnalités**
 
@@ -849,7 +872,7 @@ src/
 
 ---
 
-## 📝 **Notes de Version**
+## **Notes de Version**
 
 ### **Conventions de Nommage**
 
@@ -866,271 +889,11 @@ src/
 
 ### **Support**
 
-- **Développeur** : Zineb Lahmar
+- **Développeur** : Zainab LAHMAR
 - **Email** : zineblahmar1@gmail.com
+- **Email professionnel** : zainab.lahmar@ynov.com
 - **Projet** : Master 2 YNOV - Application de Recyclage Intelligent
 
 ---
 
-**🌱 Ensemble, recyclons intelligemment pour un avenir durable !** ♻️
-
-# 📋 **Changelog - Historique des Versions**
-
-## **Version 7.0.0 - Page de Collecte Intelligente** _(15 Décembre 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-### **🗑️ Page de Collecte Complètement Refondue**
-
-- **Intégration des données Bordeaux Métropole** : Fichier `en_frcol_s.json` avec fréquences de collecte
-- **Service de collecte intelligent** : `CollecteService` singleton pour la gestion des données
-- **Géolocalisation automatique** : Détection de la ville et affichage des informations de collecte
-- **Sélecteur de commune** : Choix parmi les villes disponibles dans le dataset
-- **Calendrier hebdomadaire visuel** : Vue d'ensemble de la semaine avec types de collecte
-
-### **📊 Composants Réutilisables Créés**
-
-- **`CollecteInfo`** : Affichage détaillé des informations de collecte (OM/TRI, passage, prochaine collecte)
-- **`CommuneSelector`** : Modal de sélection de commune avec recherche et filtrage
-- **`WeeklyCalendar`** : Calendrier visuel de la semaine avec badges colorés et légende
-
-### **🌍 Service de Géolocalisation Centralisé**
-
-- **`LocationService`** : Singleton pour la gestion de la géolocalisation
-- **`useLocation`** : Hook React personnalisé pour l'utilisation du service
-- **Permissions automatiques** : Gestion des permissions Android pour la localisation
-- **Reverse geocoding** : Conversion automatique coordonnées → nom de ville
-
-### **🎨 Interface Utilisateur Modernisée**
-
-- **Icons MaterialIcons** : Remplacement des emojis par des icônes vectorielles professionnelles
-- **Design cohérent** : Utilisation de la palette de couleurs EcoTri
-- **Composants stylés** : Ombres, bordures arrondies, espacement harmonieux
-
-**⚡ AMÉLIORATIONS :**
-
-- **Performance** : Service singleton pour éviter les rechargements
-- **UX** : Interface intuitive avec sélection de commune et calendrier visuel
-- **Données** : Intégration de données réelles de collecte Bordeaux Métropole
-- **Géolocalisation** : Détection automatique de la ville avec fallback manuel
-- **Réutilisabilité** : Composants modulaires utilisables dans d'autres écrans
-
-**🔧 ARCHITECTURE :**
-
-- **Service-oriented** : Architecture basée sur des services singleton
-- **Hooks personnalisés** : Abstraction de la logique métier
-- **Composants modulaires** : Structure réutilisable et maintenable
-- **Gestion d'état** : État local avec mise à jour automatique
-
-**📱 FONCTIONNALITÉS DÉTAILLÉES :**
-
-#### **🗑️ CollecteService**
-
-```typescript
-// Service singleton pour la gestion des données de collecte
-class CollecteService {
-  // Trouver la zone la plus proche d'une localisation
-  findNearestZone(lat: number, lon: number): CollecteZone | null;
-
-  // Obtenir les informations de collecte par commune
-  getCollecteInfo(commune: string): CollecteInfo | null;
-
-  // Obtenir les informations par localisation GPS
-  getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null;
-
-  // Lister toutes les communes disponibles
-  getAvailableCommunes(): string[];
-
-  // Formater les jours de collecte
-  formatCollecteDays(jours: string[]): string;
-
-  // Calculer le prochain jour de collecte
-  getNextCollecteDay(jours: string[]): string | null;
-}
-```
-
-#### **🌍 LocationService**
-
-```typescript
-// Service singleton pour la géolocalisation
-class LocationService {
-  // Obtenir la localisation actuelle
-  async getCurrentLocation(): Promise<LocationData>;
-
-  // Vérifier et demander les permissions
-  async checkAndRequestPermissions(): Promise<boolean>;
-
-  // Convertir coordonnées en nom de ville
-  async reverseGeocode(lat: number, lon: number): Promise<string>;
-
-  // Rafraîchir la localisation
-  async refreshLocation(): Promise<LocationData>;
-}
-```
-
-#### **📅 WeeklyCalendar**
-
-```typescript
-// Composant de calendrier hebdomadaire
-interface WeeklyCalendarProps {
-  collecteInfo: CollecteInfo;
-}
-
-// Fonctionnalités :
-// - Affichage des 7 jours de la semaine
-// - Badges colorés pour les types de collecte (OM, TRI, OM+TRI)
-// - Mise en évidence du jour actuel
-// - Légende explicative des codes couleur
-```
-
-**🎯 UTILISATION :**
-
-1. **Détection automatique** : L'app détecte automatiquement la ville de l'utilisateur
-2. **Affichage des informations** : Jours de collecte, passage, prochaine collecte
-3. **Sélection manuelle** : Possibilité de changer de commune via le sélecteur
-4. **Vue d'ensemble** : Calendrier hebdomadaire pour planifier les collectes
-
-**📊 DONNÉES INTÉGRÉES :**
-
-- **Source** : Dataset Bordeaux Métropole (`en_frcol_s.json`)
-- **Contenu** : Fréquences de collecte par zone géographique
-- **Types** : Ordures Ménagères (OM) et Tri/Recyclage (TRI)
-- **Informations** : Jours de collecte, passage, coordonnées GPS
-
-**🔧 TECHNICAL DEBT :**
-
-- **Suppression des sections inutiles** : "Vos Statistiques" et "Types de Déchets" retirées
-- **Code nettoyé** : Interface simplifiée et focalisée sur la collecte
-- **Performance optimisée** : Chargement unique des données au démarrage
-
----
-
-## **Version 6.0.0 - Géolocalisation et Services Centralisés** _(14 Décembre 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-### **🌍 Service de Géolocalisation Centralisé**
-
-- **`LocationService`** : Singleton pour la gestion de la géolocalisation
-- **`useLocation`** : Hook React personnalisé pour l'utilisation du service
-- **Permissions automatiques** : Gestion des permissions Android
-- **Reverse geocoding** : Conversion coordonnées → nom de ville
-
-### **📱 Intégration dans HomeScreen et ProfileScreen**
-
-- **Géolocalisation unifiée** : Même service utilisé dans les deux écrans
-- **Performance optimisée** : Pas de duplication de code
-- **État synchronisé** : Localisation cohérente entre les écrans
-
-**⚡ AMÉLIORATIONS :**
-
-- **Architecture** : Services singleton pour la réutilisabilité
-- **Performance** : Géolocalisation optimisée et centralisée
-- **Maintenance** : Code centralisé et facile à maintenir
-
----
-
-## **Version 5.1.0 - Détection Avancée ML Kit** _(14 Août 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-- **Détection d'objets avancée** : Module natif Object Detection ML Kit
-- **Classification intelligente multi-sources** : Objet + Texte + Code-barres
-- **Système de fallback robuste** : Gestion automatique des erreurs
-- **Interface utilisateur améliorée** : Classification automatique sans bouton
-
-**⚡ AMÉLIORATIONS :**
-
-- **Précision globale** : 80% → **92%** (+12%)
-- **Vitesse d'analyse** : 5s → **3s** (-40%)
-- **Robustesse** : Gestion d'erreurs avancée
-- **Performance** : Support multi-objets simultanés
-
-**🐛 CORRECTIONS :**
-
-- Optimisation de la gestion des erreurs ML Kit
-- Amélioration de la stabilité du module natif
-- Correction des logs de debugging
-
----
-
-## **Version 5.0.0 - Module Natif ML Kit** _(13 Août 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-- **Module natif Android ML Kit** : Remplacement de Firebase ML Kit
-- **Détection native** : Image Labeling, Barcode Scanning, Text Recognition, Face Detection
-- **Architecture optimisée** : Communication directe React Native ↔ Android
-- **Performance native** : Analyse ML Kit en temps réel
-
-**⚡ AMÉLIORATIONS :**
-
-- **Performance** : Analyse 3x plus rapide
-- **Précision** : Détection native plus fiable
-- **Indépendance** : Plus de dépendance Firebase ML Kit
-- **Contrôle** : Gestion complète des modules ML Kit
-
----
-
-## **Version 4.0.0 - Authentification Firebase** _(12 Août 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-- **Authentification complète** : Login, Signup, Password Reset
-- **Gestion des sessions** : Persistance des connexions
-- **Profil utilisateur** : Stockage Firestore
-- **Interface moderne** : Modal d'authentification
-
-**⚡ AMÉLIORATIONS :**
-
-- **Sécurité** : Authentification Firebase robuste
-- **UX** : Interface utilisateur intuitive
-- **Performance** : Gestion optimisée des états
-
----
-
-## **Version 3.0.0 - Navigation Personnalisée** _(11 Août 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-- **Navigation par onglets** : Scan, Collecte, Profile, Conseils
-- **Navigation personnalisée** : Remplacement de React Navigation
-- **Gestion des états** : Navigation fluide et stable
-
-**⚡ AMÉLIORATIONS :**
-
-- **Stabilité** : Plus d'erreurs de navigation
-- **Performance** : Navigation native optimisée
-- **UX** : Interface utilisateur cohérente
-
----
-
-## **Version 2.0.0 - ML Kit de Base** _(10 Août 2024)_
-
-**🚀 NOUVELLES FONCTIONNALITÉS :**
-
-- **Intégration ML Kit** : Reconnaissance d'objets, codes-barres, texte
-- **Classification des déchets** : 7 types de déchets supportés
-- **Interface de scan** : Caméra et galerie intégrées
-- **Système de conseils** : Tips personnalisés par type de déchet
-
-**⚡ AMÉLIORATIONS :**
-
-- **Intelligence** : Reconnaissance automatique des déchets
-- **Précision** : Classification ML Kit avancée
-- **UX** : Interface de scan intuitive
-
----
-
-## **Version 1.0.0 - Base de l'Application** _(9 Août 2024)_
-
-**🚀 FONCTIONNALITÉS DE BASE :**
-
-- **Structure React Native** : Application mobile cross-platform
-- **Interface de base** : Écrans principaux
-- **Configuration Android/iOS** : Build natif configuré
-- **Architecture TypeScript** : Code typé et maintenable
-
----
-
-**L'application EcoTri évolue constamment pour offrir la meilleure expérience de recyclage intelligent !** 🌱✨
+**Ensemble, recyclons intelligemment pour un avenir durable !**

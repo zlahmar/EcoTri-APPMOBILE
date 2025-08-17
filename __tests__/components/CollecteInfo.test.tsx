@@ -49,7 +49,6 @@ describe('CollecteInfo', () => {
       <CollecteInfo {...defaultProps} onCommuneChange={mockOnCommuneChange} />
     );
     
-    // Le composant se rend correctement et onCommuneChange est défini
     expect(getByText('Collecte des déchets')).toBeTruthy();
     expect(mockOnCommuneChange).toBeDefined();
   });
@@ -65,7 +64,6 @@ describe('CollecteInfo', () => {
       <CollecteInfo {...defaultProps} onCommuneChange={undefined} />
     );
     
-    // Le composant se rend sans crash même sans onCommuneChange
     expect(getByText('Collecte des déchets')).toBeTruthy();
   });
 
@@ -80,7 +78,6 @@ describe('CollecteInfo', () => {
       <CollecteInfo {...defaultProps} collecteInfo={emptyCollecteInfo} />
     );
     
-    // Le composant se rend sans crash même avec des données vides
     expect(getByText('Collecte des déchets')).toBeTruthy();
   });
 });

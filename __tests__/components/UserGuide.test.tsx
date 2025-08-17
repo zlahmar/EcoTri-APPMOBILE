@@ -43,13 +43,10 @@ describe('UserGuide', () => {
     
     const scannerSection = getByText('Scanner des Déchets');
     
-    // Section should not be expanded initially
     expect(queryByText('• Ouvrez la page de scan')).toBeNull();
     
-    // Press to expand
     fireEvent.press(scannerSection);
     
-    // Section should now be expanded
     expect(queryByText('• Ouvrez la page de scan')).toBeTruthy();
     expect(queryByText('• Pointez votre caméra vers le déchet')).toBeTruthy();
   });
@@ -59,11 +56,9 @@ describe('UserGuide', () => {
     
     const scannerSection = getByText('Scanner des Déchets');
     
-    // First press to expand
     fireEvent.press(scannerSection);
     expect(queryByText('• Ouvrez la page de scan')).toBeTruthy();
     
-    // Second press to collapse
     fireEvent.press(scannerSection);
     expect(queryByText('• Ouvrez la page de scan')).toBeNull();
   });
@@ -72,8 +67,6 @@ describe('UserGuide', () => {
     const mockOnClose = jest.fn();
     const { getByText } = render(<UserGuide {...defaultProps} onClose={mockOnClose} />);
     
-    // Le bouton de fermeture est dans le header, testons plutôt que le composant se rend correctement
-    // et que la fonction onClose est passée en prop
     expect(getByText('Guide d\'Utilisation EcoTri')).toBeTruthy();
     expect(mockOnClose).toBeDefined();
   });
@@ -87,7 +80,6 @@ describe('UserGuide', () => {
   it('should handle missing onClose prop gracefully', () => {
     const { getByText } = render(<UserGuide isVisible={true} />);
     
-    // Should render without crashing
     expect(getByText('Guide d\'Utilisation EcoTri')).toBeTruthy();
   });
 
@@ -97,7 +89,6 @@ describe('UserGuide', () => {
     const recyclingSection = getByText('Trouver des Points de Recyclage');
     fireEvent.press(recyclingSection);
     
-    // Check for detailed content
     expect(queryByText('• Allez sur la page d\'accueil')).toBeTruthy();
     expect(queryByText('• Votre position est détectée automatiquement')).toBeTruthy();
     expect(queryByText('• Les points proches s\'affichent sur la carte')).toBeTruthy();
@@ -109,11 +100,9 @@ describe('UserGuide', () => {
     const scannerSection = getByText('Scanner des Déchets');
     const recyclingSection = getByText('Trouver des Points de Recyclage');
     
-    // Expand scanner section
     fireEvent.press(scannerSection);
     expect(queryByText('• Ouvrez la page de scan')).toBeTruthy();
     
-    // Expand recycling section
     fireEvent.press(recyclingSection);
     expect(queryByText('• Ouvrez la page de scan')).toBeNull();
     expect(queryByText('• Allez sur la page d\'accueil')).toBeTruthy();

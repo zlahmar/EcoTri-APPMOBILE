@@ -56,9 +56,9 @@ EcoTri est une application mobile innovante conçue pour simplifier et améliore
    - Autorisez l'accès à la caméra (optionnel)
 
 3. **Configuration Initiale**
-   - Sélectionnez votre commune
-   - Configurez vos préférences de recyclage
+   - Sélectionnez votre commune (automatiquement détectée via la localisation)
    - Créez votre compte utilisateur (optionnel)
+   - C'est tout !
 
 ### Interface Principale
 
@@ -128,7 +128,7 @@ Après le scan, vous obtenez :
 
 - **Identification de l'objet** : Nom et catégorie du déchet
 - **Conseils de recyclage** : Instructions spécifiques au type de déchet
-- **Points de collecte** : Localisation des centres de recyclage appropriés
+- **Points de collecte** : Localisation des centres de recyclage appropriés (à venir)
 - **Impact environnemental** : Informations sur l'empreinte carbone
 - **Alternatives durables** : Suggestions de réutilisation ou de réduction
 
@@ -153,9 +153,8 @@ EcoTri prend en charge tous les types de déchets courants :
 #### Calendrier de Collecte
 
 - **Vue hebdomadaire** : Planning des ramassages par type de déchet
-- **Notifications** : Rappels automatiques la veille de la collecte
-- **Modifications** : Alertes en cas de changement d'horaire
-- **Historique** : Suivi des collectes passées
+- **Notifications** : Rappels automatiques la veille de la collecte (à venir)
+- **Modifications** : Alertes en cas de changement d'horaire (à venir)
 
 #### Zones de Collecte
 
@@ -172,6 +171,8 @@ EcoTri prend en charge tous les types de déchets courants :
 - **Informations pratiques** : Accès, parking, conditions d'accueil
 
 ### Navigation vers les Points de Collecte
+
+**Direction vers votre application de navigation préférée** (Google Maps, Waze, etc.)
 
 - **Itinéraires** : Calcul automatique du trajet optimal
 - **Modes de transport** : Voiture, transports en commun, vélo, marche
@@ -196,12 +197,10 @@ EcoTri prend en charge tous les types de déchets courants :
    - Adresse email valide
    - Mot de passe sécurisé (8 caractères minimum)
    - Prénom et nom
-   - Commune de résidence
 
 3. **Validation**
    - Confirmez votre email
    - Acceptez les conditions d'utilisation
-   - Configurez vos préférences de recyclage
 
 #### Connexion
 
@@ -215,9 +214,9 @@ EcoTri prend en charge tous les types de déchets courants :
 #### Informations Personnelles
 
 - **Données de base** : Nom, prénom, email
-- **Localisation** : Commune et adresse
-- **Préférences** : Types de déchets prioritaires
-- **Notifications** : Configuration des alertes
+- **Localisation** : Commune et adresse (automatiquement détectée via la localisation)
+- **Préférences** : Types de déchets prioritaires (à venir)
+- **Notifications** : Configuration des alertes (à venir)
 
 #### Statistiques Personnelles
 
@@ -231,6 +230,12 @@ EcoTri prend en charge tous les types de déchets courants :
 - **Partage de données** : Contrôle de l'utilisation de vos informations
 - **Visibilité du profil** : Gestion de votre présence dans l'application
 - **Suppression de compte** : Procédure de suppression des données
+
+#### Guide de l'utilisateur
+
+- **Guide de l'utilisateur** : Accès à la documentation de l'application
+- **Aide** : Résolution des problèmes courants (à venir)
+- **À propos** : Informations sur l'application
 
 ---
 
@@ -269,9 +274,9 @@ EcoTri prend en charge tous les types de déchets courants :
 #### Adaptation Visuelle
 
 - **Taille du texte** : Ajustement selon vos besoins
-- **Contraste** : Mode sombre et clair disponibles
+- **Contraste** : Mode sombre et clair disponibles (à venir)
 - **Couleurs** : Palette accessible aux daltoniens
-- **Icônes** : Symboles clairs et reconnaissables
+- **Icônes** : Symboles clairs et reconnaissables avec le texte
 
 #### Navigation Adaptée
 
@@ -282,7 +287,6 @@ EcoTri prend en charge tous les types de déchets courants :
 
 #### Personnalisation
 
-- **Vitesse d'animation** : Ajustement des transitions
 - **Sons et vibrations** : Configuration des notifications
 - **Interface simplifiée** : Mode accessible pour les débutants
 - **Aide contextuelle** : Explications disponibles à tout moment
@@ -364,13 +368,6 @@ EcoTri prend en charge tous les types de déchets courants :
 - **Problèmes de sécurité** : Alertez sur les vulnérabilités
 - **Améliorations** : Suggérez des optimisations
 
-#### Programme Bêta
-
-- **Test des nouvelles fonctionnalités** : Accès anticipé
-- **Feedback en temps réel** : Évaluation continue
-- **Influence sur le développement** : Vos avis comptent
-- **Récompenses** : Avantages pour les testeurs actifs
-
 ---
 
 ## Annexes
@@ -412,12 +409,11 @@ R : Utilisez l'option de synchronisation dans les paramètres.
 - **Site web officiel** : www.ecotri-app.com
 - **Documentation technique** : docs.ecotri-app.com
 - **Communauté utilisateurs** : community.ecotri-app.com
-- **Formation et tutoriels** : learn.ecotri-app.com
 
 ---
 
 **Version du document** : 2.0  
-**Dernière mise à jour** : Janvier 2025  
+**Dernière mise à jour** : Août 2025  
 **Compatibilité** : iOS 12+, Android 8+  
 **Maintenu par** : Équipe EcoTri  
 **Statut** : Approuvé et en production

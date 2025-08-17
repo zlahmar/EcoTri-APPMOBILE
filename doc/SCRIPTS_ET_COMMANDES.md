@@ -1,10 +1,10 @@
-# 🚀 Scripts et Commandes - EcoTri
+# Scripts et Commandes - EcoTri
 
 **Version :** 8.0.0  
 **Dernière mise à jour :** Août 2025  
 **Environnement :** Windows PowerShell
 
-## 📋 **Table des Matières**
+## **Table des Matières**
 
 - [Vérification de l'Environnement](#-vérification-de-lenvironnement)
 - [Gestion des Dépendances](#-gestion-des-dépendances)
@@ -20,7 +20,7 @@
 
 ---
 
-## 🔍 **Vérification de l'Environnement**
+## **Vérification de l'Environnement**
 
 ### **Versions des Outils**
 
@@ -43,7 +43,7 @@ npx react-native --version
 
 ---
 
-## 📦 **Gestion des Dépendances**
+## **Gestion des Dépendances**
 
 ### **Installation des Dépendances**
 
@@ -89,7 +89,7 @@ npm install
 
 ---
 
-## 🧪 **Tests Automatisés**
+## **Tests Automatisés**
 
 ### **Commandes de Test Principales**
 
@@ -141,7 +141,7 @@ npx tsc --showConfig
 
 ---
 
-## 🔧 **Qualité du Code**
+## **Qualité du Code**
 
 ### **Linting avec ESLint**
 
@@ -193,7 +193,7 @@ npx tsc
 
 ---
 
-## 🤖 **Configuration Android**
+## **Configuration Android**
 
 ### **React Native Doctor**
 
@@ -236,7 +236,7 @@ cd ..
 
 ---
 
-## 📱 **Configuration TypeScript**
+## **Configuration TypeScript**
 
 ### **Vérification de la Configuration**
 
@@ -263,7 +263,7 @@ npm list @types/*
 
 ---
 
-## 🎯 **Configuration Jest**
+## **Configuration Jest**
 
 ### **Vérification de la Configuration**
 
@@ -293,7 +293,7 @@ npx jest --detectLeaks --detectOpenHandles
 
 ---
 
-## 🔍 **Configuration ESLint**
+## **Configuration ESLint**
 
 ### **Vérification de la Configuration**
 
@@ -323,7 +323,7 @@ npx eslint . --cache
 
 ---
 
-## ✨ **Configuration Prettier**
+## **Configuration Prettier**
 
 ### **Vérification et Formatage**
 
@@ -350,7 +350,7 @@ npx prettier --single-quote --trailing-comma=all --write src/
 
 ---
 
-## 🚀 **Démarrage et Build**
+## **Démarrage et Build**
 
 ### **Metro Bundler**
 
@@ -390,7 +390,7 @@ npx react-native run-android --variant=release
 
 ---
 
-## 🛠️ **Commandes Utiles**
+## **Commandes Utiles**
 
 ### **Nettoyage et Maintenance**
 
@@ -442,7 +442,7 @@ dir /s *.test.tsx
 
 ---
 
-## 📊 **Résultats Attendus des Tests**
+## **Résultats Attendus des Tests**
 
 ### **Tests de Base**
 
@@ -475,7 +475,7 @@ npm run lint
 
 ---
 
-## ⚠️ **Résolution des Problèmes Courants**
+## **Résolution des Problèmes Courants**
 
 ### **Erreurs de Dépendances**
 
@@ -511,7 +511,7 @@ npx react-native start --reset-cache
 
 ---
 
-## 🎯 **Checklist de Validation**
+## **Checklist de Validation**
 
 ### **Avant de Commencer**
 
@@ -542,7 +542,7 @@ npx react-native start --reset-cache
 
 ---
 
-## 📚 **Ressources et Références**
+## **Ressources et Références**
 
 ### **Documentation Officielle**
 
@@ -560,6 +560,6 @@ npx react-native start --reset-cache
 
 ---
 
-**🌱 Ensemble, recyclons intelligemment pour un avenir durable !** ♻️✨
+**Ensemble, recyclons intelligemment pour un avenir durable !**
 
 _Dernière mise à jour : Août 2025_

@@ -32,7 +32,6 @@ import { PermissionsAndroid } from 'react-native';
 describe('LocationService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset du singleton
     (locationService as any).currentLocation = null;
     (locationService as any).isRequestingLocation = false;
   });

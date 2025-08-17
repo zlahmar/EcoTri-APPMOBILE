@@ -10,16 +10,26 @@
 6. [Interface Utilisateur](#interface-utilisateur)
 7. [Gestion des Données](#gestion-des-données)
 8. [Sécurité et Authentification](#sécurité-et-authentification)
-   - [Authentification Firebase](#authentification-firebase)
+   - [Authentification et Sécurité](#authentification-et-sécurité)
    - [Gestion des Permissions](#gestion-des-permissions)
    - [Protection des Données](#protection-des-données)
    - [Protection OWASP](#protection-owasp)
    - [Accessibilité](#accessibilité)
-9. [Tests et Qualité](#tests-et-qualité)
-10. [Performance et Optimisation](#performance-et-optimisation)
-11. [Déploiement et Build](#déploiement-et-build)
-12. [Maintenance et Support](#maintenance-et-support)
-13. [Annexes](#annexes)
+9. [Intelligence Artificielle et ML Kit](#intelligence-artificielle-et-ml-kit)
+   - [Module Natif ML Kit Android](#module-natif-ml-kit-android)
+   - [Fonctionnalités ML Kit Intégrées](#fonctionnalités-ml-kit-intégrées)
+   - [Configuration Technique](#configuration-technique)
+10. [Configuration Firebase](#configuration-firebase)
+    - [Services Configurés](#services-configurés)
+    - [Configuration Android](#configuration-android)
+    - [Configuration iOS](#configuration-ios)
+    - [Services d'Authentification](#services-dauthentification)
+    - [Base de Données Firestore](#base-de-données-firestore)
+11. [Tests et Qualité](#tests-et-qualité)
+12. [Performance et Optimisation](#performance-et-optimisation)
+13. [Déploiement et Build](#déploiement-et-build)
+14. [Maintenance et Support](#maintenance-et-support)
+15. [Annexes](#annexes)
 
 ---
 
@@ -49,15 +59,68 @@ L'architecture d'EcoTri suit le pattern Model-View-Controller (MVC) adapté aux 
 ### Structure des Dossiers
 
 ```
-src/
-├── components/          # Composants réutilisables
-│   ├── common/         # Composants partagés
-│   └── screens/        # Écrans de l'application
-├── services/           # Logique métier et API
-├── hooks/              # Hooks React personnalisés
-├── styles/             # Définitions de styles
-├── utils/              # Fonctions utilitaires
-└── assets/             # Ressources statiques
+EcoTri/                          # Racine du projet
+├── src/                        # Code source principal
+│   ├── components/             # Composants réutilisables
+│   │   ├── common/            # Composants partagés (Header, CustomButton, etc.)
+│   │   └── main/              # Composants spécifiques aux écrans principaux
+│   ├── screens/               # Écrans de l'application
+│   │   ├── auth/              # Écrans d'authentification (Login, Signup)
+│   │   ├── main/              # Écrans principaux (Home, Profile, Splash)
+│   │   └── recycling/         # Écrans de recyclage (Collecte, Scan, Conseils)
+│   ├── services/              # Logique métier et API (9 services)
+│   │   ├── authService.ts     # Authentification Firebase
+│   │   ├── locationService.ts # Géolocalisation
+│   │   ├── collecteService.ts # Données de collecte
+│   │   ├── statsService.ts    # Statistiques utilisateur
+│   │   ├── mlKitService.ts    # Reconnaissance d'objets
+│   │   ├── iconService.ts     # Gestion des icônes
+│   │   ├── firestoreService.ts # Base de données
+│   │   ├── useLocation.ts     # Hook de géolocalisation
+│   │   ├── firebase.ts        # Configuration Firebase
+│   │   └── ...
+│   ├── navigation/            # Gestion de la navigation
+│   ├── styles/                # Définitions de styles et thèmes
+│   └── assets/                # Ressources statiques (images, données)
+├── android/                   # Configuration Android native
+│   ├── app/                   # Application Android principale
+│   │   ├── build.gradle       # Configuration build Android
+│   │   ├── src/main/          # Code source Android natif
+│   │   └── google-services.json # Configuration Firebase
+│   ├── build.gradle           # Configuration Gradle projet
+│   └── gradle.properties      # Propriétés Gradle
+├── ios/                       # Configuration iOS native (macOS uniquement)
+│   ├── EcoTri.xcodeproj/     # Projet Xcode
+│   ├── Podfile               # Dépendances CocoaPods
+│   └── GoogleService-Info.plist # Configuration Firebase iOS
+├── doc/                       # Documentation complète
+│   ├── TECHNICAL_GUIDE.md    # Guide technique (ce document)
+│   ├── TESTING_GUIDE.md      # Guide des tests
+│   ├── COMPETENCES_VALIDEES.md # Validation des compétences
+│   ├── SCRIPTS_ET_COMMANDES.md # Scripts et commandes
+│   ├── CHANGELOG.md          # Historique des versions
+│   ├── USER_GUIDE.md         # Guide utilisateur
+│   └── CI_CD_GUIDE.md        # Guide CI/CD
+├── __tests__/                 # Tests automatisés
+│   ├── components/            # Tests des composants
+│   ├── services/              # Tests des services
+│   ├── screens/               # Tests des écrans
+│   └── hooks/                 # Tests des hooks
+├── __mocks__/                 # Mocks pour les tests
+├── .github/                   # Configuration GitHub Actions (CI/CD)
+│   └── workflows/             # Pipelines CI/CD
+├── coverage/                  # Rapports de couverture des tests
+├── node_modules/              # Dépendances npm (généré)
+├── package.json               # Configuration npm et scripts
+├── jest.config.js             # Configuration Jest
+├── tsconfig.json              # Configuration TypeScript
+├── babel.config.js            # Configuration Babel
+├── metro.config.js            # Configuration Metro (React Native)
+├── .eslintrc.js               # Configuration ESLint
+├── .prettierrc.js             # Configuration Prettier
+├── .gitignore                 # Fichiers ignorés par Git
+├── App.tsx                    # Point d'entrée de l'application
+└── index.js                   # Point d'entrée React Native
 ```
 
 ### Principes d'Architecture
@@ -80,6 +143,7 @@ src/
 - **Base de données** : Firebase Firestore
 - **Authentification** : Firebase Auth
 - **Stockage local** : AsyncStorage
+- **Intelligence artificielle** : ML Kit
 - **Tests** : Jest et React Native Testing Library
 
 ### Dépendances Principales
@@ -88,6 +152,48 @@ src/
 - **react-native-geolocation-service** : Services de géolocalisation
 - **react-native-vector-icons** : Icônes Material Design
 - **@react-native-async-storage** : Stockage local persistant
+
+### Comparatif des Technologies et Choix d'Architecture
+
+#### **Pourquoi React Native ?**
+
+| Alternative        | Avantages                            | Inconvénients                              | Choix EcoTri                                                  |
+| ------------------ | ------------------------------------ | ------------------------------------------ | ------------------------------------------------------------- |
+| **Flutter**        | Performance native, UI cohérente     | Courbe d'apprentissage, écosystème         | **React Native** : Équipe expérimentée, écosystème mature     |
+| **Native Android** | Performance maximale, contrôle total | Développement séparé, maintenance double   | **React Native** : Code unique, maintenance simplifiée        |
+| **Ionic/Cordova**  | Web technologies                     | Performance limitée, accès natif restreint | **React Native** : Performance native, accès complet aux APIs |
+
+#### **Pourquoi Firebase ?**
+
+| Alternative        | Avantages                        | Inconvénients                   | Choix EcoTri                                                 |
+| ------------------ | -------------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| **AWS Amplify**    | Services complets, scalabilité   | Complexité, coût élevé          | **Firebase** : Simplicité, gratuité, intégration Google      |
+| **Supabase**       | Open source, PostgreSQL          | Écosystème moins mature         | **Firebase** : Stabilité, support Google, écosystème riche   |
+| **Backend custom** | Contrôle total, personnalisation | Développement long, maintenance | **Firebase** : Rapidité de développement, maintenance Google |
+
+#### **Pourquoi ML Kit Natif vs Firebase ML ?**
+
+| Alternative         | Avantages                     | Inconvénients                       | Choix EcoTri                                                 |
+| ------------------- | ----------------------------- | ----------------------------------- | ------------------------------------------------------------ |
+| **Firebase ML Kit** | Intégration simple, cloud     | Coût par requête, dépendance réseau | **ML Kit Natif** : Gratuit, hors ligne, performance maximale |
+| **TensorFlow Lite** | Modèles personnalisés         | Complexité, taille des modèles      | **ML Kit Natif** : Prêt à l'emploi, optimisé Google          |
+| **APIs cloud**      | Précision élevée, maintenance | Latence réseau, coût                | **ML Kit Natif** : < 100ms, gratuit, contrôle total          |
+
+#### **Justification de l'Architecture MVC Adaptée**
+
+**Pourquoi pas d'autres patterns ?**
+
+- **Redux/MobX** : Overkill pour l'application, Hooks + Context suffisants
+- **Clean Architecture** : Complexité excessive pour une app mobile
+- **MVVM** : React Native suit naturellement le pattern MVC
+- **Microservices** : Application mobile monolithique plus efficace
+
+**Avantages de notre approche :**
+
+- **Simplicité** : Facile à comprendre et maintenir
+- **Performance** : Pas de surcharge d'architecture
+- **Évolutivité** : Services modulaires, ajout facile de fonctionnalités
+- **Tests** : Structure claire pour les tests unitaires et d'intégration
 
 ---
 
@@ -107,7 +213,7 @@ Les composants sont organisés selon une hiérarchie claire :
 - **Système de couleurs centralisé** : Palette cohérente
 - **Styles conditionnels** : Adaptation selon l'état
 - **Responsive design** : Adaptation aux différentes tailles d'écran
-- **Thème sombre/clair** : Support des préférences utilisateur
+- **Thème sombre(à venir)/clair** : Support des préférences utilisateur
 
 ---
 
@@ -283,19 +389,26 @@ interface UserData {
 
 ## Sécurité et Authentification
 
-### Authentification Firebase
+### Authentification et Sécurité
 
-- **Méthodes supportées** : Email/mot de passe
+- **Méthodes supportées** : Email/mot de passe, Google Sign-In
 - **Validation des données** : Vérification des formats
 - **Gestion des erreurs** : Messages utilisateur localisés
 - **Sécurité des sessions** : Tokens JWT sécurisés
+- **Structure utilisateur** : uid, email, firstName, lastName, timestamps
+- **Sécurité** : Sessions persistantes, déconnexion sécurisée
+
+_Configuration complète dans [Configuration Firebase](#configuration-firebase)._
 
 ### Gestion des Permissions
 
-- **Géolocalisation** : Demande explicite des permissions
+- **Géolocalisation** : Demande explicite des permissions GPS
 - **Stockage** : Accès sécurisé aux données locales
 - **Réseau** : Validation des appels API
-- **Caméra** : Permission pour la reconnaissance d'objets
+- **Caméra** : Permission pour la reconnaissance d'objets ML Kit
+- **Audio** : Permission pour les fonctionnalités avancées
+
+_Configuration détaillée dans [Intelligence Artificielle et ML Kit](#intelligence-artificielle-et-ml-kit)._
 
 ### Protection des Données
 
@@ -327,8 +440,8 @@ Les mesures de sécurité implémentées couvrent les 10 failles principales dé
 
 - **Standard français** : Conformité aux exigences nationales
 - **Complétude** : Couvre tous les aspects d'accessibilité numérique
-- **Mise à jour régulière** : Version 4.1 conforme aux standards internationaux
-- **Certification officielle** : Reconnaissance par les autorités publiques
+- **Mise à jour régulière** : Référentiel RGAA 4.1 conforme aux standards internationaux WCAG
+- **Certification officielle** : Reconnaissance par les autorités publiques françaises (à venir)
 
 #### Implémentation des Exigences RGAA
 
@@ -340,7 +453,131 @@ Le prototype répond aux exigences du référentiel RGAA :
 - **Alternatives textuelles** : Images et icônes avec descriptions
 - **Structure sémantique** : Hiérarchie des titres et landmarks
 - **Formulaires accessibles** : Labels associés et messages d'erreur clairs
-- **Multimédia** : Sous-titres et transcriptions pour le contenu audio/vidéo
+- **Multimédia** : Sous-titres et transcriptions pour le contenu audio/vidéo (à venir)
+
+---
+
+## Intelligence Artificielle et ML Kit
+
+### Module Natif ML Kit Android
+
+#### Architecture ML Kit Complète
+
+- **Module natif personnalisé** : MLKitModule.kt et MLKitPackage.kt
+- **Intégration directe Google ML Kit** : Sans dépendance Firebase
+- **Performance native maximale** : < 100ms d'analyse
+- **Bridge React Native ↔ Android** : Communication optimisée
+- **Gestion d'erreurs robuste** : Try-catch natif et fallback
+
+#### Fonctionnalités ML Kit Intégrées
+
+##### Reconnaissance d'Objets (Image Labeling)
+
+- **API native** : `ImageLabeling.getClient()`
+- **Confiance minimale** : 70% (configurable)
+- **Applications** : Identification automatique des types de déchets
+- **Exemples** : Bouteilles plastique, canettes métal, cartons, verre
+
+##### Scanner de Codes-barres (Barcode Scanning)
+
+- **API native** : `BarcodeScanning.getClient()`
+- **Formats supportés** : EAN-13, EAN-8, UPC, Code 128, QR Code
+- **Données retournées** : Valeur brute, affichage, format, type
+- **Applications** : Identification rapide des produits
+
+##### Reconnaissance de Texte (Text Recognition)
+
+- **API native** : `TextRecognition.getClient()`
+- **Scripts supportés** : Latin, Chinois, Devanagari, Japonais, Coréen
+- **Applications** : Symboles de recyclage, codes PET, instructions
+- **Précision** : Optimisée pour les emballages
+
+##### Détection de Visages (Face Detection)
+
+- **API native** : `FaceDetection.getClient()`
+- **Mode performance** : FAST (optimisé pour la vitesse)
+- **Métriques** : Rotation Y/Z, taille minimale 15%
+- **Applications** : Sécurité, validation des scans
+
+##### Analyse Complète d'Image
+
+- **Méthode native** : `analyzeImage(imageUri)`
+- **Fonctionnalité** : Lance les 4 détections en parallèle
+- **Performance** : 4x plus rapide que l'analyse séquentielle
+- **Résultats** : Structure unifiée avec timestamp
+
+#### Configuration Technique
+
+- **Dépendances Gradle** : ML Kit 17.x, CameraX 1.3.1, support complet Android
+- **Permissions** : Caméra, stockage, audio configurées dans AndroidManifest.xml
+- **Performance** : < 100ms d'analyse, fonctionnement hors ligne
+- **Avantages** : Module natif vs Firebase ML Kit (gratuit, plus rapide, contrôle total)
+
+_Configuration des permissions détaillée dans [Gestion des Permissions](#gestion-des-permissions)._
+
+---
+
+## Configuration Firebase
+
+### Services Configurés
+
+- **Firebase App** : Configuration de base
+- **Firebase Auth** : Authentification utilisateur
+- **Firebase Firestore** : Base de données
+- **Firebase Storage** : Stockage de fichiers
+
+### Configuration Android
+
+- **Package Name** : `com.ecotri.app`
+- **google-services.json** : Configuré avec le projet Firebase
+- **build.gradle** : Dépendances Firebase ajoutées
+
+#### Étapes de Configuration
+
+1. **Créer un projet Firebase**
+
+   - Accéder à [Firebase Console](https://console.firebase.google.com/)
+   - Créer un nouveau projet ou sélectionner un projet existant
+   - Activer les services Auth, Firestore et Storage
+
+2. **Télécharger `google-services.json`**
+
+   - Dans la console Firebase, aller dans "Paramètres du projet"
+   - Section "Vos applications" → "Ajouter une application"
+   - Sélectionner Android et entrer le package name `com.ecotri.app`
+   - Télécharger le fichier `google-services.json`
+
+3. **Placer le fichier dans `android/app/`**
+
+   - Copier `google-services.json` dans le dossier `android/app/`
+   - Vérifier que le fichier est bien présent et non ignoré par Git
+
+4. **Vérifier que le package name correspond**
+   - Le package name dans `google-services.json` doit correspondre à `com.ecotri.app`
+   - Vérifier dans `android/app/build.gradle` que `applicationId` est correct
+
+### Configuration iOS
+
+- **Bundle Identifier** : `com.ecotri.app`
+- **GoogleService-Info.plist** : Configuré avec le projet Firebase
+- **Podfile** : Dépendances Firebase ajoutées
+
+### Services d'Authentification
+
+- **Méthodes supportées** : Email/mot de passe, Google Sign-In
+- **Gestion des sessions** : Tokens JWT sécurisés
+- **Récupération de mot de passe** : Email de réinitialisation
+- **Validation des données** : Vérification des formats
+- **Gestion d'erreurs** : Codes Firebase traduits en français
+
+_Configuration complète dans [Authentification et Sécurité](#authentification-et-sécurité)._
+
+### Base de Données Firestore
+
+- **Structure** : Collections organisées par utilisateur
+- **Sécurité** : Règles d'accès granulaires
+- **Synchronisation** : Temps réel avec l'application
+- **Backup** : Sauvegarde automatique quotidienne
 
 ---
 
@@ -348,28 +585,24 @@ Le prototype répond aux exigences du référentiel RGAA :
 
 ### Stratégie de Test
 
-L'application dispose d'un harnais de test complet couvrant 100% des fonctionnalités principales :
+L'application dispose d'un harnais de test complet couvrant **95% des fonctionnalités principales**. Pour plus de détails, consultez le [Guide de Tests](TESTING_GUIDE.md).
 
-#### Tests Unitaires
+#### Métriques de Couverture
 
-- **Services** : 66 tests (100% de couverture)
-- **Hooks** : 11 tests (100% de couverture)
-- **Composants** : 73 tests (100% de couverture)
-- **Écrans** : 8 tests (100% de couverture)
+| Catégorie      | Tests   | Couverture | Statut |
+| -------------- | ------- | ---------- | ------ |
+| **Services**   | 66      | 100%       | ✅     |
+| **Hooks**      | 11      | 100%       | ✅     |
+| **Composants** | 73      | 100%       | ✅     |
+| **Écrans**     | 2       | 25%        | 🔄     |
+| **Total**      | **152** | **95%**    | **🔄** |
 
-#### Outils de Test
+#### Outils et Qualité
 
-- **Jest** : Framework de test principal
-- **React Native Testing Library** : Tests des composants
-- **Mocks ciblés** : Simulation des dépendances
-- **Tests de robustesse** : Gestion des cas d'erreur
-
-### Qualité du Code
-
-- **TypeScript** : Typage strict et validation
-- **ESLint** : Règles de qualité du code
-- **Prettier** : Formatage automatique
-- **Husky** : Hooks Git pour la validation
+- **Framework** : Jest + React Native Testing Library
+- **Mocks** : Simulation ciblée des dépendances
+- **Qualité** : TypeScript, ESLint, Prettier, Husky
+- **CI/CD** : Tests automatisés dans le pipeline GitHub Actions
 
 ---
 
@@ -402,178 +635,112 @@ L'application dispose d'un harnais de test complet couvrant 100% des fonctionnal
 
 ### Infrastructure CI/CD
 
-#### **Pipeline GitHub Actions**
+L'application EcoTri dispose d'un **pipeline CI/CD complet** configuré avec GitHub Actions. Pour plus de détails, consultez le [Guide CI/CD](CI_CD_GUIDE.md).
 
-L'application EcoTri dispose d'un pipeline CI/CD complet configuré avec GitHub Actions, comprenant 7 jobs automatisés :
+#### **Pipeline Principal (7 Jobs)**
 
-```yaml
-# Pipeline principal avec 7 jobs
-jobs:
-  - validate-and-test # Validation et tests (30 min)
-  - build-android # Build Android (45 min)
-  - build-ios # Temporairement désactivé
-  - integration-tests # Tests d'intégration (20 min)
-  - security-audit # Audit de sécurité (15 min)
-  - deploy # Déploiement (30 min)
-  - generate-report # Rapport de qualité (10 min)
-```
+| Job                   | Durée  | Description                                      |
+| --------------------- | ------ | ------------------------------------------------ |
+| **validate-and-test** | 30 min | Validation TypeScript, ESLint, tests (152 tests) |
+| **build-android**     | 45 min | Build Debug/Release avec cache intelligent       |
+| **build-ios**         | -      | Temporairement désactivé (version future)        |
+| **integration-tests** | 20 min | Tests d'intégration et composants                |
+| **security-audit**    | 15 min | npm audit, vulnérabilités, secrets               |
+| **deploy**            | 30 min | Déploiement Firebase (Staging/Production)        |
+| **generate-report**   | 10 min | Rapports de qualité et métriques                 |
 
-#### **Environnements Supportés**
+#### **Environnements et Déclencheurs**
 
-- **Development** : Tests et validation en cours de développement
-- **Staging** : Tests d'intégration et validation pré-production
-- **Production** : Déploiement final vers l'environnement de production
-
-#### **Déclencheurs Automatiques**
-
-- **Push automatique** : Sur les branches `main`, `develop`, `feature/*`, `hotfix/*`
-- **Pull Request** : Sur les branches `main` et `develop`
-- **Déclenchement manuel** : Via l'interface GitHub Actions avec sélection d'environnement
+- **Environnements** : Development → Staging → Production
+- **Déclenchement** : Push sur `main`, `dev`, `feature/*` + Pull Requests
+- **Manuel** : Interface GitHub Actions avec sélection d'environnement
 
 ### Configuration de Build
 
 #### **Environnement Android Optimisé**
 
-- **Java** : Version 17 (Temurin) - Distribution optimisée pour CI/CD
-- **SDK Android** : Version 34
-- **Build Tools** : Version 34.0.0
-- **NDK** : Version 25.1.8937393
-- **Node.js** : Version 18
+| Composant       | Version      | Description                       |
+| --------------- | ------------ | --------------------------------- |
+| **Java**        | 17 (Temurin) | Distribution optimisée pour CI/CD |
+| **SDK Android** | 34           | Version stable et supportée       |
+| **Build Tools** | 34.0.0       | Outils de compilation optimisés   |
+| **NDK**         | 25.1.8937393 | Support natif complet             |
+| **Node.js**     | 18           | Runtime JavaScript                |
 
-#### **Build Matrix Android**
+#### **Build Matrix et Cache**
 
-```yaml
-strategy:
-  matrix:
-    build-type: [debug, release]
-```
-
-- **Debug** : Version de développement avec logs et debugging
-- **Release** : Version de production optimisée
-- **Formats de sortie** : APK et AAB (Android App Bundle)
-
-#### **Cache Intelligent**
-
-- **Cache Gradle** : `~/.gradle/caches` et `~/.gradle/wrapper`
-- **Cache npm** : `node_modules` et `~/.npm`
-- **Restauration optimisée** : Clés partielles pour optimiser les builds
+- **Matrix** : Debug (développement) + Release (production)
+- **Formats** : APK et AAB (Android App Bundle)
+- **Cache** : Gradle + npm avec restauration optimisée
+- **Performance** : Builds parallèles avec cache intelligent
 
 ### Processus de Déploiement
 
-#### **Validation Automatique**
+#### **Validation et Build**
 
-- **TypeScript** : `tsc --noEmit` avec vérification stricte
-- **ESLint** : Analyse statique du code
-- **Prettier** : Vérification du formatage
-- **Tests** : Exécution automatique avec couverture
+- **Validation** : TypeScript, ESLint, Prettier, Tests (152 tests)
+- **Build Android** : Matrix Debug/Release avec artefacts
+- **Tests** : Intégration + Audit de sécurité automatique
 
-#### **Build et Tests**
+#### **Déploiement et Conservation**
 
-- **Build Android** : Matrix Debug/Release avec upload d'artefacts
-- **Tests d'intégration** : Services, composants, écrans
-- **Audit de sécurité** : npm audit, vulnérabilités, analyse de secrets
-
-#### **Déploiement Firebase**
-
-- **Staging** : Branche `develop` ou `main` + environnement `staging`
+- **Staging** : Branche `dev` + environnement `staging`
 - **Production** : Branche `main` + environnement `production`
-- **Artefacts** : APKs et AABs conservés 30 jours
+- **Artefacts** : APKs/AABs conservés 30 jours
 - **Rapports** : Qualité et métriques conservés 90 jours
 
 ### Monitoring et Rapports
 
-#### **Codecov Integration**
+#### **Intégrations Automatiques**
 
-- **Fichier de couverture** : `./coverage/lcov.info`
-- **Flags** : `unittests`
-- **Nom** : `codecov-umbrella`
-- **Gestion d'erreur** : Non-bloquant
-
-#### **Rapports de Qualité Automatiques**
-
-Le pipeline génère automatiquement un rapport de qualité incluant :
-
-- Résultats des tests et métriques de couverture
-- Statut des builds (Android Debug/Release)
-- Métriques de l'application (composants, services, écrans)
-- Audit de sécurité et vérification des vulnérabilités
+- **Codecov** : Couverture des tests avec flags `unittests`
+- **Rapports** : Tests, builds, métriques, audit de sécurité
+- **Gestion d'erreur** : Non-bloquant pour éviter les échecs de pipeline
 
 ### Support iOS Temporaire
 
-#### **Configuration Préservée**
+#### **Statut Actuel et Futur**
 
-- **Job iOS** : Désactivé avec `if: false` pour la version actuelle
-- **Structure préservée** : Prêt pour activation dans la prochaine version
-- **Runner macOS** : Optimisation des performances pour iOS
-- **CocoaPods** : Gestion des dépendances iOS
-
-#### **Activation Future**
-
-- **Prochaine version** : Support iOS complet
-- **Configuration** : Xcode, CocoaPods, certificats de signature
-- **Build** : Applications iOS (Debug et Release)
-- **Deployment** : App Store Connect
+- **Version actuelle** : Job iOS désactivé (`if: false`)
+- **Structure** : Configuration préservée pour activation future
+- **Prochaine version** : Support iOS complet avec Xcode, CocoaPods
+- **Déploiement** : App Store Connect et distribution
 
 ### Gestion des Versions
 
-- **Semantic Versioning** : MAJOR.MINOR.PATCH
-- **Changelog** : Documentation des modifications
-- **Rollback** : Retour aux versions précédentes
-- **Hotfix** : Corrections d'urgence
+- **Versioning** : Semantic Versioning (MAJOR.MINOR.PATCH)
+- **Documentation** : Changelog complet des modifications
+- **Gestion** : Rollback et hotfix d'urgence
 
 ---
 
 ## Maintenance et Support
 
-### Mises à Jour
+### **Gestion des Mises à Jour**
 
-- **Mises à jour automatiques** : Via les stores
+- **Automatique** : Via les stores avec préservation des données
 - **Compatibilité** : Support des versions Android/iOS récentes
-- **Migration des données** : Préservation des données utilisateur
-- **Documentation** : Guides de mise à jour
+- **Documentation** : Guides de mise à jour complets
 
-### Support Technique
+### **Support et Monitoring**
 
-- **Documentation utilisateur** : Guides et tutoriels
-- **FAQ** : Questions fréquemment posées
-- **Support communautaire** : Forum et discussions
-- **Contact support** : Assistance technique directe
-
-### Monitoring en Production
-
-- **Santé de l'application** : Métriques de disponibilité
-- **Alertes automatiques** : Notification des problèmes
-- **Dashboards** : Visualisation des métriques
-- **Rapports** : Analyses périodiques
+- **Support** : Documentation, FAQ, support communautaire
+- **Monitoring** : Santé de l'app, alertes automatiques, dashboards
+- **Rapports** : Analyses périodiques et métriques de production
 
 ---
 
 ## Annexes
 
-### Guides Disponibles
+### **Documentation Complète**
 
-- **User Guide** : Guide utilisateur complet
-- **API Documentation** : Documentation des services
-- **Deployment Guide** : Guide de déploiement
-- **Testing Guide** : Guide des tests
-
-### Structure du Projet
-
-- **Repository** : Organisation du code source
-- **Branches** : Stratégie de développement
-- **Pull Requests** : Processus de revue de code
-- **Releases** : Gestion des versions
-
-### Contacts et Support
-
-- **Équipe de développement** : EcoTri Team
-- **Mainteneur principal** : Lead Developer
-- **Documentation** : Repository GitHub
-- **Issues** : Suivi des problèmes et demandes
+- **Guides** : [User Guide](USER_GUIDE.md), [Testing Guide](TESTING_GUIDE.md), [CI/CD Guide](CI_CD_GUIDE.md)
+- **Structure** : Repository GitHub avec branches, PR, releases
+- **Support** : Équipe EcoTri, documentation, issues GitHub
 
 ---
 
-**Dernière mise à jour** : Janvier 2025  
-**Version du document** : 2.0  
+**Dernière mise à jour** : Août 2025  
+**Version du document** : 3.0 (Optimisé)  
 **Maintenu par** : Équipe EcoTri  
 **Statut** : Approuvé et en production
