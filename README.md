@@ -3,7 +3,7 @@
 **Version** : 8.0.0  
 **Statut** : Pipeline CI/CD complet, configuration Android optimisée, 161 tests automatisés
 **Développeur : Zainab LAHMAR - Master 2 YNOV**
-**Github : [https://github.com/zineblahmar/EcoTri](https://github.com/zineblahmar/EcoTri)**
+**Github : [https://github.com/zlahmar/EcoTri-APPMOBILE]**
 
 **Master 2 YNOV - Bloc 2 : CONCEVOIR ET DÉVELOPPER DES APPLICATIONS LOGICIELLES**  
 _Application mobile React Native avec Firebase pour la gestion intelligente du recyclage_
@@ -42,11 +42,11 @@ EcoTri est une application mobile développée en React Native qui permet aux ut
 
 ### **APK Prêt à Tester (Recommandé)**
 
-**APK fonctionnel disponible** : [Pipeline #20 réussi](https://github.com/zineblahmar/EcoTri/actions)
+**APK fonctionnel disponible** : [Pipeline #20 réussi](https://github.com/zlahmar/EcoTri-APPMOBILE/actions)
 
 **Instructions rapides :**
 
-1. **Allez sur** : [GitHub Actions EcoTri](https://github.com/zineblahmar/EcoTri/actions)
+1. **Allez sur** : [GitHub Actions EcoTri](https://github.com/zlahmar/EcoTri-APPMOBILE/actions)
 2. **Trouvez** : Pipeline #20 (Réussi)
 3. **Téléchargez** : Section Artifacts → `android-build-debug` ou `android-build-release`
 4. **Installez** : `adb install app-debug.apk` ou clic sur l'APK
@@ -68,7 +68,7 @@ Voir le fichier [doc/TECHNICAL_GUIDE.md](doc/TECHNICAL_GUIDE.md) pour les plus d
 
 ```bash
 # Cloner le repository
-git clone https://github.com/zineblahmar/EcoTri.git
+git clone https://github.com/zlahmar/EcoTri-APPMOBILE.git
 cd EcoTri
 
 # Installer les dépendances
@@ -157,10 +157,10 @@ npm run ios        # Pour iOS (macOS uniquement)
 
 ### Liens Utiles
 
-- **Repository GitHub** : [https://github.com/zineblahmar/EcoTri](https://github.com/zineblahmar/EcoTri)
-- **Pipeline CI/CD** : [GitHub Actions](https://github.com/zineblahmar/EcoTri/actions)
-- **Issues** : [Suivi des problèmes](https://github.com/zineblahmar/EcoTri/issues)
-- **Releases** : [Versions publiées](https://github.com/zineblahmar/EcoTri/releases)
+- **Repository GitHub** : [https://github.com/zlahmar/EcoTri-APPMOBILE]
+- **Pipeline CI/CD** : [GitHub Actions](https://github.com/zlahmar/EcoTri-APPMOBILE/actions)
+- **Issues** : [Suivi des problèmes](https://github.com/zlahmar/EcoTri-APPMOBILE/issues)
+- **Releases** : [Versions publiées](https://github.com/zlahmar/EcoTri-APPMOBILE/releases)
 
 ## Droits et Propriété Intellectuelle
 
