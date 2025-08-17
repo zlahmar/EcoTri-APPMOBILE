@@ -56,6 +56,44 @@ npm run android    # Pour Android
 npm run ios        # Pour iOS (macOS uniquement)
 ```
 
+### **APKs et Tests**
+
+#### **Où trouver les APKs ?**
+
+**APKs générés par le pipeline CI/CD :**
+
+- **GitHub Actions** : [Actions](https://github.com/zineblahmar/EcoTri/actions) → Workflow "EcoTri CI/CD Pipeline" → Artifacts
+- **APK Debug** : `android-build-debug` (toutes les branches)
+- **APK Release** : `android-build-release` (branche `main` uniquement)
+
+**APKs locaux (développement) :**
+
+```bash
+# Build Debug
+./gradlew assembleDebug
+# APK : android/app/build/outputs/apk/debug/app-debug.apk
+
+# Build Release
+./gradlew assembleRelease
+# APK : android/app/build/outputs/apk/release/app-release.apk
+```
+
+#### **Tester les APKs**
+
+**APK Debug (développement) :**
+
+- **Metro requis** : `npx react-native start`
+- **Hot Reload** : Modifications en temps réel
+- **Débogage** : Console, logs détaillés
+- **Installation** : `npx react-native run-android`
+
+**APK Release (production) :**
+
+- **Metro non requis** : Fonctionne de manière autonome
+- **Pas de Hot Reload** : Code figé
+- **Performance optimisée** : Prêt pour distribution
+- **Installation** : `adb install app-release.apk`
+
 ---
 
 - S'authentifier avec un système de connexion/inscription complet
@@ -87,10 +125,13 @@ npm run ios        # Pour iOS (macOS uniquement)
 
 - **Pipeline CI/CD** : GitHub Actions avec 7 jobs automatisés
 - **Build Android** : Java 17, SDK 34, configuration optimisée
+  - **Debug** : Développement avec Metro et Hot Reload
+  - **Release** : Production optimisée et autonome
 - **Tests** : Jest + React Native Testing Library
 - **Qualité** : TypeScript, ESLint, Prettier, Codecov
 - **Sécurité** : Protection OWASP Top 10, accessibilité RGAA
 - **Déploiement** : Firebase automatique (Staging/Production)
+- **Artefacts** : APKs et AABs automatiquement générés et uploadés
 
 ## Plateformes Supportées
 

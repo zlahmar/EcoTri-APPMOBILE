@@ -56,6 +56,20 @@ yarn-error.log
 # Bundle artifact
 *.jsbundle
 
+# APK files (builds)
+*.apk
+*.aab
+builds/
+dist/
+
+# Firebase configuration files (SENSIBLE !)
+google-services.json
+GoogleService-Info.plist
+firebase-config.json
+.env
+.env.local
+.env.production
+
 # Ruby / CocoaPods
 **/Pods/
 /vendor/bundle/

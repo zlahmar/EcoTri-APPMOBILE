@@ -712,6 +712,55 @@ L'application EcoTri dispose d'un **pipeline CI/CD complet** configuré avec Git
 - **Documentation** : Changelog complet des modifications
 - **Gestion** : Rollback et hotfix d'urgence
 
+### APKs et Tests
+
+#### **Où trouver les APKs générés ?**
+
+**APKs du pipeline CI/CD :**
+
+- **GitHub Actions** : [Actions](https://github.com/zineblahmar/EcoTri/actions) → Workflow "EcoTri CI/CD Pipeline" → Artifacts
+- **APK Debug** : `android-build-debug` (toutes les branches)
+- **APK Release** : `android-build-release` (branche `main` uniquement)
+
+**APKs locaux (développement) :**
+
+```bash
+# Build Debug
+./gradlew assembleDebug
+# APK : android/app/build/outputs/apk/debug/app-debug.apk
+
+# Build Release
+./gradlew assembleRelease
+# APK : android/app/build/outputs/apk/release/app-release.apk
+```
+
+#### **Différences entre Debug et Release**
+
+**APK Debug (développement) :**
+
+- **Metro requis** : `npx react-native start`
+- **Hot Reload** : Modifications en temps réel
+- **Débogage** : Console, logs détaillés
+- **Installation** : `npx react-native run-android`
+- **Performance** : Non optimisée (débogage activé)
+
+**APK Release (production) :**
+
+- **Metro non requis** : Fonctionne de manière autonome
+- **Pas de Hot Reload** : Code figé
+- **Performance optimisée** : Prêt pour distribution
+- **Installation** : `adb install app-release.apk`
+- **Taille** : Optimisée et minifiée
+
+#### **Stratégie de Build Intelligente**
+
+Le pipeline utilise une stratégie de build conditionnelle :
+
+- **Debug** : Sur toutes les branches (développement rapide)
+- **Release** : Seulement sur `main` (production validée)
+- **Économie** : ~50% de temps de build sur les branches de dev
+- **Artefacts** : APKs et AABs automatiquement générés et uploadés
+
 ---
 
 ## Maintenance et Support
