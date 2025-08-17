@@ -1,28 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, SafeAreaView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../styles';
 import ProfileScreen from '../screens/main/ProfileScreen';
-import { ScanScreen, CollecteScreen, ConseilsScreen } from '../screens/recycling';
+import HomeScreen from '../screens/main/HomeScreen';
+import {
+  ScanScreen,
+  CollecteScreen,
+  ConseilsScreen,
+} from '../screens/recycling';
 import AuthScreen from '../screens/auth/AuthScreen';
 import authService, { UserData } from '../services/authService';
 
 const MainNavigator = () => {
-  const [currentScreen, setCurrentScreen] = useState('scan');
+  const [currentScreen, setCurrentScreen] = useState('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserData | null>(null);
 
-  // Écouter les changements d'état d'authentification Firebase
+  // Écoute des changements d'état d'authentification Firebase
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged(async (user) => {
+    const unsubscribe = authService.onAuthStateChanged(async user => {
       if (user) {
         try {
           const userData = await authService.getUserData(user.uid);
           setUserInfo(userData);
           setIsAuthenticated(true);
         } catch (error) {
-          console.error('Erreur lors de la récupération des données utilisateur:', error);
-          // L'utilisateur est connecté mais on ne peut pas récupérer ses données
+          console.error(
+            'Erreur lors de la récupération des données utilisateur:',
+            error,
+          );
           setIsAuthenticated(true);
         }
       } else {
@@ -44,12 +61,25 @@ const MainNavigator = () => {
 
   const handleLogout = async () => {
     try {
-      await authService.signOut();
+      console.log('Début de la déconnexion...');
+      
+      // Mettre à jour l'état local en premier
       setIsAuthenticated(false);
       setUserInfo(null);
-    } catch (error) {
+      
+      // Puis déconnecter Firebase
+      await authService.signOut();
+      
+      console.log('Déconnexion terminée avec succès');
+    } catch (error: any) {
       console.error('Erreur lors de la déconnexion:', error);
-      Alert.alert('Erreur', 'Impossible de se déconnecter');
+      
+      if (error.code === 'auth/no-current-user') {
+        console.log('Utilisateur déjà déconnecté, déconnexion locale réussie');
+        return;
+      }
+      
+      Alert.alert('Erreur', 'Impossible de se déconnecter complètement');
     }
   };
 
@@ -57,43 +87,96 @@ const MainNavigator = () => {
     setShowAuthModal(true);
   };
 
+  const handleProfilePress = () => {
+    setShowProfileModal(true);
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
-      case 'scan':
-        return <ScanScreen />;
-      case 'collecte':
-        return <CollecteScreen />;
-      case 'profile':
+      case 'home':
         return (
-          <ProfileScreen
+          <HomeScreen
             isAuthenticated={isAuthenticated}
-            onLoginPress={handleLoginPress}
-            onLogout={handleLogout}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
+      case 'scan':
+        return (
+          <ScanScreen
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
+      case 'collecte':
+        return (
+          <CollecteScreen
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
             userInfo={userInfo || undefined}
           />
         );
       case 'conseils':
-        return <ConseilsScreen />;
+        return (
+          <ConseilsScreen
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
       default:
-        return <ScanScreen />;
+        return (
+          <HomeScreen
+            isAuthenticated={isAuthenticated}
+            onProfilePress={handleProfilePress}
+            userInfo={userInfo || undefined}
+          />
+        );
     }
   };
 
   return (
     <View style={styles.container}>
       {/* Contenu de l'écran */}
-      <View style={styles.content}>
-        {renderScreen()}
-      </View>
+      <View style={styles.content}>{renderScreen()}</View>
 
-      {/* Barre de navigation personnalisée */}
       <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === 'home' && styles.activeTab]}
+          onPress={() => setCurrentScreen('home')}
+        >
+          <MaterialIcons
+            name="home"
+            size={24}
+            color={currentScreen === 'home' ? colors.primary : colors.textLight}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              currentScreen === 'home' && styles.activeTabText,
+            ]}
+          >
+            Accueil
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.tab, currentScreen === 'scan' && styles.activeTab]}
           onPress={() => setCurrentScreen('scan')}
         >
-          <Text style={[styles.tabText, currentScreen === 'scan' && styles.activeTabText]}>
-            📱 Scan
+          <MaterialIcons
+            name="camera-alt"
+            size={24}
+            color={currentScreen === 'scan' ? colors.primary : colors.textLight}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              currentScreen === 'scan' && styles.activeTabText,
+            ]}
+          >
+            Scanner Éco
           </Text>
         </TouchableOpacity>
 
@@ -101,17 +184,20 @@ const MainNavigator = () => {
           style={[styles.tab, currentScreen === 'collecte' && styles.activeTab]}
           onPress={() => setCurrentScreen('collecte')}
         >
-          <Text style={[styles.tabText, currentScreen === 'collecte' && styles.activeTabText]}>
-            ♻️ Collecte
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, currentScreen === 'profile' && styles.activeTab]}
-          onPress={() => setCurrentScreen('profile')}
-        >
-          <Text style={[styles.tabText, currentScreen === 'profile' && styles.activeTabText]}>
-            👤 Profile
+          <MaterialIcons
+            name="recycling"
+            size={24}
+            color={
+              currentScreen === 'collecte' ? colors.primary : colors.textLight
+            }
+          />
+          <Text
+            style={[
+              styles.tabText,
+              currentScreen === 'collecte' && styles.activeTabText,
+            ]}
+          >
+            Collecte
           </Text>
         </TouchableOpacity>
 
@@ -119,8 +205,20 @@ const MainNavigator = () => {
           style={[styles.tab, currentScreen === 'conseils' && styles.activeTab]}
           onPress={() => setCurrentScreen('conseils')}
         >
-          <Text style={[styles.tabText, currentScreen === 'conseils' && styles.activeTabText]}>
-            💡 Conseils
+          <MaterialIcons
+            name="lightbulb"
+            size={24}
+            color={
+              currentScreen === 'conseils' ? colors.primary : colors.textLight
+            }
+          />
+          <Text
+            style={[
+              styles.tabText,
+              currentScreen === 'conseils' && styles.activeTabText,
+            ]}
+          >
+            Conseils
           </Text>
         </TouchableOpacity>
       </View>
@@ -133,13 +231,37 @@ const MainNavigator = () => {
         statusBarTranslucent={true}
       >
         <SafeAreaView style={styles.modalContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setShowAuthModal(false)}
           >
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
           <AuthScreen onAuthSuccess={handleAuthSuccess} />
+        </SafeAreaView>
+      </Modal>
+
+      {/* Modal du profil */}
+      <Modal
+        visible={showProfileModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        statusBarTranslucent={true}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowProfileModal(false)}
+          >
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+          <ProfileScreen
+            isAuthenticated={isAuthenticated}
+            onLoginPress={handleLoginPress}
+            onLogout={handleLogout}
+            onCloseModal={() => setShowProfileModal(false)}
+            userInfo={userInfo || undefined}
+          />
         </SafeAreaView>
       </Modal>
     </View>
@@ -161,7 +283,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     paddingBottom: 8,
     paddingTop: 8,
-    height: 60,
+    height: 70,
   },
   tab: {
     flex: 1,
@@ -171,14 +293,16 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: colors.secondary,
-    borderRadius: 8,
+    borderRadius: 12,
     marginHorizontal: 4,
+    paddingVertical: 8,
   },
   tabText: {
     fontSize: 12,
     color: colors.textLight,
     fontWeight: '500',
     textAlign: 'center',
+    marginTop: 4,
   },
   activeTabText: {
     color: colors.primary,

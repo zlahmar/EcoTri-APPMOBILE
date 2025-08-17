@@ -1,110 +1,203 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
+import {
+  CollecteInfoComponent as CollecteInfo,
+  CommuneSelector,
+  WeeklyCalendar,
+} from '../../components/common';
+import { useLocation, collecteService } from '../../services';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const CollecteScreen = () => {
+const CollecteScreen = ({
+  isAuthenticated = false,
+  onProfilePress,
+  userInfo: _userInfo,
+}: {
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
+  userInfo?: any;
+}) => {
+  const [selectedCommune, setSelectedCommune] = useState<string>('');
+  const [collecteInfo, setCollecteInfo] = useState<any>(null);
+  const [showCommuneSelector, setShowCommuneSelector] = useState(false);
+  const [availableCommunes, setAvailableCommunes] = useState<string[]>([]);
+
+  // Utilisation du service de géolocalisation
+  const { city, location, getCurrentLocation } = useLocation({
+    onLocationUpdate: locationData => {
+      console.log('Nouvelle localisation dans CollecteScreen:', locationData);
+      if (locationData) {
+        updateCollecteInfoByLocation(
+          locationData.latitude,
+          locationData.longitude,
+        );
+      }
+    },
+    onError: error => {
+      console.error('Erreur de localisation dans CollecteScreen:', error);
+    },
+  });
+
+  // Chargement des communes disponibles au démarrage
+  useEffect(() => {
+    console.log(' Début du chargement des communes...');
+    console.log(' collecteService disponible:', !!collecteService);
+
+    try {
+      console.log(' Test du service - getAvailableCommunes appelé');
+      const communes = collecteService.getAvailableCommunes();
+      console.log(' Communes récupérées du service:', communes);
+      console.log(' Nombre de communes:', communes.length);
+      console.log(' Type des communes:', typeof communes);
+      console.log(' Est-ce un array?', Array.isArray(communes));
+
+      if (Array.isArray(communes) && communes.length > 0) {
+        console.log(' Premières communes:', communes.slice(0, 5));
+        setAvailableCommunes(communes);
+      } else {
+        console.log(' Aucune commune trouvée ou format incorrect');
+        setAvailableCommunes([]);
+      }
+    } catch (error) {
+      console.error(' Erreur lors du chargement des communes:', error);
+      setAvailableCommunes([]);
+    }
+  }, []);
+
+  // Mettre à jour les informations de collecte par localisation
+  const updateCollecteInfoByLocation = (lat: number, lon: number) => {
+    try {
+      console.log(' Tentative de mise à jour par localisation:', { lat, lon });
+      const info = collecteService.getCollecteInfoByLocation(lat, lon);
+      console.log(' Info récupérée:', info);
+      if (info) {
+        setCollecteInfo(info);
+        setSelectedCommune(info.commune);
+        console.log(' Informations de collecte trouvées pour:', info.commune);
+      } else {
+        console.log(
+          ' Aucune information de collecte trouvée pour cette localisation',
+        );
+        setCollecteInfo(null);
+        setSelectedCommune('');
+      }
+    } catch (error) {
+      console.error(
+        'Erreur lors de la récupération des informations de collecte:',
+        error,
+      );
+    }
+  };
+
+  // Mettre à jour les informations de collecte par commune sélectionnée
+  const updateCollecteInfoByCommune = (commune: string) => {
+    try {
+      console.log(' Tentative de mise à jour par commune:', commune);
+      const info = collecteService.getCollecteInfo(commune);
+      if (info) {
+        setCollecteInfo(info);
+        setSelectedCommune(commune);
+        console.log(' Informations de collecte mises à jour pour:', commune);
+      } else {
+        console.log(' Aucune information de collecte trouvée pour:', commune);
+        setCollecteInfo(null);
+      }
+    } catch (error) {
+      console.error(
+        'Erreur lors de la récupération des informations de collecte:',
+        error,
+      );
+    }
+  };
+
+  const handleCommuneChange = (commune: string) => {
+    console.log('Changement de commune sélectionnée:', commune);
+    updateCollecteInfoByCommune(commune);
+  };
+
+  useEffect(() => {
+    console.log(' Démarrage de la localisation...');
+    getCurrentLocation();
+  }, [getCurrentLocation]);
+
+  useEffect(() => {
+    if (location) {
+      console.log(' Nouvelle localisation détectée:', location);
+      updateCollecteInfoByLocation(location.latitude, location.longitude);
+    }
+  }, [location]);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Collecte & Recyclage" />
-      
+      <Header
+        title="Calendrier de Collecte"
+        showProfileIcon={true}
+        isAuthenticated={isAuthenticated}
+        onProfilePress={onProfilePress}
+      />
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Statistiques de collecte */}
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Vos Statistiques</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>24</Text>
-              <Text style={styles.statLabel}>Déchets Scannés</Text>
+        {/* Informations de collecte */}
+        <View style={styles.collecteSection}>
+          {collecteInfo ? (
+            <>
+              <CollecteInfo
+                collecteInfo={collecteInfo}
+                onCommuneChange={() => setShowCommuneSelector(true)}
+                showCommuneSelector={true}
+              />
+
+              {/* Calendrier hebdomadaire */}
+              <WeeklyCalendar collecteInfo={collecteInfo} />
+
+              {/* Source des données */}
+              <View style={styles.sourceContainer}>
+                <MaterialIcons
+                  name="info-outline"
+                  size={16}
+                  color={colors.textLight}
+                />
+                <Text style={styles.sourceText}>
+                  Source : Bordeaux Métropole - Données de collecte des déchets
+                </Text>
+              </View>
+            </>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>
+                {city
+                  ? `Aucune information de collecte disponible pour ${city}`
+                  : 'Localisation en cours...'}
+              </Text>
+              <TouchableOpacity
+                style={styles.selectCommuneButton}
+                onPress={() => setShowCommuneSelector(true)}
+              >
+                <Text style={styles.selectCommuneButtonText}>
+                  Sélectionner une commune
+                </Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>18</Text>
-              <Text style={styles.statLabel}>Recyclés</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>6</Text>
-              <Text style={styles.statLabel}>En Attente</Text>
-            </View>
-          </View>
+          )}
         </View>
-
-        {/* Types de déchets */}
-        <View style={styles.wasteTypesSection}>
-          <Text style={styles.sectionTitle}>Types de Déchets</Text>
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.plastic }]}>
-              <Text style={styles.wasteIconText}>🥤</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Plastique</Text>
-              <Text style={styles.wasteCount}>8 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.paper }]}>
-              <Text style={styles.wasteIconText}>📄</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Papier</Text>
-              <Text style={styles.wasteCount}>6 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.glass }]}>
-              <Text style={styles.wasteIconText}>🍷</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Verre</Text>
-              <Text style={styles.wasteCount}>4 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.wasteTypeItem}>
-            <View style={[styles.wasteIcon, { backgroundColor: colors.metal }]}>
-              <Text style={styles.wasteIconText}>🥫</Text>
-            </View>
-            <View style={styles.wasteInfo}>
-              <Text style={styles.wasteName}>Métal</Text>
-              <Text style={styles.wasteCount}>6 déchets</Text>
-            </View>
-            <TouchableOpacity style={styles.collectButton}>
-              <Text style={styles.collectButtonText}>Collecter</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Centres de recyclage */}
-        <View style={styles.centersSection}>
-          <Text style={styles.sectionTitle}>Centres de Recyclage Proches</Text>
-          <TouchableOpacity style={styles.centerCard}>
-            <Text style={styles.centerName}>♻️ ÉcoPoint Centre</Text>
-            <Text style={styles.centerAddress}>123 Rue de l'Écologie, Paris</Text>
-            <Text style={styles.centerDistance}>À 0.8 km de chez vous</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.centerCard}>
-            <Text style={styles.centerName}>♻️ Recyclage Express</Text>
-            <Text style={styles.centerAddress}>456 Avenue Verte, Paris</Text>
-            <Text style={styles.centerDistance}>À 1.2 km de chez vous</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Bouton d'action principal */}
-        <TouchableOpacity style={styles.mainActionButton}>
-          <Text style={styles.mainActionButtonText}>📱 Scanner un Nouveau Déchet</Text>
-        </TouchableOpacity>
       </ScrollView>
+
+      <CommuneSelector
+        selectedCommune={selectedCommune}
+        availableCommunes={availableCommunes}
+        onCommuneSelect={handleCommuneChange}
+        visible={showCommuneSelector}
+        onClose={() => setShowCommuneSelector(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -118,142 +211,44 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 15,
-    marginTop: 10,
-  },
-  statsSection: {
+
+  collecteSection: {
     marginBottom: 25,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flex: 1,
+  noDataContainer: {
     backgroundColor: colors.surface,
-    padding: 15,
+    padding: 20,
     borderRadius: 12,
     alignItems: 'center',
-    marginHorizontal: 5,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginTop: 10,
   },
-  statNumber: {
-    fontSize: 24,
+  noDataText: {
+    fontSize: 16,
+    color: colors.textLight,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  selectCommuneButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+  },
+  selectCommuneButtonText: {
+    color: colors.textInverse,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 5,
   },
-  statLabel: {
+  sourceContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  sourceText: {
     fontSize: 12,
     color: colors.textLight,
     textAlign: 'center',
-  },
-  wasteTypesSection: {
-    marginBottom: 25,
-  },
-  wasteTypeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  wasteIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  wasteIconText: {
-    fontSize: 24,
-  },
-  wasteInfo: {
-    flex: 1,
-  },
-  wasteName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  wasteCount: {
-    fontSize: 14,
-    color: colors.textLight,
-  },
-  collectButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  collectButtonText: {
-    color: colors.textInverse,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  centersSection: {
-    marginBottom: 25,
-  },
-  centerCard: {
-    backgroundColor: colors.surface,
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  centerName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 5,
-  },
-  centerAddress: {
-    fontSize: 14,
-    color: colors.textLight,
-    marginBottom: 3,
-  },
-  centerDistance: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  mainActionButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginBottom: 30,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  mainActionButtonText: {
-    color: colors.textInverse,
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginLeft: 5,
   },
 });
 

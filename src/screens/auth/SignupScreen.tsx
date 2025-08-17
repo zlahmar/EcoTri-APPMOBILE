@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
@@ -20,7 +21,10 @@ interface SignupScreenProps {
   onSwitchToLogin: () => void;
 }
 
-const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchToLogin }) => {
+const SignupScreen: React.FC<SignupScreenProps> = ({
+  onSignupSuccess,
+  onSwitchToLogin,
+}) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -35,7 +39,12 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
   };
 
   const validateForm = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.password
+    ) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
       return false;
     }
@@ -46,7 +55,10 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
     }
 
     if (formData.password.length < 6) {
-      Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
+      Alert.alert(
+        'Erreur',
+        'Le mot de passe doit contenir au moins 6 caractères',
+      );
       return false;
     }
 
@@ -68,35 +80,44 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
         formData.email,
         formData.password,
         formData.firstName,
-        formData.lastName
+        formData.lastName,
       );
-      
+
       console.log('Inscription réussie:', userData.email);
       onSignupSuccess(userData);
     } catch (error: any) {
       setIsLoading(false);
-      Alert.alert('Erreur d\'inscription', error.userFriendlyMessage || 'Impossible de créer le compte');
+      Alert.alert(
+        "Erreur d'inscription",
+        error.userFriendlyMessage || 'Impossible de créer le compte',
+      );
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Inscription" />
-      
-      <KeyboardAvoidingView 
+
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoSection}>
-            <Text style={styles.logo}>🌱</Text>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.title}>Rejoignez EcoTri</Text>
-            <Text style={styles.subtitle}>Créez votre compte pour commencer votre voyage écologique</Text>
+            <Text style={styles.subtitle}>
+              Créez votre compte pour commencer votre voyage écologique
+            </Text>
           </View>
 
           <View style={styles.formSection}>
@@ -108,7 +129,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
                   placeholder="Votre prénom"
                   placeholderTextColor={colors.textLight}
                   value={formData.firstName}
-                  onChangeText={(value) => updateFormData('firstName', value)}
+                  onChangeText={value => updateFormData('firstName', value)}
                   autoCapitalize="words"
                   returnKeyType="next"
                 />
@@ -121,7 +142,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
                   placeholder="Votre nom"
                   placeholderTextColor={colors.textLight}
                   value={formData.lastName}
-                  onChangeText={(value) => updateFormData('lastName', value)}
+                  onChangeText={value => updateFormData('lastName', value)}
                   autoCapitalize="words"
                   returnKeyType="next"
                 />
@@ -135,7 +156,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
                 placeholder="votre@email.com"
                 placeholderTextColor={colors.textLight}
                 value={formData.email}
-                onChangeText={(value) => updateFormData('email', value)}
+                onChangeText={value => updateFormData('email', value)}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -150,7 +171,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
                 placeholder="Au moins 6 caractères"
                 placeholderTextColor={colors.textLight}
                 value={formData.password}
-                onChangeText={(value) => updateFormData('password', value)}
+                onChangeText={value => updateFormData('password', value)}
                 secureTextEntry
                 autoCapitalize="none"
                 returnKeyType="next"
@@ -164,7 +185,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
                 placeholder="Retapez votre mot de passe"
                 placeholderTextColor={colors.textLight}
                 value={formData.confirmPassword}
-                onChangeText={(value) => updateFormData('confirmPassword', value)}
+                onChangeText={value => updateFormData('confirmPassword', value)}
                 secureTextEntry
                 autoCapitalize="none"
                 returnKeyType="done"
@@ -173,7 +194,10 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onSwitchTo
             </View>
 
             <TouchableOpacity
-              style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+              style={[
+                styles.signupButton,
+                isLoading && styles.signupButtonDisabled,
+              ]}
               onPress={handleSignup}
               disabled={isLoading}
             >
@@ -215,7 +239,8 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   logo: {
-    fontSize: 65,
+    width: 100,
+    height: 100,
     marginBottom: 15,
   },
   title: {

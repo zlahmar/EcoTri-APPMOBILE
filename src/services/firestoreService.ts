@@ -25,7 +25,7 @@ export interface RecyclingCenter {
   phone?: string;
   website?: string;
   rating: number;
-  distance?: number; // Distance depuis l'utilisateur
+  distance?: number;
 }
 
 export interface RecyclingTip {
@@ -51,9 +51,8 @@ export interface CollectionSchedule {
 }
 
 class FirestoreService {
-  // === GESTION DES DÉCHETS ===
+  // GESTION DES DÉCHETS
   
-  // Ajouter un déchet scanné
   async addWasteItem(wasteItem: Omit<WasteItem, 'id'>): Promise<string> {
     try {
       const docRef = await firebaseFirestore
@@ -66,7 +65,6 @@ class FirestoreService {
     }
   }
 
-  // Récupérer l'historique des déchets d'un utilisateur
   async getUserWasteHistory(userId: string, limit = 20): Promise<WasteItem[]> {
     try {
       const snapshot = await firebaseFirestore
@@ -85,9 +83,8 @@ class FirestoreService {
     }
   }
 
-  // === GESTION DES CENTRES DE RECYCLAGE ===
+  // GESTION DES CENTRES DE RECYCLAGE
   
-  // Récupérer tous les centres de recyclage
   async getRecyclingCenters(): Promise<RecyclingCenter[]> {
     try {
       const snapshot = await firebaseFirestore
@@ -103,7 +100,6 @@ class FirestoreService {
     }
   }
 
-  // Rechercher des centres par matériau accepté
   async getCentersByMaterial(material: string): Promise<RecyclingCenter[]> {
     try {
       const snapshot = await firebaseFirestore
@@ -120,9 +116,8 @@ class FirestoreService {
     }
   }
 
-  // === GESTION DES CONSEILS ===
+  // GESTION DES CONSEILS
   
-  // Récupérer tous les conseils de recyclage
   async getRecyclingTips(category?: string): Promise<RecyclingTip[]> {
     try {
       let query = firebaseFirestore.collection('recyclingTips');
@@ -144,7 +139,6 @@ class FirestoreService {
     }
   }
 
-  // Récupérer un conseil aléatoire du jour
   async getDailyTip(): Promise<RecyclingTip | null> {
     try {
       const today = new Date();
@@ -164,7 +158,6 @@ class FirestoreService {
         } as RecyclingTip;
       }
       
-      // Si aucun conseil du jour, prendre un conseil aléatoire
       const allTips = await this.getRecyclingTips();
       if (allTips.length > 0) {
         const randomIndex = Math.floor(Math.random() * allTips.length);
@@ -177,9 +170,8 @@ class FirestoreService {
     }
   }
 
-  // === GESTION DES PLANNINGS DE COLLECTE ===
+  // GESTION DES PLANNINGS DE COLLECTE
   
-  // Ajouter un planning de collecte
   async addCollectionSchedule(schedule: Omit<CollectionSchedule, 'id'>): Promise<string> {
     try {
       const docRef = await firebaseFirestore
@@ -192,7 +184,6 @@ class FirestoreService {
     }
   }
 
-  // Récupérer les plannings d'un utilisateur
   async getUserCollectionSchedules(userId: string): Promise<CollectionSchedule[]> {
     try {
       const snapshot = await firebaseFirestore
@@ -210,7 +201,6 @@ class FirestoreService {
     }
   }
 
-  // Marquer une collecte comme terminée
   async markCollectionCompleted(scheduleId: string): Promise<void> {
     try {
       await firebaseFirestore
@@ -222,9 +212,8 @@ class FirestoreService {
     }
   }
 
-  // === STATISTIQUES ===
+  // STATISTIQUES
   
-  // Récupérer les statistiques de recyclage d'un utilisateur
   async getUserRecyclingStats(userId: string) {
     try {
       const wasteSnapshot = await firebaseFirestore

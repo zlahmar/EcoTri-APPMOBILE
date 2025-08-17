@@ -7,11 +7,7 @@ interface AppContainerProps {
 }
 
 const AppContainer: React.FC<AppContainerProps> = ({ children }) => {
-  return (
-    <View style={styles.container}>
-      {children}
-    </View>
-  );
+  return <View style={styles.container}>{children}</View>;
 };
 
 const styles = StyleSheet.create({

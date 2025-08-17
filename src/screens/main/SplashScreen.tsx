@@ -39,12 +39,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         duration: 600,
         useNativeDriver: true,
       }),
-      // Pause
       Animated.delay(1000),
     ]);
 
     animationSequence.start(() => {
-      // Navigation vers l'écran principal après l'animation
       setTimeout(onFinish, 500);
     });
   }, [onFinish, logoScale, logoOpacity, textOpacity]);
@@ -61,13 +59,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             },
           ]}
         >
-          <Image 
-            source={require('../../assets/logo.png')} 
+          <Image
+            source={require('../../assets/logo.png')}
             style={styles.logoImage}
             resizeMode="contain"
           />
         </Animated.View>
-        
+
         <Animated.Text
           style={[
             styles.appName,
@@ -78,7 +76,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         >
           EcoTri
         </Animated.Text>
-        
+
         <Animated.Text
           style={[
             styles.tagline,
@@ -90,9 +88,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           Recyclage Intelligent
         </Animated.Text>
       </View>
-      
+
       <View style={styles.footer}>
-        <Text style={styles.version}>Version 2.1.0</Text>
+        <Text style={styles.version}>Version 8.0.0</Text>
         <Text style={styles.copyright}>© 2025 EcoTri - Master 2 YNOV</Text>
       </View>
     </View>

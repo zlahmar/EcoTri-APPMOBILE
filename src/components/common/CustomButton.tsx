@@ -72,8 +72,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  
-  // Variants
+
   primary: {
     backgroundColor: colors.primary,
   },
@@ -85,8 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  
-  // Sizes
+
   small: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -102,8 +100,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     minHeight: 56,
   },
-  
-  // Text styles
+
   text: {
     fontWeight: '600',
     textAlign: 'center',
@@ -117,7 +114,7 @@ const styles = StyleSheet.create({
   outlineText: {
     color: colors.primary,
   },
-  
+
   smallText: {
     fontSize: 14,
   },
@@ -127,8 +124,7 @@ const styles = StyleSheet.create({
   largeText: {
     fontSize: 18,
   },
-  
-  // States
+
   disabled: {
     opacity: 0.6,
   },

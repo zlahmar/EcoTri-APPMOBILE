@@ -10,7 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import authService, { UserData } from '../../services/authService';
@@ -20,7 +22,10 @@ interface LoginScreenProps {
   onSwitchToSignup: () => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onSwitchToSignup }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({
+  onLoginSuccess,
+  onSwitchToSignup,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,50 +38,65 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onSwitchToSig
 
     setIsLoading(true);
     try {
-      const userData = await authService.signInWithEmailAndPassword(email, password);
+      const userData = await authService.signInWithEmailAndPassword(
+        email,
+        password,
+      );
       console.log('Connexion réussie:', userData.email);
       onLoginSuccess(userData);
     } catch (error: any) {
       setIsLoading(false);
-      Alert.alert('Erreur de connexion', error.userFriendlyMessage || 'Une erreur est survenue');
+      Alert.alert(
+        'Erreur de connexion',
+        error.userFriendlyMessage || 'Une erreur est survenue',
+      );
     }
   };
 
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert('Erreur', 'Veuillez d\'abord saisir votre email');
+      Alert.alert('Erreur', "Veuillez d'abord saisir votre email");
       return;
     }
 
     try {
       await authService.resetPassword(email);
       Alert.alert(
-        'Email envoyé', 
-        'Un email de réinitialisation a été envoyé à votre adresse email'
+        'Email envoyé',
+        'Un email de réinitialisation a été envoyé à votre adresse email',
       );
     } catch (error: any) {
-      Alert.alert('Erreur', error.userFriendlyMessage || 'Impossible d\'envoyer l\'email');
+      Alert.alert(
+        'Erreur',
+        error.userFriendlyMessage || "Impossible d'envoyer l'email",
+      );
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Connexion" />
-      
-      <KeyboardAvoidingView 
+
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoSection}>
-            <Text style={styles.logo}>🌱</Text>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.title}>Bienvenue sur EcoTri</Text>
-            <Text style={styles.subtitle}>Connectez-vous pour accéder à votre profil</Text>
+            <Text style={styles.subtitle}>
+              Connectez-vous pour accéder à votre profil
+            </Text>
           </View>
 
           <View style={styles.formSection}>
@@ -110,12 +130,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onSwitchToSig
               />
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword}>
-              <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
+            <TouchableOpacity
+              style={styles.forgotPassword}
+              onPress={handleForgotPassword}
+            >
+              <Text style={styles.forgotPasswordText}>
+                Mot de passe oublié ?
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              style={[
+                styles.loginButton,
+                isLoading && styles.loginButtonDisabled,
+              ]}
               onPress={handleLogin}
               disabled={isLoading}
             >
@@ -157,7 +185,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    fontSize: 70,
+    width: 100,
+    height: 100,
     marginBottom: 20,
   },
   title: {

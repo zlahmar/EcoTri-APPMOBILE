@@ -31,7 +31,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun detectObjects(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "🔍 Début de la détection d'objets pour: $imageUri")
+            Log.d(TAG, " Début de la détection d'objets pour: $imageUri")
             
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
@@ -47,15 +47,15 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                         }
                         objectsArray.pushMap(labelObject)
                     }
-                    Log.d(TAG, "✅ Objets détectés: ${labels.size}")
+                    Log.d(TAG, " Objets détectés: ${labels.size}")
                     promise.resolve(objectsArray)
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection d'objets", exception)
+                    Log.e(TAG, " Erreur lors de la détection d'objets", exception)
                     promise.reject("OBJECT_DETECTION_ERROR", "Erreur lors de la détection d'objets", exception)
                 }
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de la détection d'objets", exception)
+            Log.e(TAG, " Erreur lors de la détection d'objets", exception)
             promise.reject("OBJECT_DETECTION_ERROR", "Erreur lors de la détection d'objets", exception)
         }
     }
@@ -64,7 +64,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun detectBarcodes(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "📱 Début de la détection de codes-barres pour: $imageUri")
+            Log.d(TAG, " Début de la détection de codes-barres pour: $imageUri")
             
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
@@ -81,15 +81,15 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                         }
                         barcodesArray.pushMap(barcodeObject)
                     }
-                    Log.d(TAG, "✅ Codes-barres détectés: ${barcodes.size}")
+                    Log.d(TAG, " Codes-barres détectés: ${barcodes.size}")
                     promise.resolve(barcodesArray)
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de codes-barres", exception)
+                    Log.e(TAG, " Erreur lors de la détection de codes-barres", exception)
                     promise.reject("BARCODE_DETECTION_ERROR", "Erreur lors de la détection de codes-barres", exception)
                 }
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de la détection de codes-barres", exception)
+            Log.e(TAG, " Erreur lors de la détection de codes-barres", exception)
             promise.reject("BARCODE_DETECTION_ERROR", "Erreur lors de la détection de codes-barres", exception)
         }
     }
@@ -98,7 +98,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun detectText(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "📝 Début de la détection de texte pour: $imageUri")
+            Log.d(TAG, " Début de la détection de texte pour: $imageUri")
             
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
@@ -114,15 +114,15 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                         }
                         textArray.pushMap(textObject)
                     }
-                    Log.d(TAG, "✅ Texte détecté: ${visionText.textBlocks.size} blocs")
+                    Log.d(TAG, " Texte détecté: ${visionText.textBlocks.size} blocs")
                     promise.resolve(textArray)
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de texte", exception)
+                    Log.e(TAG, " Erreur lors de la détection de texte", exception)
                     promise.reject("TEXT_DETECTION_ERROR", "Erreur lors de la détection de texte", exception)
                 }
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de la détection de texte", exception)
+            Log.e(TAG, " Erreur lors de la détection de texte", exception)
             promise.reject("TEXT_DETECTION_ERROR", "Erreur lors de la détection de texte", exception)
         }
     }
@@ -131,7 +131,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun detectFaces(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "👤 Début de la détection de visages pour: $imageUri")
+            Log.d(TAG, " Début de la détection de visages pour: $imageUri")
             
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
@@ -147,15 +147,15 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                         }
                         facesArray.pushMap(faceObject)
                     }
-                    Log.d(TAG, "✅ Visages détectés: ${faces.size}")
+                    Log.d(TAG, " Visages détectés: ${faces.size}")
                     promise.resolve(facesArray)
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de visages", exception)
+                    Log.e(TAG, " Erreur lors de la détection de visages", exception)
                     promise.reject("FACE_DETECTION_ERROR", "Erreur lors de la détection de visages", exception)
                 }
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de la détection de visages", exception)
+            Log.e(TAG, " Erreur lors de la détection de visages", exception)
             promise.reject("FACE_DETECTION_ERROR", "Erreur lors de la détection de visages", exception)
         }
     }
@@ -164,7 +164,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun analyzeImage(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "🚀 Début de l'analyse complète pour: $imageUri")
+            Log.d(TAG, " Début de l'analyse complète pour: $imageUri")
             
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
@@ -198,7 +198,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                     checkCompletion()
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection d'objets", exception)
+                    Log.e(TAG, " Erreur lors de la détection d'objets", exception)
                     hasError = true
                     promise.reject("ANALYSIS_ERROR", "Erreur lors de l'analyse", exception)
                 }
@@ -220,7 +220,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                     checkCompletion()
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de codes-barres", exception)
+                    Log.e(TAG, " Erreur lors de la détection de codes-barres", exception)
                     hasError = true
                     promise.reject("ANALYSIS_ERROR", "Erreur lors de l'analyse", exception)
                 }
@@ -241,7 +241,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                     checkCompletion()
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de texte", exception)
+                    Log.e(TAG, " Erreur lors de la détection de texte", exception)
                     hasError = true
                     promise.reject("ANALYSIS_ERROR", "Erreur lors de l'analyse", exception)
                 }
@@ -262,36 +262,36 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                     checkCompletion()
                 }
                 .addOnFailureListener { exception ->
-                    Log.e(TAG, "❌ Erreur lors de la détection de visages", exception)
+                    Log.e(TAG, " Erreur lors de la détection de visages", exception)
                     hasError = true
                     promise.reject("ANALYSIS_ERROR", "Erreur lors de l'analyse", exception)
                 }
                 
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de l'analyse complète", exception)
+            Log.e(TAG, " Erreur lors de l'analyse complète", exception)
             promise.reject("ANALYSIS_ERROR", "Erreur lors de l'analyse", exception)
         }
     }
 
-    // 🚀 NOUVEAU : Méthode de détection d'objets avancée (version simplifiée)
+    //  NOUVEAU : Méthode de détection d'objets avancée (version simplifiée)
     @ReactMethod
     fun detectObjectsAdvanced(imageUri: String, promise: Promise) {
         try {
-            Log.d(TAG, "🔍 Début de la détection d'objets avancée pour: $imageUri")
+            Log.d(TAG, " Début de la détection d'objets avancée pour: $imageUri")
             
             // Pour l'instant, utiliser la détection d'objets standard
             // La version avancée sera implémentée dans la prochaine itération
             detectObjects(imageUri, promise)
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors de la détection d'objets avancés", exception)
+            Log.e(TAG, " Erreur lors de la détection d'objets avancés", exception)
             promise.reject("ADVANCED_OBJECT_DETECTION_ERROR", "Erreur lors de la détection d'objets avancés", exception)
         }
     }
 
-    // 🌿 NOUVEAU : Méthode de segmentation d'images (version temporaire)
+    //  NOUVEAU : Méthode de segmentation d'images (version temporaire)
     @ReactMethod
     fun segmentImage(imageUri: String, promise: Promise) {
-        // 🌿 TEMPORAIRE : La segmentation sera disponible dans la prochaine version
+        //  TEMPORAIRE : La segmentation sera disponible dans la prochaine version
         val tempResult = Arguments.createMap().apply {
             putString("status", "coming_soon")
             putString("message", "La segmentation d'images sera disponible dans la prochaine version")
@@ -330,7 +330,7 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
             }
             
         } catch (exception: Exception) {
-            Log.e(TAG, "❌ Erreur lors du chargement de l'image", exception)
+            Log.e(TAG, " Erreur lors du chargement de l'image", exception)
             throw exception
         }
     }

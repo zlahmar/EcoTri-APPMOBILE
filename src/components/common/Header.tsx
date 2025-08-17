@@ -1,126 +1,88 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../styles';
 
 interface HeaderProps {
   title: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  onLeftPress?: () => void;
-  onRightPress?: () => void;
-  showBackButton?: boolean;
-  onBackPress?: () => void;
+  showProfileIcon?: boolean;
+  isAuthenticated?: boolean;
+  onProfilePress?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   title,
-  leftIcon,
-  rightIcon,
-  onLeftPress,
-  onRightPress,
-  showBackButton = false,
-  onBackPress,
+  showProfileIcon = false,
+  isAuthenticated = false,
+  onProfilePress,
 }) => {
   return (
-    <View style={styles.container}>
-      <StatusBar
-        backgroundColor={colors.primaryDark}
-        barStyle="light-content"
-      />
-      <View style={styles.content}>
-        <View style={styles.leftSection}>
-          {showBackButton && (
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={onBackPress}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.backButtonText}>←</Text>
-            </TouchableOpacity>
-          )}
-          {leftIcon && (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onLeftPress}
-              activeOpacity={0.7}
-            >
-              {leftIcon}
-            </TouchableOpacity>
-          )}
-        </View>
-        
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-        
-        <View style={styles.rightSection}>
-          {rightIcon && (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onRightPress}
-              activeOpacity={0.7}
-            >
-              {rightIcon}
-            </TouchableOpacity>
-          )}
-        </View>
+    <View style={styles.header}>
+      <View style={styles.leftSection}>
+        <Image
+          source={require('../../assets/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      <View style={styles.centerSection}>
+        <Text style={styles.title}>{title}</Text>
+      </View>
+
+      <View style={styles.rightSection}>
+        {showProfileIcon && (
+          <TouchableOpacity style={styles.profileIcon} onPress={onProfilePress}>
+            <MaterialIcons
+              name={isAuthenticated ? 'account-circle' : 'person-outline'}
+              size={28}
+              color={colors.primary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.primaryDark,
-    paddingTop: 44, // Pour les appareils avec notch
-    paddingBottom: 16,
-  },
-  content: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: colors.primaryDark,
+    paddingTop: 32,
+    paddingBottom: 12,
     paddingHorizontal: 16,
-    minHeight: 44,
+    elevation: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   leftSection: {
-    flexDirection: 'row',
+    width: 60,
     alignItems: 'center',
-    minWidth: 60,
   },
-  rightSection: {
-    flexDirection: 'row',
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  centerSection: {
+    flex: 1,
     alignItems: 'center',
-    minWidth: 60,
-    justifyContent: 'flex-end',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.textInverse,
-    flex: 1,
     textAlign: 'center',
-    marginHorizontal: 16,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+  rightSection: {
+    width: 60,
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  backButtonText: {
-    fontSize: 20,
-    color: colors.textInverse,
-    fontWeight: '600',
-  },
-  iconButton: {
+  profileIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
