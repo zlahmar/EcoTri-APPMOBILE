@@ -97,6 +97,7 @@ jobs:
           echo "  - Services : $(find src/services -name "*.ts" | wc -l)"
 
   # Job de build Android
+  # Stratégie intelligente : Debug sur toutes les branches, Release seulement sur main
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
@@ -104,7 +105,10 @@ jobs:
     timeout-minutes: 45
     strategy:
       matrix:
-        build-type: [debug, release]
+        build-type: [debug]
+        include:
+          - build-type: release
+            condition: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Checkout du code source
@@ -169,7 +173,7 @@ jobs:
           echo "✅ Build Android Debug réussi"
 
       - name: Build Android Release
-        if: matrix.build-type == 'release'
+        if: matrix.build-type == 'release' && github.ref == 'refs/heads/main'
         run: |
           cd android
           chmod +x ./gradlew
@@ -184,6 +188,8 @@ jobs:
             android/app/build/outputs/apk/${{ matrix.build-type }}/*.apk
             android/app/build/outputs/bundle/${{ matrix.build-type }}/*.aab
           retention-days: 30
+        # Upload conditionnel : Release seulement sur main
+        if: matrix.build-type == 'debug' || (matrix.build-type == 'release' && github.ref == 'refs/heads/main')
 
     # Job de build iOS (Désactivé pour la version actuelle)
   build-ios:
