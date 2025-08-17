@@ -45,7 +45,9 @@ class ErrorBoundary extends Component<Props, State> {
           {__DEV__ && this.state.error && (
             <View style={styles.errorContainer}>
               <Text style={styles.errorTitle}>Détails de l'erreur :</Text>
-              <Text style={styles.errorText}>{this.state.error.toString()}</Text>
+              <Text style={styles.errorText}>
+                {this.state.error.toString()}
+              </Text>
               {this.state.errorInfo && (
                 <Text style={styles.errorText}>
                   {this.state.errorInfo.componentStack}
