@@ -43,7 +43,12 @@ Le pipeline CI/CD se déclenche automatiquement dans les situations suivantes :
 
 ### 2. Build Android (`build-android`)
 
-**Objectif** : Compilation des applications Android (Debug et Release)
+**Objectif** : Compilation des applications Android avec stratégie intelligente
+
+**Stratégie de Build** :
+
+- **Debug** : Sur toutes les branches (développement)
+- **Release** : Seulement sur la branche `main` (production)
 
 **Étapes** :
 
@@ -51,12 +56,15 @@ Le pipeline CI/CD se déclenche automatiquement dans les situations suivantes :
 - Installation des dépendances Node.js
 - Configuration des variables d'environnement Android
 - Cache des dépendances Gradle et npm
-- Build des APKs et AABs
-- Upload des artefacts
+- Build des APKs et AABs (conditionnel)
+- Upload des artefacts (conditionnel)
 
-**Durée estimée** : 45 minutes
-**Runner** : `ubuntu-latest`
-**Dépendances** : `validate-and-test`
+**Durée estimée** :
+
+- **Debug uniquement** : 15-20 minutes (branches de dev)
+- **Debug + Release** : 35-45 minutes (branche main)
+  **Runner** : `ubuntu-latest`
+  **Dépendances** : `validate-and-test`
 
 ### 3. Build iOS (`build-ios`) - Temporairement Désactivé
 
@@ -208,15 +216,25 @@ Chaque job dispose de timeouts spécifiques pour éviter les blocages :
 
 ## Stratégie de Build
 
-### Build Matrix
+### Build Matrix Intelligente
 
-Le pipeline utilise des matrices de build pour optimiser la compilation :
+Le pipeline utilise une stratégie de build intelligente pour optimiser les coûts et le temps :
 
 ```yaml
 strategy:
   matrix:
-    build-type: [debug, release]
+    build-type: [debug]
+    include:
+      - build-type: release
+        condition: ${{ github.ref == 'refs/heads/main' }}
 ```
+
+**Avantages de cette approche :**
+
+- **Debug** : Sur toutes les branches (développement rapide)
+- **Release** : Seulement sur `main` (production validée)
+- **Économie** : ~50% de temps de build sur les branches de dev
+- **Coût** : Gratuit pour les repos publics (GitHub Actions)
 
 ### Conditions de Déploiement
 
