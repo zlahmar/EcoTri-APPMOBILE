@@ -30,9 +30,32 @@ _Application mobile React Native avec Firebase pour la gestion intelligente du r
 
 EcoTri est une application mobile développée en React Native qui permet aux utilisateurs de :
 
+- S'authentifier avec un système de connexion/inscription complet
+- Scanner des déchets pour identifier leur type
+- Localiser les centres de recyclage
+- Suivre leur impact environnemental
+- Recevoir des conseils de recyclage personnalisés
+- Gérer leur profil utilisateur avec données persistantes
+- Suivre les jours de collecte des déchets
+
 ## Démarrage Rapide et Installation
 
-### **Prérequis**
+### **APK Prêt à Tester (Recommandé)**
+
+**APK fonctionnel disponible** : [Pipeline #20 réussi](https://github.com/zineblahmar/EcoTri/actions)
+
+**Instructions rapides :**
+
+1. **Allez sur** : [GitHub Actions EcoTri](https://github.com/zineblahmar/EcoTri/actions)
+2. **Trouvez** : Pipeline #20 (Réussi)
+3. **Téléchargez** : Section Artifacts → `android-build-debug` ou `android-build-release`
+4. **Installez** : `adb install app-debug.apk` ou clic sur l'APK
+
+**⚠ Note** : Les pipelines récents échouent à cause de la sécurisation Firebase, mais le Pipeline #20 contient des APKs 100% fonctionnels !
+
+---
+
+### **Pour Développeurs**
 
 Voir le fichier [doc/TECHNICAL_GUIDE.md](doc/TECHNICAL_GUIDE.md) pour les plus de détails.
 
@@ -56,17 +79,7 @@ npm run android    # Pour Android
 npm run ios        # Pour iOS (macOS uniquement)
 ```
 
-### **APKs et Tests**
-
-#### **Où trouver les APKs ?**
-
-**APKs générés par le pipeline CI/CD :**
-
-- **GitHub Actions** : [Actions](https://github.com/zineblahmar/EcoTri/actions) → Workflow "EcoTri CI/CD Pipeline" → Artifacts
-- **APK Debug** : `android-build-debug` (toutes les branches)
-- **APK Release** : `android-build-release` (branche `main` uniquement)
-
-**APKs locaux (développement) :**
+#### **Build APKs Locaux**
 
 ```bash
 # Build Debug
@@ -78,31 +91,21 @@ npm run ios        # Pour iOS (macOS uniquement)
 # APK : android/app/build/outputs/apk/release/app-release.apk
 ```
 
-#### **Tester les APKs**
+#### **Différences APK Debug vs Release**
 
 **APK Debug (développement) :**
 
 - **Metro requis** : `npx react-native start`
 - **Hot Reload** : Modifications en temps réel
 - **Débogage** : Console, logs détaillés
-- **Installation** : `npx react-native run-android`
 
 **APK Release (production) :**
 
 - **Metro non requis** : Fonctionne de manière autonome
 - **Pas de Hot Reload** : Code figé
 - **Performance optimisée** : Prêt pour distribution
-- **Installation** : `adb install app-release.apk`
 
 ---
-
-- S'authentifier avec un système de connexion/inscription complet
-- Scanner des déchets pour identifier leur type
-- Localiser les centres de recyclage
-- Suivre leur impact environnemental
-- Recevoir des conseils de recyclage personnalisés
-- Gérer leur profil utilisateur avec données persistantes
-- Suivre les jours de collecte des déchets
 
 ## Architecture et Structure
 
