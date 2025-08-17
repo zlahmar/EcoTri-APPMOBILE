@@ -61,7 +61,7 @@ class CollecteService {
           lat,
           lon,
           zone.geo_point_2d.lat,
-          zone.geo_point_2d.lon
+          zone.geo_point_2d.lon,
         );
 
         if (distance < minDistance) {
@@ -76,8 +76,8 @@ class CollecteService {
 
   // Récupération des informations de collecte pour une commune
   public getCollecteInfo(commune: string): CollecteInfo | null {
-    const zonesCommune = this.zones.filter(zone => 
-      zone.commune.toLowerCase() === commune.toLowerCase()
+    const zonesCommune = this.zones.filter(
+      zone => zone.commune.toLowerCase() === commune.toLowerCase(),
     );
 
     if (zonesCommune.length === 0) return null;
@@ -87,14 +87,18 @@ class CollecteService {
 
     return {
       commune: commune,
-      orduresMenageres: orduresMenageres ? {
-        jours: orduresMenageres.jour_col,
-        passage: orduresMenageres.passage
-      } : { jours: [], passage: 'JOUR' },
-      triRecyclage: triRecyclage ? {
-        jours: triRecyclage.jour_col,
-        passage: triRecyclage.passage
-      } : { jours: [], passage: 'JOUR' }
+      orduresMenageres: orduresMenageres
+        ? {
+            jours: orduresMenageres.jour_col,
+            passage: orduresMenageres.passage,
+          }
+        : { jours: [], passage: 'JOUR' },
+      triRecyclage: triRecyclage
+        ? {
+            jours: triRecyclage.jour_col,
+            passage: triRecyclage.passage,
+          }
+        : { jours: [], passage: 'JOUR' },
     };
   }
 
@@ -106,12 +110,15 @@ class CollecteService {
         communes.add(zone.commune);
       }
     });
-    
+
     return Array.from(communes).sort();
   }
 
   // Récupération des informations de collecte pour une position GPS
-  public getCollecteInfoByLocation(lat: number, lon: number): CollecteInfo | null {
+  public getCollecteInfoByLocation(
+    lat: number,
+    lon: number,
+  ): CollecteInfo | null {
     const nearestZone = this.findNearestZone(lat, lon);
     if (!nearestZone) return null;
 
@@ -119,31 +126,38 @@ class CollecteService {
   }
 
   // Calcul de la distance entre deux points GPS (formule de Haversine)
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Rayon de la Terre en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance en km
   }
 
   // Formatage des jours de collecte pour l'affichage
   public formatCollecteDays(jours: string[]): string {
     if (jours.length === 0) return 'Aucune collecte programmée';
-    
+
     const joursTraduits = jours.map(jour => {
       const traductions: { [key: string]: string } = {
-        'LUNDI': 'Lundi',
-        'MARDI': 'Mardi',
-        'MERCREDI': 'Mercredi',
-        'JEUDI': 'Jeudi',
-        'VENDREDI': 'Vendredi',
-        'SAMEDI': 'Samedi',
-        'DIMANCHE': 'Dimanche'
+        LUNDI: 'Lundi',
+        MARDI: 'Mardi',
+        MERCREDI: 'Mercredi',
+        JEUDI: 'Jeudi',
+        VENDREDI: 'Vendredi',
+        SAMEDI: 'Samedi',
+        DIMANCHE: 'Dimanche',
       };
       return traductions[jour] || jour;
     });
@@ -165,27 +179,35 @@ class CollecteService {
 
     const today = new Date();
     const todayName = this.getDayName(today.getDay());
-    
+
     if (jours.includes(todayName)) {
-      return 'Aujourd\'hui';
+      return "Aujourd'hui";
     }
 
-    const joursOrdre = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
+    const joursOrdre = [
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+      'DIMANCHE',
+    ];
     const todayIndex = joursOrdre.indexOf(todayName);
-    
+
     for (let i = 1; i <= 7; i++) {
       const nextIndex = (todayIndex + i) % 7;
       const nextDay = joursOrdre[nextIndex];
-      
+
       if (jours.includes(nextDay)) {
         const traductions: { [key: string]: string } = {
-          'LUNDI': 'Lundi',
-          'MARDI': 'Mardi',
-          'MERCREDI': 'Mercredi',
-          'JEUDI': 'Jeudi',
-          'VENDREDI': 'Vendredi',
-          'SAMEDI': 'Samedi',
-          'DIMANCHE': 'Dimanche'
+          LUNDI: 'Lundi',
+          MARDI: 'Mardi',
+          MERCREDI: 'Mercredi',
+          JEUDI: 'Jeudi',
+          VENDREDI: 'Vendredi',
+          SAMEDI: 'Samedi',
+          DIMANCHE: 'Dimanche',
         };
         return traductions[nextDay];
       }
@@ -196,7 +218,15 @@ class CollecteService {
 
   // Conversion de l'index du jour en nom
   private getDayName(dayIndex: number): string {
-    const jours = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
+    const jours = [
+      'DIMANCHE',
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+    ];
     return jours[dayIndex];
   }
 }

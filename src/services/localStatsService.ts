@@ -36,7 +36,7 @@ class LocalStatsService {
     console.log(' Vérification authentification:', {
       user: user ? user.uid : 'null',
       email: user?.email || 'null',
-      isAuthenticated: user !== null
+      isAuthenticated: user !== null,
     });
     return user !== null;
   }
@@ -70,12 +70,15 @@ class LocalStatsService {
       console.log(' Statistiques initialisées avec succès');
       return defaultStats;
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation des stats:', error);
+      console.error("Erreur lors de l'initialisation des stats:", error);
       return null;
     }
   }
 
-  async addScan(wasteType: string, confidence: number): Promise<{
+  async addScan(
+    wasteType: string,
+    confidence: number,
+  ): Promise<{
     pointsEarned: number;
     newStats: UserStats;
     message: string;
@@ -83,10 +86,10 @@ class LocalStatsService {
   } | null> {
     try {
       console.log(' Début addScan:', { wasteType, confidence });
-      
+
       const isAuth = this.isUserAuthenticated();
       console.log(' Statut authentification:', isAuth);
-      
+
       if (!isAuth) {
         console.log(' Utilisateur non connecté - Scan non enregistré');
         return null;
@@ -94,11 +97,11 @@ class LocalStatsService {
 
       let currentStats = await this.getStats();
       console.log(' Stats actuelles:', currentStats ? 'existantes' : 'null');
-      
+
       if (!currentStats) {
         currentStats = await this.initializeStats();
         if (!currentStats) {
-          console.log(' Impossible d\'initialiser les stats');
+          console.log(" Impossible d'initialiser les stats");
           return null;
         }
       }
@@ -108,14 +111,17 @@ class LocalStatsService {
 
       let pointsEarned = this.POINTS_PER_SCAN;
       console.log(' Points de base:', pointsEarned);
-      
+
       if (confidence > 0.8) {
         pointsEarned += this.BONUS_POINTS_HIGH_CONFIDENCE;
         console.log(' Bonus haute confiance (+5):', pointsEarned);
       }
 
       if (currentStats.recyclingStreak > 0) {
-        const streakBonus = Math.min(currentStats.recyclingStreak * this.STREAK_BONUS, 10);
+        const streakBonus = Math.min(
+          currentStats.recyclingStreak * this.STREAK_BONUS,
+          10,
+        );
         pointsEarned += streakBonus;
         console.log(' Bonus streak (+' + streakBonus + '):', pointsEarned);
       }
@@ -138,7 +144,10 @@ class LocalStatsService {
         },
       };
 
-      newStats.recyclingStreak = await this.calculateStreak(currentStats.lastScanDate, today);
+      newStats.recyclingStreak = await this.calculateStreak(
+        currentStats.lastScanDate,
+        today,
+      );
 
       newStats.scansThisWeek = await this.calculateWeeklyScans();
       newStats.scansThisMonth = await this.calculateMonthlyScans();
@@ -147,21 +156,23 @@ class LocalStatsService {
 
       await this.saveStats(newStats);
 
-      console.log(' Scan enregistré avec succès:', { 
-        pointsEarned, 
+      console.log(' Scan enregistré avec succès:', {
+        pointsEarned,
         totalPoints: newStats.totalPoints,
         totalScans: newStats.totalScans,
-        recyclingStreak: newStats.recyclingStreak
+        recyclingStreak: newStats.recyclingStreak,
       });
 
       return {
         pointsEarned,
         newStats,
-        message: `+${pointsEarned} points ! ${this.getStreakMessage(newStats.recyclingStreak)}`,
+        message: `+${pointsEarned} points ! ${this.getStreakMessage(
+          newStats.recyclingStreak,
+        )}`,
         isAuthenticated: true,
       };
     } catch (error) {
-      console.error(' Erreur lors de l\'ajout du scan:', error);
+      console.error(" Erreur lors de l'ajout du scan:", error);
       return null;
     }
   }
@@ -173,10 +184,10 @@ class LocalStatsService {
   } | null> {
     try {
       console.log(' Début addRecyclingPointSearch');
-      
+
       const isAuth = this.isUserAuthenticated();
       console.log(' Statut authentification:', isAuth);
-      
+
       if (!isAuth) {
         console.log(' Utilisateur non connecté - Recherche non enregistrée');
         return null;
@@ -186,7 +197,7 @@ class LocalStatsService {
       if (!currentStats) {
         currentStats = await this.initializeStats();
         if (!currentStats) {
-          console.log(' Impossible d\'initialiser les stats');
+          console.log(" Impossible d'initialiser les stats");
           return null;
         }
       }
@@ -211,7 +222,7 @@ class LocalStatsService {
         isAuthenticated: true,
       };
     } catch (error) {
-      console.error(' Erreur lors de l\'enregistrement de la recherche:', error);
+      console.error(" Erreur lors de l'enregistrement de la recherche:", error);
       return null;
     }
   }
@@ -236,9 +247,8 @@ class LocalStatsService {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneWeekAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneWeekAgo)
+        .length;
     } catch (error) {
       return 0;
     }
@@ -250,15 +260,17 @@ class LocalStatsService {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneMonthAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneMonthAgo)
+        .length;
     } catch (error) {
       return 0;
     }
   }
 
-  private async calculateStreak(lastScanDate: string | null, today: string): Promise<number> {
+  private async calculateStreak(
+    lastScanDate: string | null,
+    today: string,
+  ): Promise<number> {
     if (!lastScanDate) return 1;
 
     const lastScan = new Date(lastScanDate);
@@ -282,7 +294,10 @@ class LocalStatsService {
       const history = await this.getScanHistory();
       if (history.length === 0) return 0;
 
-      const totalConfidence = history.reduce((sum, scan) => sum + scan.confidence, 0);
+      const totalConfidence = history.reduce(
+        (sum, scan) => sum + scan.confidence,
+        0,
+      );
       return Math.round((totalConfidence / history.length) * 100);
     } catch (error) {
       return 0;
@@ -303,14 +318,17 @@ class LocalStatsService {
     try {
       const history = await this.getScanHistory();
       history.push(scan);
-      
+
       if (history.length > 100) {
         history.splice(0, history.length - 100);
       }
 
-      await AsyncStorage.setItem(this.SCAN_HISTORY_KEY, JSON.stringify(history));
+      await AsyncStorage.setItem(
+        this.SCAN_HISTORY_KEY,
+        JSON.stringify(history),
+      );
     } catch (error) {
-      console.error('Erreur lors de l\'ajout à l\'historique:', error);
+      console.error("Erreur lors de l'ajout à l'historique:", error);
     }
   }
 
@@ -323,7 +341,10 @@ class LocalStatsService {
     }
   }
 
-  private generateMotivationalMessage(pointsEarned: number, stats: UserStats): string {
+  private generateMotivationalMessage(
+    pointsEarned: number,
+    stats: UserStats,
+  ): string {
     const messages = [
       `🎉 +${pointsEarned} points ! Excellent recyclage !`,
       `♻️ Bravo ! Vous avez maintenant ${stats.totalPoints} points !`,
@@ -342,7 +363,13 @@ class LocalStatsService {
     accuracyScore: number;
   }> {
     const stats = await this.getStats();
-    if (!stats) return { totalPoints: 0, totalScans: 0, recyclingStreak: 0, accuracyScore: 0 };
+    if (!stats)
+      return {
+        totalPoints: 0,
+        totalScans: 0,
+        recyclingStreak: 0,
+        accuracyScore: 0,
+      };
 
     return {
       totalPoints: stats.totalPoints,

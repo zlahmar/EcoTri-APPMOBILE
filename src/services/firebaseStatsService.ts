@@ -37,6 +37,8 @@ class FirebaseStatsService {
         recyclingStreak: 0,
         wasteTypesScanned: {},
         accuracyScore: 0,
+        recyclingPointSearches: 0,
+        lastRecyclingSearch: null,
       };
 
       await firestore()
@@ -48,12 +50,18 @@ class FirebaseStatsService {
 
       return defaultStats;
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation des stats Firebase:', error);
+      console.error(
+        "Erreur lors de l'initialisation des stats Firebase:",
+        error,
+      );
       throw error;
     }
   }
 
-  async addScan(wasteType: string, confidence: number): Promise<{
+  async addScan(
+    wasteType: string,
+    confidence: number,
+  ): Promise<{
     pointsEarned: number;
     newStats: UserStats;
     message: string;
@@ -73,13 +81,16 @@ class FirebaseStatsService {
       const today = now.toISOString().split('T')[0];
 
       let pointsEarned = this.POINTS_PER_SCAN;
-      
+
       if (confidence > 0.8) {
         pointsEarned += this.BONUS_POINTS_HIGH_CONFIDENCE;
       }
 
       if (currentStats.recyclingStreak > 0) {
-        pointsEarned += Math.min(currentStats.recyclingStreak * this.STREAK_BONUS, 10);
+        pointsEarned += Math.min(
+          currentStats.recyclingStreak * this.STREAK_BONUS,
+          10,
+        );
       }
 
       const newStats: UserStats = {
@@ -96,18 +107,21 @@ class FirebaseStatsService {
       newStats.scansThisWeek = await this.calculateWeeklyScans();
       newStats.scansThisMonth = await this.calculateMonthlyScans();
 
-      newStats.recyclingStreak = await this.calculateStreak(today, currentStats.lastScanDate);
+      newStats.recyclingStreak = await this.calculateStreak(
+        today,
+        currentStats.lastScanDate,
+      );
 
       newStats.accuracyScore = await this.calculateAccuracyScore();
 
       const batch = firestore().batch();
-      
+
       const statsRef = firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
         .collection(this.COLLECTION_STATS)
         .doc('current');
-      
+
       batch.set(statsRef, newStats);
 
       const historyRef = firestore()
@@ -135,7 +149,7 @@ class FirebaseStatsService {
         message,
       };
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du scan Firebase:', error);
+      console.error("Erreur lors de l'ajout du scan Firebase:", error);
       throw error;
     }
   }
@@ -154,13 +168,16 @@ class FirebaseStatsService {
         .doc('current')
         .get();
 
-      if (statsDoc.exists) {
+      if (statsDoc.exists()) {
         return statsDoc.data() as UserStats;
       }
 
       return null;
     } catch (error) {
-      console.error('Erreur lors de la récupération des stats Firebase:', error);
+      console.error(
+        'Erreur lors de la récupération des stats Firebase:',
+        error,
+      );
       return null;
     }
   }
@@ -171,9 +188,8 @@ class FirebaseStatsService {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneWeekAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneWeekAgo)
+        .length;
     } catch (error) {
       return 0;
     }
@@ -185,15 +201,17 @@ class FirebaseStatsService {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      return history.filter(scan => 
-        new Date(scan.timestamp) > oneMonthAgo
-      ).length;
+      return history.filter(scan => new Date(scan.timestamp) > oneMonthAgo)
+        .length;
     } catch (error) {
       return 0;
     }
   }
 
-  private async calculateStreak(today: string, lastScanDate: string | null): Promise<number> {
+  private async calculateStreak(
+    today: string,
+    lastScanDate: string | null,
+  ): Promise<number> {
     if (!lastScanDate) return 1;
 
     const lastScan = new Date(lastScanDate);
@@ -217,7 +235,10 @@ class FirebaseStatsService {
       const history = await this.getScanHistory();
       if (history.length === 0) return 0;
 
-      const totalConfidence = history.reduce((sum, scan) => sum + scan.confidence, 0);
+      const totalConfidence = history.reduce(
+        (sum, scan) => sum + scan.confidence,
+        0,
+      );
       return Math.round((totalConfidence / history.length) * 100);
     } catch (error) {
       return 0;
@@ -242,12 +263,18 @@ class FirebaseStatsService {
 
       return historySnapshot.docs.map(doc => doc.data() as ScanResult);
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'historique Firebase:', error);
+      console.error(
+        "Erreur lors de la récupération de l'historique Firebase:",
+        error,
+      );
       return [];
     }
   }
 
-  private generateMotivationalMessage(pointsEarned: number, stats: UserStats): string {
+  private generateMotivationalMessage(
+    pointsEarned: number,
+    stats: UserStats,
+  ): string {
     const messages = [
       `🎉 +${pointsEarned} points ! Excellent recyclage !`,
       `♻️ Bravo ! Vous avez maintenant ${stats.totalPoints} points !`,
@@ -268,7 +295,12 @@ class FirebaseStatsService {
   }> {
     const stats = await this.getStats();
     if (!stats) {
-      return { totalPoints: 0, totalScans: 0, recyclingStreak: 0, accuracyScore: 0 };
+      return {
+        totalPoints: 0,
+        totalScans: 0,
+        recyclingStreak: 0,
+        accuracyScore: 0,
+      };
     }
 
     const rank = await this.calculateUserRank(stats.totalPoints);
@@ -282,7 +314,9 @@ class FirebaseStatsService {
     };
   }
 
-  private async calculateUserRank(userPoints: number): Promise<number | undefined> {
+  private async calculateUserRank(
+    userPoints: number,
+  ): Promise<number | undefined> {
     try {
       const usersSnapshot = await firestore()
         .collectionGroup(this.COLLECTION_STATS)
@@ -313,13 +347,13 @@ class FirebaseStatsService {
       }
 
       const batch = firestore().batch();
-      
+
       const statsRef = firestore()
         .collection(this.COLLECTION_USERS)
         .doc(userId)
         .collection(this.COLLECTION_STATS)
         .doc('current');
-      
+
       batch.delete(statsRef);
 
       const historySnapshot = await firestore()
@@ -352,8 +386,8 @@ class FirebaseStatsService {
       .doc(userId)
       .collection(this.COLLECTION_STATS)
       .doc('current')
-      .onSnapshot((doc) => {
-        if (doc.exists) {
+      .onSnapshot(doc => {
+        if (doc.exists()) {
           callback(doc.data() as UserStats);
         } else {
           callback(null);

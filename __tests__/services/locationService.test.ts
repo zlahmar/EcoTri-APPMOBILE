@@ -22,7 +22,10 @@ jest.mock('react-native', () => ({
 }));
 
 // Mock fetch pour l'API Nominatim
-global.fetch = jest.fn();
+Object.defineProperty(globalThis, 'fetch', {
+  value: jest.fn(),
+  writable: true,
+});
 
 // Import après les mocks
 import locationService, { LocationData } from '../../src/services/locationService';
@@ -141,7 +144,9 @@ describe('LocationService', () => {
     it('should handle geolocation errors', async () => {
       const mockGetCurrentPosition = Geolocation.getCurrentPosition as jest.MockedFunction<typeof Geolocation.getCurrentPosition>;
       mockGetCurrentPosition.mockImplementation((success, error) => {
-        error({ code: 1, message: 'Location permission denied' } as any);
+        if (error) {
+          error({ code: 1, message: 'Location permission denied' } as any);
+        }
       });
 
       const result = await locationService.getCurrentLocation();

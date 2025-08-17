@@ -27,15 +27,21 @@ class AuthService {
   }
 
   // Connexion avec email et mot de passe
-  async signInWithEmailAndPassword(email: string, password: string): Promise<UserData> {
+  async signInWithEmailAndPassword(
+    email: string,
+    password: string,
+  ): Promise<UserData> {
     try {
-      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
+      );
       const user = userCredential.user;
-      
+
       await this.updateLastLogin(user.uid);
-      
+
       const userData = await this.getUserData(user.uid);
-      
+
       return userData;
     } catch (error: any) {
       throw this.handleAuthError(error);
@@ -43,15 +49,18 @@ class AuthService {
   }
 
   async createUserWithEmailAndPassword(
-    email: string, 
-    password: string, 
-    firstName: string, 
-    lastName: string
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
   ): Promise<UserData> {
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password,
+      );
       const user = userCredential.user;
-      
+
       const userData: Omit<UserData, 'uid'> = {
         email,
         firstName,
@@ -59,12 +68,9 @@ class AuthService {
         createdAt: new Date(),
         lastLoginAt: new Date(),
       };
-      
-      await firestore()
-        .collection('users')
-        .doc(user.uid)
-        .set(userData);
-      
+
+      await firestore().collection('users').doc(user.uid).set(userData);
+
       return {
         uid: user.uid,
         ...userData,
@@ -82,33 +88,30 @@ class AuthService {
         console.log('Aucun utilisateur connecté, déconnexion ignorée');
         return;
       }
-      
+
       await auth().signOut();
       console.log('Déconnexion réussie');
     } catch (error: any) {
       console.error('Erreur lors de la déconnexion Firebase:', error);
-      
+
       // Si l'erreur est "no-current-user", c'est normal après déconnexion
       if (error.code === 'auth/no-current-user') {
         console.log('Utilisateur déjà déconnecté');
         return;
       }
-      
+
       throw this.handleAuthError(error);
     }
   }
 
   async getUserData(uid: string): Promise<UserData> {
     try {
-      const userDoc = await firestore()
-        .collection('users')
-        .doc(uid)
-        .get();
-      
+      const userDoc = await firestore().collection('users').doc(uid).get();
+
       if (!userDoc.exists) {
         throw new Error('Profil utilisateur non trouvé');
       }
-      
+
       const data = userDoc.data();
       return {
         uid,
@@ -119,26 +122,28 @@ class AuthService {
         lastLoginAt: data?.lastLoginAt?.toDate() || new Date(),
       };
     } catch (error: any) {
-      throw new Error('Erreur lors de la récupération du profil: ' + error.message);
+      throw new Error(
+        'Erreur lors de la récupération du profil: ' + error.message,
+      );
     }
   }
 
   private async updateLastLogin(uid: string): Promise<void> {
     try {
-      await firestore()
-        .collection('users')
-        .doc(uid)
-        .update({
-          lastLoginAt: firestore.FieldValue.serverTimestamp(),
-        });
+      await firestore().collection('users').doc(uid).update({
+        lastLoginAt: firestore.FieldValue.serverTimestamp(),
+      });
     } catch (error) {
-      console.warn('Erreur lors de la mise à jour de la dernière connexion:', error);
+      console.warn(
+        'Erreur lors de la mise à jour de la dernière connexion:',
+        error,
+      );
     }
   }
 
   private handleAuthError(error: any): AuthError {
     let userFriendlyMessage = 'Une erreur est survenue';
-    
+
     switch (error.code) {
       case 'auth/user-not-found':
         userFriendlyMessage = 'Aucun compte trouvé avec cet email';
@@ -147,10 +152,11 @@ class AuthService {
         userFriendlyMessage = 'Mot de passe incorrect';
         break;
       case 'auth/invalid-email':
-        userFriendlyMessage = 'Format d\'email invalide';
+        userFriendlyMessage = "Format d'email invalide";
         break;
       case 'auth/weak-password':
-        userFriendlyMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+        userFriendlyMessage =
+          'Le mot de passe doit contenir au moins 6 caractères';
         break;
       case 'auth/email-already-in-use':
         userFriendlyMessage = 'Cet email est déjà utilisé par un autre compte';
@@ -165,9 +171,10 @@ class AuthService {
         userFriendlyMessage = 'Aucun utilisateur connecté';
         break;
       default:
-        userFriendlyMessage = error.message || 'Une erreur inattendue est survenue';
+        userFriendlyMessage =
+          error.message || 'Une erreur inattendue est survenue';
     }
-    
+
     return {
       code: error.code || 'unknown',
       message: error.message || 'Unknown error',

@@ -180,7 +180,7 @@ jobs:
           echo "✅ Build Android Release réussi"
 
       - name: Upload des artefacts Android
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-build-${{ matrix.build-type }}
           path: |
@@ -394,7 +394,7 @@ jobs:
           echo "✅ Rapport de qualité généré"
 
       - name: Upload du rapport de qualité
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: quality-report
           path: quality-report.md

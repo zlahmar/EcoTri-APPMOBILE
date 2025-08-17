@@ -78,7 +78,7 @@ describe('UserGuide', () => {
   });
 
   it('should handle missing onClose prop gracefully', () => {
-    const { getByText } = render(<UserGuide isVisible={true} />);
+    const { getByText } = render(<UserGuide isVisible={true} onClose={jest.fn()} />);
     
     expect(getByText('Guide d\'Utilisation EcoTri')).toBeTruthy();
   });

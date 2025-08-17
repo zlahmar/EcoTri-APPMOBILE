@@ -52,13 +52,13 @@ export interface CollectionSchedule {
 
 class FirestoreService {
   // GESTION DES DÉCHETS
-  
+
   async addWasteItem(wasteItem: Omit<WasteItem, 'id'>): Promise<string> {
     try {
       const docRef = await firebaseFirestore
         .collection('wasteItems')
         .add(wasteItem);
-      
+
       return docRef.id;
     } catch (error) {
       throw new Error(`Erreur lors de l'ajout du déchet: ${error}`);
@@ -73,24 +73,26 @@ class FirestoreService {
         .orderBy('scannedAt', 'desc')
         .limit(limit)
         .get();
-      
+
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       })) as WasteItem[];
     } catch (error) {
-      throw new Error(`Erreur lors de la récupération de l'historique: ${error}`);
+      throw new Error(
+        `Erreur lors de la récupération de l'historique: ${error}`,
+      );
     }
   }
 
   // GESTION DES CENTRES DE RECYCLAGE
-  
+
   async getRecyclingCenters(): Promise<RecyclingCenter[]> {
     try {
       const snapshot = await firebaseFirestore
         .collection('recyclingCenters')
         .get();
-      
+
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -106,7 +108,7 @@ class FirestoreService {
         .collection('recyclingCenters')
         .where('acceptedMaterials', 'array-contains', material)
         .get();
-      
+
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -117,20 +119,18 @@ class FirestoreService {
   }
 
   // GESTION DES CONSEILS
-  
+
   async getRecyclingTips(category?: string): Promise<RecyclingTip[]> {
     try {
-      let query = firebaseFirestore.collection('recyclingTips');
-      
+      let query: any = firebaseFirestore.collection('recyclingTips');
+
       if (category) {
         query = query.where('category', '==', category);
       }
-      
-      const snapshot = await query
-        .orderBy('createdAt', 'desc')
-        .get();
-      
-      return snapshot.docs.map(doc => ({
+
+      const snapshot = await query.orderBy('createdAt', 'desc').get();
+
+      return snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       })) as RecyclingTip[];
@@ -142,14 +142,18 @@ class FirestoreService {
   async getDailyTip(): Promise<RecyclingTip | null> {
     try {
       const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      
+      const startOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
+
       const snapshot = await firebaseFirestore
         .collection('recyclingTips')
         .where('createdAt', '>=', startOfDay)
         .limit(1)
         .get();
-      
+
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
         return {
@@ -157,41 +161,47 @@ class FirestoreService {
           ...doc.data(),
         } as RecyclingTip;
       }
-      
+
       const allTips = await this.getRecyclingTips();
       if (allTips.length > 0) {
         const randomIndex = Math.floor(Math.random() * allTips.length);
         return allTips[randomIndex];
       }
-      
+
       return null;
     } catch (error) {
-      throw new Error(`Erreur lors de la récupération du conseil du jour: ${error}`);
+      throw new Error(
+        `Erreur lors de la récupération du conseil du jour: ${error}`,
+      );
     }
   }
 
   // GESTION DES PLANNINGS DE COLLECTE
-  
-  async addCollectionSchedule(schedule: Omit<CollectionSchedule, 'id'>): Promise<string> {
+
+  async addCollectionSchedule(
+    schedule: Omit<CollectionSchedule, 'id'>,
+  ): Promise<string> {
     try {
       const docRef = await firebaseFirestore
         .collection('collectionSchedules')
         .add(schedule);
-      
+
       return docRef.id;
     } catch (error) {
       throw new Error(`Erreur lors de l'ajout du planning: ${error}`);
     }
   }
 
-  async getUserCollectionSchedules(userId: string): Promise<CollectionSchedule[]> {
+  async getUserCollectionSchedules(
+    userId: string,
+  ): Promise<CollectionSchedule[]> {
     try {
       const snapshot = await firebaseFirestore
         .collection('collectionSchedules')
         .where('userId', '==', userId)
         .orderBy('collectionDate', 'asc')
         .get();
-      
+
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -213,28 +223,31 @@ class FirestoreService {
   }
 
   // STATISTIQUES
-  
+
   async getUserRecyclingStats(userId: string) {
     try {
       const wasteSnapshot = await firebaseFirestore
         .collection('wasteItems')
         .where('userId', '==', userId)
         .get();
-      
+
       const totalWaste = wasteSnapshot.size;
       const recyclableWaste = wasteSnapshot.docs.filter(
-        doc => doc.data().isRecyclable
+        doc => doc.data().isRecyclable,
       ).length;
-      
-      const recyclingRate = totalWaste > 0 ? (recyclableWaste / totalWaste) * 100 : 0;
-      
+
+      const recyclingRate =
+        totalWaste > 0 ? (recyclableWaste / totalWaste) * 100 : 0;
+
       return {
         totalWasteScanned: totalWaste,
         recyclableWaste,
         recyclingRate: Math.round(recyclingRate * 100) / 100,
       };
     } catch (error) {
-      throw new Error(`Erreur lors de la récupération des statistiques: ${error}`);
+      throw new Error(
+        `Erreur lors de la récupération des statistiques: ${error}`,
+      );
     }
   }
 }

@@ -37,7 +37,7 @@ class LocationService {
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
         return granted;
       } catch (error) {
@@ -57,13 +57,14 @@ class LocationService {
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: 'Permission de localisation',
-            message: 'EcoTri a besoin d\'accéder à votre position pour afficher votre ville.',
+            message:
+              "EcoTri a besoin d'accéder à votre position pour afficher votre ville.",
             buttonNeutral: 'Demander plus tard',
             buttonNegative: 'Annuler',
             buttonPositive: 'OK',
-          }
+          },
         );
-        
+
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           return true;
         } else {
@@ -103,7 +104,7 @@ class LocationService {
 
     this.isRequestingLocation = true;
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
         this.isRequestingLocation = false;
         this.callbacks.onError?.('Timeout de localisation');
@@ -111,34 +112,34 @@ class LocationService {
       }, 15000);
 
       Geolocation.getCurrentPosition(
-        async (position) => {
+        async position => {
           clearTimeout(timeout);
           this.isRequestingLocation = false;
-          
+
           const { latitude, longitude } = position.coords;
-          
+
           const city = await this.fetchCityFromCoordinates(latitude, longitude);
-          
+
           const locationData: LocationData = {
             latitude,
             longitude,
             city,
             address: null,
           };
-          
+
           this.currentLocation = locationData;
           this.callbacks.onLocationUpdate?.(locationData);
           this.callbacks.onCityUpdate?.(city);
-          
+
           resolve(locationData);
         },
-        (error) => {
+        error => {
           clearTimeout(timeout);
           this.isRequestingLocation = false;
-          
+
           console.error('Erreur de géolocalisation:', error);
           let errorMessage = 'Localisation impossible';
-          
+
           switch (error.code) {
             case 1:
               errorMessage = 'Permission refusée';
@@ -147,12 +148,12 @@ class LocationService {
               errorMessage = 'Position indisponible';
               break;
             case 3:
-              errorMessage = 'Délai d\'attente dépassé';
+              errorMessage = "Délai d'attente dépassé";
               break;
             default:
               errorMessage = 'Erreur de localisation';
           }
-          
+
           this.callbacks.onError?.(errorMessage);
           resolve(null);
         },
@@ -160,36 +161,39 @@ class LocationService {
           enableHighAccuracy: true,
           timeout: 15000,
           maximumAge: 60000,
-        }
+        },
       );
     });
   }
 
   // Récupération du nom de la ville via OpenStreetMap
-  private async fetchCityFromCoordinates(lat: number, lon: number): Promise<string> {
+  private async fetchCityFromCoordinates(
+    lat: number,
+    lon: number,
+  ): Promise<string> {
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=fr`;
       const response = await fetch(url, {
-        headers: { "User-Agent": "EcoTri/1.0" },
+        headers: { 'User-Agent': 'EcoTri/1.0' },
       });
-      
+
       if (!response.ok) {
-        throw new Error('Erreur lors de la récupération de l\'adresse');
+        throw new Error("Erreur lors de la récupération de l'adresse");
       }
-      
+
       const data = await response.json();
       let cityName = 'Ville inconnue';
-      
+
       if (data.address) {
-        cityName = data.address.city || 
-                  data.address.town || 
-                  data.address.village || 
-                  data.address.county || 
-                  'Ville inconnue';
+        cityName =
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.county ||
+          'Ville inconnue';
       }
-      
+
       return cityName;
-      
     } catch (error) {
       console.error('Erreur lors de la récupération de la ville:', error);
       return 'Ville inconnue';
@@ -201,11 +205,10 @@ class LocationService {
     return this.getCurrentLocation();
   }
 
-    // Obtenir la localisation actuelle (depuis le cache si disponible)
+  // Obtenir la localisation actuelle (depuis le cache si disponible)
   public getLocation(): LocationData | null {
     return this.currentLocation;
   }
-
 
   public getCity(): string {
     return this.currentLocation?.city || '';
@@ -214,7 +217,6 @@ class LocationService {
   public hasLocation(): boolean {
     return this.currentLocation !== null;
   }
-
 
   public clearCallbacks(): void {
     this.callbacks = {};
