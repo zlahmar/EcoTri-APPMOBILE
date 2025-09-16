@@ -165,13 +165,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     } else if (tags.amenity) {
       // Si pas de nom ni rue, utiliser le type d'amenity
       const amenityTranslations: { [key: string]: string } = {
-        'recycling': 'Point de recyclage',
-        'waste_disposal': 'Point de collecte',
-        'waste_transfer_station': 'Station de transfert',
-        'waste_basket': 'Poubelle',
-        'waste_collection': 'Collecte de déchets',
+        recycling: 'Point de recyclage',
+        waste_disposal: 'Point de collecte',
+        waste_transfer_station: 'Station de transfert',
+        waste_basket: 'Poubelle',
+        waste_collection: 'Collecte de déchets',
       };
-      addressParts.push(amenityTranslations[tags.amenity] || 'Point de recyclage');
+      addressParts.push(
+        amenityTranslations[tags.amenity] || 'Point de recyclage',
+      );
     }
 
     // Ajouter les détails d'adresse si disponibles
@@ -199,169 +201,185 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   }, []);
 
   // Récupération des types de recyclage à partir des tags
-  const getRecyclingTypes = useCallback((tags: any): string => {
-    if (!tags) return 'Type non spécifié';
+  const getRecyclingTypes = useCallback(
+    (tags: any): string => {
+      if (!tags) return 'Type non spécifié';
 
-    const types = [];
+      const types = [];
 
-    // Vérifier les tags de recyclage spécifiques (format OpenStreetMap avec :)
-    if (
-      tags['recycling:glass_bottles'] === 'yes' ||
-      tags['recycling:glass'] === 'yes' ||
-      tags.recycling_glass === 'yes' ||
-      tags.recycling_glass === 'container'
-    ) {
-      types.push('glass');
-    }
-
-    if (
-      tags['recycling:plastic'] === 'yes' ||
-      tags.recycling_plastic === 'yes' ||
-      tags.recycling_plastic === 'container'
-    ) {
-      types.push('plastic');
-    }
-
-    if (
-      tags['recycling:paper'] === 'yes' ||
-      tags['recycling:cartons'] === 'yes' ||
-      tags.recycling_paper === 'yes' ||
-      tags.recycling_paper === 'container'
-    ) {
-      types.push('paper');
-    }
-
-    if (
-      tags['recycling:metal'] === 'yes' ||
-      tags['recycling:cans'] === 'yes' ||
-      tags.recycling_metal === 'yes' ||
-      tags.recycling_metal === 'container'
-    ) {
-      types.push('metal');
-    }
-
-    if (
-      tags['recycling:electrical'] === 'yes' ||
-      tags['recycling:electrical_items'] === 'yes' ||
-      tags.recycling_electronics === 'yes' ||
-      tags.recycling_electronics === 'container'
-    ) {
-      types.push('electronics');
-    }
-
-    if (
-      tags['recycling:clothes'] === 'yes' ||
-      tags.recycling_textile === 'yes' ||
-      tags.recycling_textile === 'container'
-    ) {
-      types.push('textile');
-    }
-
-    if (
-      tags['recycling:batteries'] === 'yes' ||
-      tags['recycling:accumulator'] === 'yes' ||
-      tags.recycling_batteries === 'yes' ||
-      tags.recycling_batteries === 'container'
-    ) {
-      types.push('batteries');
-    }
-
-    if (
-      tags['recycling:organic'] === 'yes' ||
-      tags['recycling:organic_waste'] === 'yes' ||
-      tags['recycling:food_waste'] === 'yes' ||
-      tags['recycling:green_waste'] === 'yes' ||
-      tags.recycling_organic === 'yes' ||
-      tags.recycling_organic === 'container'
-    ) {
-      types.push('organic');
-    }
-
-    if (
-      tags['recycling:wood'] === 'yes' ||
-      tags['recycling:wood_waste'] === 'yes'
-    ) {
-      types.push('wood');
-    }
-
-    if (
-      tags['recycling:light_bulbs'] === 'yes'
-    ) {
-      types.push('light_bulbs');
-    }
-
-    // Vérifier les tags génériques
-    if (tags.recycling) {
-      if (tags.recycling.includes('glass') || tags.recycling.includes('verre')) {
+      // Vérifier les tags de recyclage spécifiques (format OpenStreetMap avec :)
+      if (
+        tags['recycling:glass_bottles'] === 'yes' ||
+        tags['recycling:glass'] === 'yes' ||
+        tags.recycling_glass === 'yes' ||
+        tags.recycling_glass === 'container'
+      ) {
         types.push('glass');
       }
-      if (tags.recycling.includes('plastic') || tags.recycling.includes('plastique')) {
-        types.push('plastic');
-      }
-      if (tags.recycling.includes('paper') || tags.recycling.includes('papier')) {
-        types.push('paper');
-      }
-      if (tags.recycling.includes('metal') || tags.recycling.includes('métal')) {
-        types.push('metal');
-      }
-      if (tags.recycling.includes('electronics') || tags.recycling.includes('électronique')) {
-        types.push('electronics');
-      }
-    }
 
-    // Vérifier les tags de description
-    if (tags.description) {
-      const desc = tags.description.toLowerCase();
-      if (desc.includes('verre') || desc.includes('glass')) {
-        types.push('glass');
-      }
-      if (desc.includes('plastique') || desc.includes('plastic')) {
+      if (
+        tags['recycling:plastic'] === 'yes' ||
+        tags.recycling_plastic === 'yes' ||
+        tags.recycling_plastic === 'container'
+      ) {
         types.push('plastic');
       }
-      if (desc.includes('papier') || desc.includes('paper')) {
-        types.push('paper');
-      }
-      if (desc.includes('métal') || desc.includes('metal')) {
-        types.push('metal');
-      }
-      if (desc.includes('électronique') || desc.includes('electronics')) {
-        types.push('electronics');
-      }
-    }
 
-    // Vérifier le nom du point pour extraire les types
-    if (tags.name) {
-      const name = tags.name.toLowerCase();
-      if (name.includes('verre') || name.includes('glass')) {
-        types.push('glass');
-      }
-      if (name.includes('plastique') || name.includes('plastic')) {
-        types.push('plastic');
-      }
-      if (name.includes('papier') || name.includes('paper')) {
+      if (
+        tags['recycling:paper'] === 'yes' ||
+        tags['recycling:cartons'] === 'yes' ||
+        tags.recycling_paper === 'yes' ||
+        tags.recycling_paper === 'container'
+      ) {
         types.push('paper');
       }
-      if (name.includes('métal') || name.includes('metal')) {
+
+      if (
+        tags['recycling:metal'] === 'yes' ||
+        tags['recycling:cans'] === 'yes' ||
+        tags.recycling_metal === 'yes' ||
+        tags.recycling_metal === 'container'
+      ) {
         types.push('metal');
       }
-      if (name.includes('électronique') || name.includes('electronics')) {
+
+      if (
+        tags['recycling:electrical'] === 'yes' ||
+        tags['recycling:electrical_items'] === 'yes' ||
+        tags.recycling_electronics === 'yes' ||
+        tags.recycling_electronics === 'container'
+      ) {
         types.push('electronics');
       }
-      if (name.includes('compost') || name.includes('organique')) {
+
+      if (
+        tags['recycling:clothes'] === 'yes' ||
+        tags.recycling_textile === 'yes' ||
+        tags.recycling_textile === 'container'
+      ) {
+        types.push('textile');
+      }
+
+      if (
+        tags['recycling:batteries'] === 'yes' ||
+        tags['recycling:accumulator'] === 'yes' ||
+        tags.recycling_batteries === 'yes' ||
+        tags.recycling_batteries === 'container'
+      ) {
+        types.push('batteries');
+      }
+
+      if (
+        tags['recycling:organic'] === 'yes' ||
+        tags['recycling:organic_waste'] === 'yes' ||
+        tags['recycling:food_waste'] === 'yes' ||
+        tags['recycling:green_waste'] === 'yes' ||
+        tags.recycling_organic === 'yes' ||
+        tags.recycling_organic === 'container'
+      ) {
         types.push('organic');
       }
-    }
 
-    // Supprimer les doublons
-    const uniqueTypes = [...new Set(types)];
+      if (
+        tags['recycling:wood'] === 'yes' ||
+        tags['recycling:wood_waste'] === 'yes'
+      ) {
+        types.push('wood');
+      }
 
-    if (uniqueTypes.length === 0) {
-      return 'Type non spécifié';
-    }
+      if (tags['recycling:light_bulbs'] === 'yes') {
+        types.push('light_bulbs');
+      }
 
-    // Traduire les types
-    return uniqueTypes.map(type => translateRecyclingType(type)).join(', ');
-  }, [translateRecyclingType]);
+      // Vérifier les tags génériques
+      if (tags.recycling) {
+        if (
+          tags.recycling.includes('glass') ||
+          tags.recycling.includes('verre')
+        ) {
+          types.push('glass');
+        }
+        if (
+          tags.recycling.includes('plastic') ||
+          tags.recycling.includes('plastique')
+        ) {
+          types.push('plastic');
+        }
+        if (
+          tags.recycling.includes('paper') ||
+          tags.recycling.includes('papier')
+        ) {
+          types.push('paper');
+        }
+        if (
+          tags.recycling.includes('metal') ||
+          tags.recycling.includes('métal')
+        ) {
+          types.push('metal');
+        }
+        if (
+          tags.recycling.includes('electronics') ||
+          tags.recycling.includes('électronique')
+        ) {
+          types.push('electronics');
+        }
+      }
+
+      // Vérifier les tags de description
+      if (tags.description) {
+        const desc = tags.description.toLowerCase();
+        if (desc.includes('verre') || desc.includes('glass')) {
+          types.push('glass');
+        }
+        if (desc.includes('plastique') || desc.includes('plastic')) {
+          types.push('plastic');
+        }
+        if (desc.includes('papier') || desc.includes('paper')) {
+          types.push('paper');
+        }
+        if (desc.includes('métal') || desc.includes('metal')) {
+          types.push('metal');
+        }
+        if (desc.includes('électronique') || desc.includes('electronics')) {
+          types.push('electronics');
+        }
+      }
+
+      // Vérifier le nom du point pour extraire les types
+      if (tags.name) {
+        const name = tags.name.toLowerCase();
+        if (name.includes('verre') || name.includes('glass')) {
+          types.push('glass');
+        }
+        if (name.includes('plastique') || name.includes('plastic')) {
+          types.push('plastic');
+        }
+        if (name.includes('papier') || name.includes('paper')) {
+          types.push('paper');
+        }
+        if (name.includes('métal') || name.includes('metal')) {
+          types.push('metal');
+        }
+        if (name.includes('électronique') || name.includes('electronics')) {
+          types.push('electronics');
+        }
+        if (name.includes('compost') || name.includes('organique')) {
+          types.push('organic');
+        }
+      }
+
+      // Supprimer les doublons
+      const uniqueTypes = [...new Set(types)];
+
+      if (uniqueTypes.length === 0) {
+        return 'Type non spécifié';
+      }
+
+      // Traduire les types
+      return uniqueTypes.map(type => translateRecyclingType(type)).join(', ');
+    },
+    [translateRecyclingType],
+  );
 
   // Fallback avec Nominatim si Overpass ne trouve pas
   const fetchRecyclingPointsFallback = useCallback(
@@ -401,7 +419,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               // Extraire le type de recyclage à partir du nom
               const name = point.display_name.toLowerCase();
               const types = [];
-              
+
               if (name.includes('verre') || name.includes('glass')) {
                 types.push('Verre');
               }
@@ -414,7 +432,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               if (name.includes('métal') || name.includes('metal')) {
                 types.push('Métal');
               }
-              if (name.includes('électronique') || name.includes('electronics')) {
+              if (
+                name.includes('électronique') ||
+                name.includes('electronics')
+              ) {
                 types.push('Électronique');
               }
               if (name.includes('textile')) {
@@ -423,15 +444,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               if (name.includes('batterie') || name.includes('battery')) {
                 types.push('Piles');
               }
-              if (name.includes('organique') || name.includes('organic') || name.includes('compost')) {
+              if (
+                name.includes('organique') ||
+                name.includes('organic') ||
+                name.includes('compost')
+              ) {
                 types.push('Organique');
               }
-              
+
               // Si c'est une déchetterie, c'est général
               if (name.includes('déchetterie') || name.includes('déchèterie')) {
                 types.push('Déchetterie');
               }
-              
+
               return {
                 place_id: point.place_id,
                 display_name: point.display_name,
@@ -469,7 +494,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           .filter((el: any) => el.lat && el.lon)
           .map((el: any) => {
             const recyclingType = getRecyclingTypes(el.tags);
-            
+
             return {
               place_id: el.id,
               display_name: formatAddressFromTags(el.tags),

@@ -28,33 +28,33 @@ const ConseilsScreen = ({
   // Fonctions utilitaires pour les catégories
   const getCategoryDisplayName = (key: string): string => {
     const names: { [key: string]: string } = {
-      'plastique': 'Plastique',
-      'papier_carton': 'Papier & Carton',
-      'verre': 'Verre',
-      'metal': 'Métal',
-      'dechets_organique': 'Déchets Organiques',
+      plastique: 'Plastique',
+      papier_carton: 'Papier & Carton',
+      verre: 'Verre',
+      metal: 'Métal',
+      dechets_organique: 'Déchets Organiques',
     };
     return names[key] || key;
   };
 
   const getCategoryIcon = (key: string): string => {
     const icons: { [key: string]: string } = {
-      'plastique': 'local-drink',
-      'papier_carton': 'description',
-      'verre': 'wine-bar',
-      'metal': 'build',
-      'dechets_organique': 'eco',
+      plastique: 'local-drink',
+      papier_carton: 'description',
+      verre: 'wine-bar',
+      metal: 'build',
+      dechets_organique: 'eco',
     };
     return icons[key] || 'recycling';
   };
 
   const getCategoryColor = (key: string): string => {
     const colors_map: { [key: string]: string } = {
-      'plastique': colors.primary,
-      'papier_carton': colors.warning,
-      'verre': colors.success,
-      'metal': colors.textLight,
-      'dechets_organique': colors.secondary,
+      plastique: colors.primary,
+      papier_carton: colors.warning,
+      verre: colors.success,
+      metal: colors.textLight,
+      dechets_organique: colors.secondary,
     };
     return colors_map[key] || colors.primary;
   };
@@ -72,7 +72,7 @@ const ConseilsScreen = ({
     const allConseils = Object.values(conseils).flat();
     const randomIndex = Math.floor(Math.random() * allConseils.length);
     const tip = allConseils[randomIndex];
-    
+
     // Trouver la catégorie du conseil
     let tipCategory = 'general';
     Object.keys(conseils).forEach(categoryKey => {
@@ -80,13 +80,12 @@ const ConseilsScreen = ({
         tipCategory = categoryKey;
       }
     });
-    
+
     setDailyTip({
       ...tip,
-      category: tipCategory
+      category: tipCategory,
     });
   }, [conseils]); // Seulement au montage du composant
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,26 +116,23 @@ const ConseilsScreen = ({
                     size={12}
                     color={getCategoryColor(dailyTip.category)}
                   />
-                  <Text style={[styles.tipCategoryText, { color: getCategoryColor(dailyTip.category) }]}>
+                  <Text
+                    style={[
+                      styles.tipCategoryText,
+                      { color: getCategoryColor(dailyTip.category) },
+                    ]}
+                  >
                     {getCategoryDisplayName(dailyTip.category)}
                   </Text>
                 </View>
               </View>
-              
-              <Text style={styles.tipTitle}>
-                {dailyTip.titre}
-              </Text>
-              <Text style={styles.tipDescription}>
-                {dailyTip.description}
-              </Text>
-              
+
+              <Text style={styles.tipTitle}>{dailyTip.titre}</Text>
+              <Text style={styles.tipDescription}>{dailyTip.description}</Text>
+
               <View style={styles.tipFooter}>
                 <View style={styles.tipTag}>
-                  <MaterialIcons
-                    name="eco"
-                    size={12}
-                    color={colors.primary}
-                  />
+                  <MaterialIcons name="eco" size={12} color={colors.primary} />
                   <Text style={styles.tipTagText}>EcoTri</Text>
                 </View>
               </View>
@@ -156,50 +152,64 @@ const ConseilsScreen = ({
             <Text style={styles.sectionTitle}>Choisissez une catégorie</Text>
           </View>
 
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.categoriesScrollView}
             contentContainerStyle={styles.categoriesContainer}
           >
-            {categories.map((category) => (
+            {categories.map(category => (
               <TouchableOpacity
                 key={category.key}
                 style={[
                   styles.categoryButton,
-                  selectedCategory === category.key && styles.categoryButtonActive,
-                  { borderColor: category.color }
+                  selectedCategory === category.key &&
+                    styles.categoryButtonActive,
+                  { borderColor: category.color },
                 ]}
-                onPress={() => setSelectedCategory(
-                  selectedCategory === category.key ? null : category.key
-                )}
+                onPress={() =>
+                  setSelectedCategory(
+                    selectedCategory === category.key ? null : category.key,
+                  )
+                }
               >
                 <View
                   style={[
                     styles.categoryButtonIcon,
-                    { 
-                      backgroundColor: selectedCategory === category.key 
-                        ? colors.textInverse + '20' 
-                        : category.color + '20' 
+                    {
+                      backgroundColor:
+                        selectedCategory === category.key
+                          ? colors.textInverse + '20'
+                          : category.color + '20',
                     },
                   ]}
                 >
                   <MaterialIcons
                     name={category.icon as any}
                     size={20}
-                    color={selectedCategory === category.key ? colors.textInverse : category.color}
+                    color={
+                      selectedCategory === category.key
+                        ? colors.textInverse
+                        : category.color
+                    }
                   />
                 </View>
-                <Text style={[
-                  styles.categoryButtonText,
-                  selectedCategory === category.key && styles.categoryButtonTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.categoryButtonText,
+                    selectedCategory === category.key &&
+                      styles.categoryButtonTextActive,
+                  ]}
+                >
                   {category.name}
                 </Text>
-                <Text style={[
-                  styles.categoryButtonCount,
-                  selectedCategory === category.key && styles.categoryButtonCountActive
-                ]}>
+                <Text
+                  style={[
+                    styles.categoryButtonCount,
+                    selectedCategory === category.key &&
+                      styles.categoryButtonCountActive,
+                  ]}
+                >
                   {conseils[category.key as keyof typeof conseils].length}
                 </Text>
               </TouchableOpacity>
@@ -224,23 +234,31 @@ const ConseilsScreen = ({
                 style={styles.closeButton}
                 onPress={() => setSelectedCategory(null)}
               >
-                <MaterialIcons name="close" size={20} color={colors.textLight} />
+                <MaterialIcons
+                  name="close"
+                  size={20}
+                  color={colors.textLight}
+                />
               </TouchableOpacity>
             </View>
 
-            {conseils[selectedCategory as keyof typeof conseils].map((conseil, index) => (
-              <View key={index} style={styles.detailedTipCard}>
-                <View style={styles.detailedTipHeader}>
-                  <View style={styles.detailedTipNumber}>
-                    <Text style={styles.detailedTipNumberText}>{index + 1}</Text>
+            {conseils[selectedCategory as keyof typeof conseils].map(
+              (conseil, index) => (
+                <View key={index} style={styles.detailedTipCard}>
+                  <View style={styles.detailedTipHeader}>
+                    <View style={styles.detailedTipNumber}>
+                      <Text style={styles.detailedTipNumberText}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <Text style={styles.detailedTipTitle}>{conseil.titre}</Text>
                   </View>
-                  <Text style={styles.detailedTipTitle}>{conseil.titre}</Text>
+                  <Text style={styles.detailedTipDescription}>
+                    {conseil.description}
+                  </Text>
                 </View>
-                <Text style={styles.detailedTipDescription}>
-                  {conseil.description}
-                </Text>
-              </View>
-            ))}
+              ),
+            )}
           </View>
         )}
 
@@ -255,12 +273,18 @@ const ConseilsScreen = ({
             />
             <View style={styles.infoContent}>
               <Text style={styles.infoText}>
-                <Text style={styles.infoNumber}>{Object.values(conseils).flat().length}</Text> conseils disponibles dans <Text style={styles.infoNumber}>{Object.keys(conseils).length}</Text> catégories
+                <Text style={styles.infoNumber}>
+                  {Object.values(conseils).flat().length}
+                </Text>{' '}
+                conseils disponibles dans{' '}
+                <Text style={styles.infoNumber}>
+                  {Object.keys(conseils).length}
+                </Text>{' '}
+                catégories
               </Text>
             </View>
           </View>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

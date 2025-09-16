@@ -39,7 +39,9 @@ const ScanScreen = ({
     null,
   );
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [_userFeedback, setUserFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [_userFeedback, setUserFeedback] = useState<
+    'correct' | 'incorrect' | null
+  >(null);
 
   useEffect(() => {
     requestPermissions();
@@ -180,7 +182,7 @@ const ScanScreen = ({
               " Erreur lors de l'enregistrement des statistiques",
             );
           }
-          
+
           // Afficher le feedback après classification
           showFeedbackAfterClassification();
         }
@@ -212,14 +214,23 @@ const ScanScreen = ({
   const handleFeedback = (feedback: 'correct' | 'incorrect') => {
     setUserFeedback(feedback);
     setShowFeedbackModal(false);
-    
+
     // Ici vous pourriez envoyer le feedback à un service d'amélioration
-    console.log(`Feedback utilisateur: ${feedback} pour classification:`, wasteClassification?.type);
-    
+    console.log(
+      `Feedback utilisateur: ${feedback} pour classification:`,
+      wasteClassification?.type,
+    );
+
     if (feedback === 'correct') {
-      Alert.alert('Merci !', 'Votre feedback nous aide à améliorer la classification.');
+      Alert.alert(
+        'Merci !',
+        'Votre feedback nous aide à améliorer la classification.',
+      );
     } else {
-      Alert.alert('Merci !', 'Nous allons améliorer notre système de classification.');
+      Alert.alert(
+        'Merci !',
+        'Nous allons améliorer notre système de classification.',
+      );
     }
   };
 
@@ -264,7 +275,10 @@ const ScanScreen = ({
               Objets détectés:
             </Text>
             {objects.slice(0, 3).map((obj, index) => (
-              <View key={`obj_${index}_${obj?.labels?.[0]?.text || 'unknown'}`} style={styles.resultItem}>
+              <View
+                key={`obj_${index}_${obj?.labels?.[0]?.text || 'unknown'}`}
+                style={styles.resultItem}
+              >
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultLabel}>
                     {obj?.labels?.[0]?.text || 'Objet non identifié'}
@@ -348,7 +362,9 @@ const ScanScreen = ({
             </Text>
             {text.slice(0, 5).map((textItem, index) => (
               <View
-                key={`text_${index}_${textItem?.text?.substring(0, 10) || 'unknown'}`}
+                key={`text_${index}_${
+                  textItem?.text?.substring(0, 10) || 'unknown'
+                }`}
                 style={styles.resultItem}
               >
                 <View style={styles.resultHeader}>
@@ -392,7 +408,10 @@ const ScanScreen = ({
               Visages détectés:
             </Text>
             {faces.map((face, index) => (
-              <View key={`face_${index}_${face?.id || 'unknown'}`} style={styles.resultItem}>
+              <View
+                key={`face_${index}_${face?.id || 'unknown'}`}
+                style={styles.resultItem}
+              >
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultLabel}>
                     Visage #{face?.id || index + 1}
@@ -439,7 +458,11 @@ const ScanScreen = ({
               <Text style={styles.analysisValue}>{barcodes.length}</Text>
             </View>
             <View style={styles.analysisItem}>
-              <MaterialIcons name="text-fields" size={16} color={colors.primary} />
+              <MaterialIcons
+                name="text-fields"
+                size={16}
+                color={colors.primary}
+              />
               <Text style={styles.analysisLabel}>Texte lu</Text>
               <Text style={styles.analysisValue}>{text.length}</Text>
             </View>
@@ -450,7 +473,7 @@ const ScanScreen = ({
                 {scanResult.timestamp
                   ? new Date(scanResult.timestamp).toLocaleTimeString('fr-FR', {
                       hour: '2-digit',
-                      minute: '2-digit'
+                      minute: '2-digit',
                     })
                   : 'N/A'}
               </Text>
@@ -515,7 +538,10 @@ const ScanScreen = ({
                   Conseils pratiques :
                 </Text>
                 {wasteClassification.tips.map((tip: string, index: number) => (
-                  <Text key={`tip_${index}_${tip.substring(0, 10)}`} style={styles.tipText}>
+                  <Text
+                    key={`tip_${index}_${tip.substring(0, 10)}`}
+                    style={styles.tipText}
+                  >
                     • {tip}
                   </Text>
                 ))}
@@ -682,7 +708,7 @@ const ScanScreen = ({
               <Text style={styles.feedbackSubtitle}>
                 Aidez-nous à améliorer notre IA de tri
               </Text>
-              
+
               <View style={styles.feedbackButtons}>
                 <TouchableOpacity
                   style={[styles.feedbackButton, styles.correctButton]}
@@ -696,7 +722,7 @@ const ScanScreen = ({
                   />
                   <Text style={styles.feedbackButtonText}>Correct</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[styles.feedbackButton, styles.incorrectButton]}
                   onPress={() => handleFeedback('incorrect')}
@@ -710,7 +736,7 @@ const ScanScreen = ({
                   <Text style={styles.feedbackButtonText}>Incorrect</Text>
                 </TouchableOpacity>
               </View>
-              
+
               <TouchableOpacity
                 style={styles.feedbackSkipButton}
                 onPress={() => setShowFeedbackModal(false)}
