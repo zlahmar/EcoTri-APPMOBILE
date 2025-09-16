@@ -38,6 +38,8 @@ const ScanScreen = ({
   const [motivationalMessage, setMotivationalMessage] = useState<string | null>(
     null,
   );
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [userFeedback, setUserFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
   useEffect(() => {
     requestPermissions();
@@ -178,6 +180,9 @@ const ScanScreen = ({
               " Erreur lors de l'enregistrement des statistiques",
             );
           }
+          
+          // Afficher le feedback après classification
+          showFeedbackAfterClassification();
         }
       } catch (classificationError) {
         console.warn(
@@ -199,6 +204,32 @@ const ScanScreen = ({
     setScanResult(null);
     setSelectedImage(null);
     setWasteClassification(null);
+    setUserFeedback(null);
+    setShowFeedbackModal(false);
+  };
+
+  // Gestion du feedback utilisateur
+  const handleFeedback = (feedback: 'correct' | 'incorrect') => {
+    setUserFeedback(feedback);
+    setShowFeedbackModal(false);
+    
+    // Ici vous pourriez envoyer le feedback à un service d'amélioration
+    console.log(`Feedback utilisateur: ${feedback} pour classification:`, wasteClassification?.type);
+    
+    if (feedback === 'correct') {
+      Alert.alert('Merci !', 'Votre feedback nous aide à améliorer la classification.');
+    } else {
+      Alert.alert('Merci !', 'Nous allons améliorer notre système de classification.');
+    }
+  };
+
+  // Afficher le modal de feedback après classification
+  const showFeedbackAfterClassification = () => {
+    if (wasteClassification && wasteClassification.type !== 'unknown') {
+      setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 2000); // Attendre 2 secondes après l'affichage du résultat
+    }
   };
 
   const renderScanResults = () => {
@@ -232,8 +263,8 @@ const ScanScreen = ({
               />
               Objets détectés:
             </Text>
-            {objects.map((obj, index) => (
-              <View key={obj?.id || `obj_${index}`} style={styles.resultItem}>
+            {objects.slice(0, 3).map((obj, index) => (
+              <View key={`obj_${index}_${obj?.labels?.[0]?.text || 'unknown'}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultLabel}>
                     {obj?.labels?.[0]?.text || 'Objet non identifié'}
@@ -257,13 +288,19 @@ const ScanScreen = ({
                   <Text style={styles.resultSubtext}>
                     Autres détections:{' '}
                     {obj.labels
-                      .slice(1)
+                      .slice(1, 3) // Limiter à 2 autres détections
                       .map(l => l?.text || 'N/A')
                       .join(', ')}
+                    {obj.labels.length > 3 && '...'}
                   </Text>
                 )}
               </View>
             ))}
+            {objects.length > 3 && (
+              <Text style={styles.moreItemsText}>
+                +{objects.length - 3} autres objets détectés
+              </Text>
+            )}
           </View>
         )}
 
@@ -280,7 +317,7 @@ const ScanScreen = ({
             </Text>
             {barcodes.map((barcode, index) => (
               <View
-                key={barcode?.rawValue || `barcode_${index}`}
+                key={`barcode_${index}_${barcode?.rawValue || 'unknown'}`}
                 style={styles.resultItem}
               >
                 <View style={styles.resultHeader}>
@@ -309,13 +346,13 @@ const ScanScreen = ({
               />
               Texte détecté:
             </Text>
-            {text.map((textItem, index) => (
+            {text.slice(0, 5).map((textItem, index) => (
               <View
-                key={textItem?.text || `text_${index}`}
+                key={`text_${index}_${textItem?.text?.substring(0, 10) || 'unknown'}`}
                 style={styles.resultItem}
               >
                 <View style={styles.resultHeader}>
-                  <Text style={styles.resultLabel}>
+                  <Text style={styles.resultLabel} numberOfLines={2}>
                     {textItem?.text || 'Texte non lisible'}
                   </Text>
                   <View
@@ -335,6 +372,11 @@ const ScanScreen = ({
                 </View>
               </View>
             ))}
+            {text.length > 5 && (
+              <Text style={styles.moreItemsText}>
+                +{text.length - 5} autres textes détectés
+              </Text>
+            )}
           </View>
         )}
 
@@ -350,7 +392,7 @@ const ScanScreen = ({
               Visages détectés:
             </Text>
             {faces.map((face, index) => (
-              <View key={face?.id || `face_${index}`} style={styles.resultItem}>
+              <View key={`face_${index}_${face?.id || 'unknown'}`} style={styles.resultItem}>
                 <View style={styles.resultHeader}>
                   <Text style={styles.resultLabel}>
                     Visage #{face?.id || index + 1}
@@ -375,28 +417,45 @@ const ScanScreen = ({
           </View>
         )}
 
-        <View style={styles.debugSection}>
-          <Text style={styles.debugTitle}>
+        <View style={styles.analysisSummary}>
+          <Text style={styles.analysisTitle}>
             <MaterialIcons
-              name="info"
+              name="analytics"
               size={18}
-              color={colors.warning}
+              color={colors.primary}
               style={styles.resultIcon}
             />
-            Debug - Structure des données:
+            Analyse détaillée
           </Text>
-          <Text style={styles.debugText}>
-            Objets: {JSON.stringify(objects.length)} | Codes:{' '}
-            {JSON.stringify(barcodes.length)} | Texte:{' '}
-            {JSON.stringify(text.length)} | Visages:{' '}
-            {JSON.stringify(faces.length)}
-          </Text>
-          <Text style={styles.debugText}>
-            Timestamp:{' '}
-            {scanResult.timestamp
-              ? new Date(scanResult.timestamp).toLocaleTimeString()
-              : 'N/A'}
-          </Text>
+          <View style={styles.analysisGrid}>
+            <View style={styles.analysisItem}>
+              <MaterialIcons name="category" size={16} color={colors.primary} />
+              <Text style={styles.analysisLabel}>Objets détectés</Text>
+              <Text style={styles.analysisValue}>{objects.length}</Text>
+            </View>
+            <View style={styles.analysisItem}>
+              <MaterialIcons name="qr-code" size={16} color={colors.primary} />
+              <Text style={styles.analysisLabel}>Codes identifiés</Text>
+              <Text style={styles.analysisValue}>{barcodes.length}</Text>
+            </View>
+            <View style={styles.analysisItem}>
+              <MaterialIcons name="text-fields" size={16} color={colors.primary} />
+              <Text style={styles.analysisLabel}>Texte lu</Text>
+              <Text style={styles.analysisValue}>{text.length}</Text>
+            </View>
+            <View style={styles.analysisItem}>
+              <MaterialIcons name="schedule" size={16} color={colors.primary} />
+              <Text style={styles.analysisLabel}>Heure</Text>
+              <Text style={styles.analysisValue}>
+                {scanResult.timestamp
+                  ? new Date(scanResult.timestamp).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : 'N/A'}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {wasteClassification && (
@@ -456,7 +515,7 @@ const ScanScreen = ({
                   Conseils pratiques :
                 </Text>
                 {wasteClassification.tips.map((tip: string, index: number) => (
-                  <Text key={index} style={styles.tipText}>
+                  <Text key={`tip_${index}_${tip.substring(0, 10)}`} style={styles.tipText}>
                     • {tip}
                   </Text>
                 ))}
@@ -606,6 +665,61 @@ const ScanScreen = ({
         )}
 
         {renderScanResults()}
+
+        {/* Modal de feedback utilisateur */}
+        {showFeedbackModal && (
+          <View style={styles.feedbackModal}>
+            <View style={styles.feedbackModalContent}>
+              <Text style={styles.feedbackTitle}>
+                <MaterialIcons
+                  name="feedback"
+                  size={20}
+                  color={colors.primary}
+                  style={styles.resultIcon}
+                />
+                La classification est-elle correcte ?
+              </Text>
+              <Text style={styles.feedbackSubtitle}>
+                Aidez-nous à améliorer notre IA de tri
+              </Text>
+              
+              <View style={styles.feedbackButtons}>
+                <TouchableOpacity
+                  style={[styles.feedbackButton, styles.correctButton]}
+                  onPress={() => handleFeedback('correct')}
+                >
+                  <MaterialIcons
+                    name="check"
+                    size={20}
+                    color={colors.textInverse}
+                    style={styles.feedbackButtonIcon}
+                  />
+                  <Text style={styles.feedbackButtonText}>Correct</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.feedbackButton, styles.incorrectButton]}
+                  onPress={() => handleFeedback('incorrect')}
+                >
+                  <MaterialIcons
+                    name="close"
+                    size={20}
+                    color={colors.textInverse}
+                    style={styles.feedbackButtonIcon}
+                  />
+                  <Text style={styles.feedbackButtonText}>Incorrect</Text>
+                </TouchableOpacity>
+              </View>
+              
+              <TouchableOpacity
+                style={styles.feedbackSkipButton}
+                onPress={() => setShowFeedbackModal(false)}
+              >
+                <Text style={styles.feedbackSkipText}>Passer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Instructions de Scan</Text>
@@ -826,6 +940,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic',
   },
+  moreItemsText: {
+    fontSize: 12,
+    color: colors.primary,
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
+    fontWeight: '500',
+  },
   formatBadge: {
     backgroundColor: colors.primary,
     paddingVertical: 4,
@@ -931,27 +1053,54 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     flex: 1,
   },
-  debugSection: {
+  analysisSummary: {
     marginTop: 20,
-    padding: 15,
+    padding: 20,
     backgroundColor: colors.surface,
+    borderRadius: 15,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  analysisTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  analysisGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  analysisItem: {
+    width: '48%',
+    backgroundColor: colors.background,
+    padding: 12,
     borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center',
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
   },
-  debugTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  debugText: {
+  analysisLabel: {
     fontSize: 12,
     color: colors.textLight,
-    marginBottom: 4,
+    marginTop: 4,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  analysisValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.primary,
+    textAlign: 'center',
   },
   classificationSection: {
     marginTop: 20,
@@ -1076,6 +1225,84 @@ const styles = StyleSheet.create({
   },
   resultIcon: {
     marginRight: 8,
+  },
+  // Styles pour le modal de feedback
+  feedbackModal: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  feedbackModalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 25,
+    margin: 20,
+    alignItems: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+    minWidth: 280,
+  },
+  feedbackTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  feedbackSubtitle: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 25,
+    textAlign: 'center',
+  },
+  feedbackButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 20,
+  },
+  feedbackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    minWidth: 100,
+    justifyContent: 'center',
+  },
+  correctButton: {
+    backgroundColor: '#4CAF50',
+    marginRight: 10,
+  },
+  incorrectButton: {
+    backgroundColor: '#F44336',
+    marginLeft: 10,
+  },
+  feedbackButtonIcon: {
+    marginRight: 8,
+  },
+  feedbackButtonText: {
+    color: colors.textInverse,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  feedbackSkipButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+  feedbackSkipText: {
+    color: colors.textLight,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
 });
 

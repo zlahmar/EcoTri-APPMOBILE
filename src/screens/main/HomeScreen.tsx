@@ -142,6 +142,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       textile: 'Textile',
       batteries: 'Piles',
       organic: 'Organique',
+      wood: 'Bois',
+      light_bulbs: 'Ampoules',
+      general: 'Général',
     };
 
     return translations[type] || type;
@@ -149,20 +152,35 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Formatage de l'adresse à partir des tags
   const formatAddressFromTags = useCallback((tags: any): string => {
-    if (!tags) return 'Adresse inconnue';
+    if (!tags) return 'Point de recyclage';
 
     const addressParts = [];
 
+    // Priorité au nom du point
     if (tags.name) {
       addressParts.push(tags.name);
-    }
-
-    if (tags['addr:street']) {
+    } else if (tags['addr:street']) {
+      // Si pas de nom, utiliser la rue
       addressParts.push(tags['addr:street']);
+    } else if (tags.amenity) {
+      // Si pas de nom ni rue, utiliser le type d'amenity
+      const amenityTranslations: { [key: string]: string } = {
+        'recycling': 'Point de recyclage',
+        'waste_disposal': 'Point de collecte',
+        'waste_transfer_station': 'Station de transfert',
+        'waste_basket': 'Poubelle',
+        'waste_collection': 'Collecte de déchets',
+      };
+      addressParts.push(amenityTranslations[tags.amenity] || 'Point de recyclage');
     }
 
-    if (tags['addr:housenumber']) {
-      addressParts.push(tags['addr:housenumber']);
+    // Ajouter les détails d'adresse si disponibles
+    if (tags['addr:housenumber'] && tags['addr:street']) {
+      addressParts.push(`${tags['addr:housenumber']} ${tags['addr:street']}`);
+    } else if (tags['addr:street'] && !tags.name) {
+      // Ne pas dupliquer si on a déjà utilisé la rue comme nom
+    } else if (tags['addr:street']) {
+      addressParts.push(tags['addr:street']);
     }
 
     if (tags['addr:postcode']) {
@@ -182,11 +200,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Récupération des types de recyclage à partir des tags
   const getRecyclingTypes = useCallback((tags: any): string => {
-    if (!tags) return 'Général';
+    if (!tags) return 'Type non spécifié';
 
     const types = [];
 
+    // Vérifier les tags de recyclage spécifiques (format OpenStreetMap avec :)
     if (
+      tags['recycling:glass_bottles'] === 'yes' ||
+      tags['recycling:glass'] === 'yes' ||
       tags.recycling_glass === 'yes' ||
       tags.recycling_glass === 'container'
     ) {
@@ -194,6 +215,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:plastic'] === 'yes' ||
       tags.recycling_plastic === 'yes' ||
       tags.recycling_plastic === 'container'
     ) {
@@ -201,6 +223,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:paper'] === 'yes' ||
+      tags['recycling:cartons'] === 'yes' ||
       tags.recycling_paper === 'yes' ||
       tags.recycling_paper === 'container'
     ) {
@@ -208,6 +232,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:metal'] === 'yes' ||
+      tags['recycling:cans'] === 'yes' ||
       tags.recycling_metal === 'yes' ||
       tags.recycling_metal === 'container'
     ) {
@@ -215,6 +241,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:electrical'] === 'yes' ||
+      tags['recycling:electrical_items'] === 'yes' ||
       tags.recycling_electronics === 'yes' ||
       tags.recycling_electronics === 'container'
     ) {
@@ -222,6 +250,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:clothes'] === 'yes' ||
       tags.recycling_textile === 'yes' ||
       tags.recycling_textile === 'container'
     ) {
@@ -229,6 +258,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:batteries'] === 'yes' ||
+      tags['recycling:accumulator'] === 'yes' ||
       tags.recycling_batteries === 'yes' ||
       tags.recycling_batteries === 'container'
     ) {
@@ -236,18 +267,101 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (
+      tags['recycling:organic'] === 'yes' ||
+      tags['recycling:organic_waste'] === 'yes' ||
+      tags['recycling:food_waste'] === 'yes' ||
+      tags['recycling:green_waste'] === 'yes' ||
       tags.recycling_organic === 'yes' ||
       tags.recycling_organic === 'container'
     ) {
       types.push('organic');
     }
 
-    if (types.length === 0) {
-      return 'Général';
+    if (
+      tags['recycling:wood'] === 'yes' ||
+      tags['recycling:wood_waste'] === 'yes'
+    ) {
+      types.push('wood');
     }
 
-    return types.join(', ');
-  }, []);
+    if (
+      tags['recycling:light_bulbs'] === 'yes'
+    ) {
+      types.push('light_bulbs');
+    }
+
+    // Vérifier les tags génériques
+    if (tags.recycling) {
+      if (tags.recycling.includes('glass') || tags.recycling.includes('verre')) {
+        types.push('glass');
+      }
+      if (tags.recycling.includes('plastic') || tags.recycling.includes('plastique')) {
+        types.push('plastic');
+      }
+      if (tags.recycling.includes('paper') || tags.recycling.includes('papier')) {
+        types.push('paper');
+      }
+      if (tags.recycling.includes('metal') || tags.recycling.includes('métal')) {
+        types.push('metal');
+      }
+      if (tags.recycling.includes('electronics') || tags.recycling.includes('électronique')) {
+        types.push('electronics');
+      }
+    }
+
+    // Vérifier les tags de description
+    if (tags.description) {
+      const desc = tags.description.toLowerCase();
+      if (desc.includes('verre') || desc.includes('glass')) {
+        types.push('glass');
+      }
+      if (desc.includes('plastique') || desc.includes('plastic')) {
+        types.push('plastic');
+      }
+      if (desc.includes('papier') || desc.includes('paper')) {
+        types.push('paper');
+      }
+      if (desc.includes('métal') || desc.includes('metal')) {
+        types.push('metal');
+      }
+      if (desc.includes('électronique') || desc.includes('electronics')) {
+        types.push('electronics');
+      }
+    }
+
+    // Vérifier le nom du point pour extraire les types
+    if (tags.name) {
+      const name = tags.name.toLowerCase();
+      if (name.includes('verre') || name.includes('glass')) {
+        types.push('glass');
+      }
+      if (name.includes('plastique') || name.includes('plastic')) {
+        types.push('plastic');
+      }
+      if (name.includes('papier') || name.includes('paper')) {
+        types.push('paper');
+      }
+      if (name.includes('métal') || name.includes('metal')) {
+        types.push('metal');
+      }
+      if (name.includes('électronique') || name.includes('electronics')) {
+        types.push('electronics');
+      }
+      if (name.includes('compost') || name.includes('organique')) {
+        types.push('organic');
+      }
+    }
+
+    // Supprimer les doublons
+    const uniqueTypes = [...new Set(types)];
+
+    if (uniqueTypes.length === 0) {
+      return 'Type non spécifié';
+    }
+
+    // Traduire les types
+    return uniqueTypes.map(type => translateRecyclingType(type)).join(', ');
+  }, [translateRecyclingType]);
 
   // Fallback avec Nominatim si Overpass ne trouve pas
   const fetchRecyclingPointsFallback = useCallback(
@@ -283,19 +397,55 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 point.display_name.toLowerCase().includes('médicament') ||
                 point.display_name.toLowerCase().includes('pharmacie'),
             )
-            .map((point: any) => ({
-              place_id: point.place_id,
-              display_name: point.display_name,
-              lat: point.lat,
-              lon: point.lon,
-              type: 'Général',
-              distance: calculateDistance(
-                lat,
-                lon,
-                parseFloat(point.lat),
-                parseFloat(point.lon),
-              ),
-            }))
+            .map((point: any) => {
+              // Extraire le type de recyclage à partir du nom
+              const name = point.display_name.toLowerCase();
+              const types = [];
+              
+              if (name.includes('verre') || name.includes('glass')) {
+                types.push('Verre');
+              }
+              if (name.includes('plastique') || name.includes('plastic')) {
+                types.push('Plastique');
+              }
+              if (name.includes('papier') || name.includes('paper')) {
+                types.push('Papier');
+              }
+              if (name.includes('métal') || name.includes('metal')) {
+                types.push('Métal');
+              }
+              if (name.includes('électronique') || name.includes('electronics')) {
+                types.push('Électronique');
+              }
+              if (name.includes('textile')) {
+                types.push('Textile');
+              }
+              if (name.includes('batterie') || name.includes('battery')) {
+                types.push('Piles');
+              }
+              if (name.includes('organique') || name.includes('organic') || name.includes('compost')) {
+                types.push('Organique');
+              }
+              
+              // Si c'est une déchetterie, c'est général
+              if (name.includes('déchetterie') || name.includes('déchèterie')) {
+                types.push('Déchetterie');
+              }
+              
+              return {
+                place_id: point.place_id,
+                display_name: point.display_name,
+                lat: point.lat,
+                lon: point.lon,
+                type: types.length > 0 ? types.join(', ') : 'Type non spécifié',
+                distance: calculateDistance(
+                  lat,
+                  lon,
+                  parseFloat(point.lat),
+                  parseFloat(point.lon),
+                ),
+              };
+            })
             .sort(
               (a: RecyclingPoint, b: RecyclingPoint) =>
                 (a.distance || 0) - (b.distance || 0),
@@ -317,16 +467,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       if (data.elements && Array.isArray(data.elements)) {
         const points = data.elements
           .filter((el: any) => el.lat && el.lon)
-          .map((el: any) => ({
-            place_id: el.id,
-            display_name: formatAddressFromTags(el.tags),
-            lat: el.lat.toString(),
-            lon: el.lon.toString(),
-            type: getRecyclingTypes(el.tags),
-            distance: calculateDistance(userLat, userLon, el.lat, el.lon),
-            tags: el.tags,
-            rawElement: el,
-          }))
+          .map((el: any) => {
+            const recyclingType = getRecyclingTypes(el.tags);
+            
+            return {
+              place_id: el.id,
+              display_name: formatAddressFromTags(el.tags),
+              lat: el.lat.toString(),
+              lon: el.lon.toString(),
+              type: recyclingType,
+              distance: calculateDistance(userLat, userLon, el.lat, el.lon),
+              tags: el.tags,
+              rawElement: el,
+            };
+          })
           .sort(
             (a: RecyclingPoint, b: RecyclingPoint) =>
               (a.distance || 0) - (b.distance || 0),
@@ -385,10 +539,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         >;
         out skel qt;
       `;
-
-        console.log('Recherche de points de recyclage...');
-        console.log('Position:', latitude, longitude);
-        console.log('Rayon:', searchRadius, 'mètres');
 
         try {
           const response = await fetch(

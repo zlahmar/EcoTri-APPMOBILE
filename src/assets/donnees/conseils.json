@@ -1,0 +1,74 @@
+{
+    "categories_recyclage": {
+      "plastique": [
+        {
+          "titre": "Éviter le plastique à usage unique",
+          "description": "Utilise des gourdes, des sacs réutilisables et des contenants durables."
+        },
+        {
+          "titre": "Vérifier les symboles de recyclage",
+          "description": "Cherche les symboles avec les chiffres 1, 2 ou 5, qui sont généralement recyclables."
+        },
+        {
+          "titre": "Compacter les bouteilles",
+          "description": "Écrase les bouteilles pour gagner de la place dans le bac de recyclage."
+        }
+      ],
+      "papier_carton": [
+        {
+          "titre": "Ne pas recycler le papier souillé",
+          "description": "Le papier gras ou taché (comme les boîtes de pizza) ne peut pas être recyclé."
+        },
+        {
+          "titre": "Retirer les agrafes et plastiques",
+          "description": "Enlève les éléments non-papier avant de recycler."
+        },
+        {
+          "titre": "Réutiliser les cartons",
+          "description": "Les boîtes peuvent servir de rangement ou d’emballage avant d’être recyclées."
+        }
+      ],
+      "verre": [
+        {
+          "titre": "Ne pas mélanger avec la vaisselle cassée",
+          "description": "La vaisselle, les miroirs et les vitres ne vont pas dans le bac à verre."
+        },
+        {
+          "titre": "Retirer les bouchons",
+          "description": "Enlève les bouchons en plastique ou en métal avant de recycler les bouteilles."
+        },
+        {
+          "titre": "Recycler à l’infini",
+          "description": "Le verre est 100% recyclable sans perte de qualité."
+        }
+      ],
+      "metal": [
+        {
+          "titre": "Rincer les boîtes de conserve",
+          "description": "Un rinçage rapide évite les mauvaises odeurs et facilite le recyclage."
+        },
+        {
+          "titre": "Recycler les canettes",
+          "description": "Les canettes en aluminium sont très bien recyclées et peuvent redevenir des canettes."
+        },
+        {
+          "titre": "Ne pas jeter les petits objets métalliques",
+          "description": "Les capsules, opercules et petits métaux peuvent être recyclés s’ils sont regroupés."
+        }
+      ],
+      "dechets_organique": [
+        {
+          "titre": "Composter les restes alimentaires",
+          "description": "Les épluchures, le marc de café et les coquilles d’œufs enrichissent le compost."
+        },
+        {
+          "titre": "Utiliser un bac à compost",
+          "description": "Un bac bien ventilé permet une décomposition rapide et sans odeur."
+        },
+        {
+          "titre": "Éviter les produits animaux",
+          "description": "La viande et les produits laitiers attirent les nuisibles et ne se compostent pas bien."
+        }
+      ]
+    }
+  }

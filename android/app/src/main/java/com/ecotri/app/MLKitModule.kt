@@ -36,18 +36,41 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
             val image = loadImageFromUri(imageUri)
             val inputImage = InputImage.fromBitmap(image, 0)
             
-            val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+            // Configuration optimisée pour le recyclage avec seuil de confiance élevé
+            val options = ImageLabelerOptions.Builder()
+                .setConfidenceThreshold(0.6f) // Seuil de confiance plus élevé
+                .build()
+            
+            val labeler = ImageLabeling.getClient(options)
             labeler.process(inputImage)
                 .addOnSuccessListener { labels ->
                     val objectsArray = Arguments.createArray()
-                    labels.forEach { label ->
+                    
+                    // Filtrer et prioriser les labels liés au recyclage
+                    val recyclingKeywords = listOf(
+                        "bottle", "can", "container", "package", "box", "bag", "wrapper",
+                        "plastic", "metal", "glass", "paper", "cardboard", "aluminum",
+                        "beverage", "food", "drink", "product", "recyclable"
+                    )
+                    
+                    val filteredLabels = labels.filter { label ->
+                        val text = label.text.lowercase()
+                        recyclingKeywords.any { keyword -> text.contains(keyword) } || label.confidence > 0.8f
+                    }.sortedByDescending { it.confidence }
+                    
+                    // Limiter à 5 détections les plus pertinentes
+                    filteredLabels.take(5).forEach { label ->
                         val labelObject = Arguments.createMap().apply {
                             putString("text", label.text)
                             putDouble("confidence", label.confidence.toDouble())
+                            putBoolean("isRecyclingRelated", recyclingKeywords.any { 
+                                label.text.lowercase().contains(it) 
+                            })
                         }
                         objectsArray.pushMap(labelObject)
                     }
-                    Log.d(TAG, " Objets détectés: ${labels.size}")
+                    
+                    Log.d(TAG, " Objets détectés (filtrés): ${filteredLabels.size}/${labels.size}")
                     promise.resolve(objectsArray)
                 }
                 .addOnFailureListener { exception ->
@@ -182,18 +205,39 @@ class MLKitModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                 }
             }
             
-            // Détection d'objets
-            val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+            // Détection d'objets avec filtrage
+            val options = ImageLabelerOptions.Builder()
+                .setConfidenceThreshold(0.6f)
+                .build()
+            
+            val labeler = ImageLabeling.getClient(options)
             labeler.process(inputImage)
                 .addOnSuccessListener { labels ->
                     val objectsArray = Arguments.createArray()
-                    labels.forEach { label ->
+                    
+                    // Filtrer les labels liés au recyclage
+                    val recyclingKeywords = listOf(
+                        "bottle", "can", "container", "package", "box", "bag", "wrapper",
+                        "plastic", "metal", "glass", "paper", "cardboard", "aluminum",
+                        "beverage", "food", "drink", "product", "recyclable"
+                    )
+                    
+                    val filteredLabels = labels.filter { label ->
+                        val text = label.text.lowercase()
+                        recyclingKeywords.any { keyword -> text.contains(keyword) } || label.confidence > 0.8f
+                    }.sortedByDescending { it.confidence }.take(5)
+                    
+                    filteredLabels.forEach { label ->
                         val labelObject = Arguments.createMap().apply {
                             putString("text", label.text)
                             putDouble("confidence", label.confidence.toDouble())
+                            putBoolean("isRecyclingRelated", recyclingKeywords.any { 
+                                label.text.lowercase().contains(it) 
+                            })
                         }
                         objectsArray.pushMap(labelObject)
                     }
+                    
                     results.putArray("objects", objectsArray)
                     checkCompletion()
                 }
