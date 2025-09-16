@@ -12,7 +12,6 @@ jest.mock('../../src/services/locationService', () => ({
   },
 }));
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-native';
 import { useLocation } from '../../src/services/useLocation';
 import locationService from '../../src/services/locationService';

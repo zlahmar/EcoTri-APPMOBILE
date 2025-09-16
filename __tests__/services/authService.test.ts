@@ -48,7 +48,7 @@ jest.mock('@react-native-firebase/firestore', () => ({
   default: mockFirestore,
 }));
 
-import authService, { UserData, AuthError } from '../../src/services/authService';
+import authService from '../../src/services/authService';
 
 describe('AuthService', () => {
   beforeEach(() => {

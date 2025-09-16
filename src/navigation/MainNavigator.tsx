@@ -51,12 +51,45 @@ const MainNavigator = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleAuthSuccess = (userData?: UserData) => {
-    if (userData) {
-      setUserInfo(userData);
+  const handleAuthSuccess = async (userData?: UserData) => {
+    try {
+      // Récupérer l'utilisateur actuel depuis Firebase
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        // Récupérer les données complètes de l'utilisateur
+        const userDataFromFirebase = await authService.getUserData(
+          currentUser.uid,
+        );
+        setUserInfo(userDataFromFirebase);
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+
+        // Afficher un message de succès
+        Alert.alert(
+          'Inscription réussie !',
+          `Bienvenue ${userDataFromFirebase.firstName} ! Votre compte a été créé avec succès.`,
+          [{ text: 'OK' }],
+        );
+      } else {
+        // Fallback si pas d'utilisateur Firebase
+        if (userData) {
+          setUserInfo(userData);
+        }
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+      }
+    } catch (error) {
+      console.error(
+        'Erreur lors de la récupération des données utilisateur:',
+        error,
+      );
+      // Fallback en cas d'erreur
+      if (userData) {
+        setUserInfo(userData);
+      }
+      setIsAuthenticated(true);
+      setShowAuthModal(false);
     }
-    setIsAuthenticated(true);
-    setShowAuthModal(false);
   };
 
   const handleLogout = async () => {
