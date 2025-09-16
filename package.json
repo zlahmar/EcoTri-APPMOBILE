@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@kolking/react-native-avatar": "^2.1.5",
-    "@react-native-async-storage/async-storage": "^1.19.5",
+    "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-firebase/app": "^23.0.1",
     "@react-native-firebase/auth": "^23.0.1",
     "@react-native-firebase/firestore": "^23.0.1",
