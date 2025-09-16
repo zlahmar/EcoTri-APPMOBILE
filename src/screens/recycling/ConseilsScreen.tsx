@@ -22,7 +22,7 @@ const ConseilsScreen = ({
   userInfo?: any;
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [conseils, setConseils] = useState(conseilsData.categories_recyclage);
+  const [conseils] = useState(conseilsData.categories_recyclage);
   const [dailyTip, setDailyTip] = useState<any>(null);
 
   // Fonctions utilitaires pour les catégories
@@ -85,18 +85,8 @@ const ConseilsScreen = ({
       ...tip,
       category: tipCategory
     });
-  }, []); // Seulement au montage du composant
+  }, [conseils]); // Seulement au montage du composant
 
-  // Fonction pour obtenir la catégorie d'un conseil
-  const getTipCategory = (tip: any) => {
-    let tipCategory = 'general';
-    Object.keys(conseils).forEach(categoryKey => {
-      if (conseils[categoryKey as keyof typeof conseils].includes(tip)) {
-        tipCategory = categoryKey;
-      }
-    });
-    return tipCategory;
-  };
 
   return (
     <SafeAreaView style={styles.container}>

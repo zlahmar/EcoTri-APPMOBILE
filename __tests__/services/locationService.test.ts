@@ -28,7 +28,7 @@ Object.defineProperty(globalThis, 'fetch', {
 });
 
 // Import après les mocks
-import locationService, { LocationData } from '../../src/services/locationService';
+import locationService from '../../src/services/locationService';
 import Geolocation from 'react-native-geolocation-service';
 import { PermissionsAndroid } from 'react-native';
 

@@ -83,7 +83,7 @@ describe('CommuneSelector', () => {
   });
 
   it('should handle case-insensitive search', () => {
-    const { getByPlaceholderText, getByText, queryByText } = render(
+    const { getByPlaceholderText, getByText } = render(
       <CommuneSelector {...defaultProps} />
     );
     

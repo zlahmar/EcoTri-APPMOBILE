@@ -1,4 +1,4 @@
-import collecteService, { CollecteZone, CollecteInfo } from '../../src/services/collecteService';
+import collecteService, { CollecteZone } from '../../src/services/collecteService';
 
 // Mock des données de test
 const mockZones: CollecteZone[] = [

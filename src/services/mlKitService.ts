@@ -534,7 +534,7 @@ class MLKitService {
       // Collecter les labels avec leur confiance
       const weightedLabels: Array<{text: string, confidence: number, source: string}> = [];
       
-      objects.forEach((obj, index) => {
+      objects.forEach((obj, _index) => {
         if (obj && obj.labels && Array.isArray(obj.labels)) {
           obj.labels.forEach((label: any) => {
             if (label && label.text && label.confidence > 0.3) {
@@ -729,7 +729,7 @@ class MLKitService {
     const countryCode = code.substring(0, 3);
     const manufacturerCode = code.substring(3, 7);
     const productCode = code.substring(7, 12);
-    const checkDigit = code.substring(12, 13);
+    // const checkDigit = code.substring(12, 13); // Non utilisé pour l'instant
 
     console.log(` 📊 EAN-13: Pays=${countryCode}, Fabricant=${manufacturerCode}, Produit=${productCode}`);
 
@@ -895,7 +895,7 @@ class MLKitService {
   }
 
   // Analyse du code produit pour déterminer le type de matériau
-  private analyzeProductCode(productCode: string, countryCode: string): {
+  private analyzeProductCode(productCode: string, _countryCode: string): {
     type: 'plastic' | 'paper' | 'glass' | 'metal' | 'organic' | 'electronic' | 'unknown';
     category: string;
     tips: string[];
@@ -1011,8 +1011,8 @@ class MLKitService {
       // Vérifier les codes de recyclage plastique
       for (const code of plasticCodes) {
         if (text.includes(code)) {
-          return {
-            type: 'plastic',
+        return {
+          type: 'plastic',
             confidence: Math.min(label.confidence + 0.2, 0.95),
             symbol: `Code ${code.toUpperCase()}`
           };
@@ -1507,20 +1507,20 @@ class MLKitService {
 
   // Classification par défaut pour les cas inconnus
   private getUnknownClassification() {
-    return {
+      return {
       type: 'unknown' as const,
-      confidence: 0.3,
-      recyclingInfo: '❓ Type non identifié, consultez les consignes locales',
-      environmentalImpact: '🌱 Impact environnemental non calculé',
-      icon: '❓',
-      color: '#9E9E9E',
-      tips: [
-        'Essayez de prendre une photo plus claire',
-        "Vérifiez les symboles sur l'emballage",
-        'Consultez les consignes de votre commune',
-        "Utilisez l'application de votre collectivité",
-      ],
-    };
+        confidence: 0.3,
+        recyclingInfo: '❓ Type non identifié, consultez les consignes locales',
+        environmentalImpact: '🌱 Impact environnemental non calculé',
+        icon: '❓',
+        color: '#9E9E9E',
+        tips: [
+          'Essayez de prendre une photo plus claire',
+          "Vérifiez les symboles sur l'emballage",
+          'Consultez les consignes de votre commune',
+          "Utilisez l'application de votre collectivité",
+        ],
+      };
   }
 }
 

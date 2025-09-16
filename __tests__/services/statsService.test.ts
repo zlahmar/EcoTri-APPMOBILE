@@ -12,7 +12,7 @@ const mockAsyncStorage = {
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
-import statsService, { UserStats, ScanResult } from '../../src/services/statsService';
+import statsService from '../../src/services/statsService';
 
 describe('StatsService', () => {
   beforeEach(() => {

@@ -39,7 +39,7 @@ const ScanScreen = ({
     null,
   );
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [userFeedback, setUserFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [_userFeedback, setUserFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
   useEffect(() => {
     requestPermissions();

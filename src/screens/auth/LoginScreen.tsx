@@ -12,7 +12,6 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { colors } from '../../styles';
 import Header from '../../components/common/Header';
 import authService, { UserData } from '../../services/authService';
