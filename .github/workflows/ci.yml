@@ -67,7 +67,9 @@ jobs:
       - name: Vérification du formatage avec Prettier
         run: |
           npx prettier --check "src/**/*.{ts,tsx,js,jsx}"
-          npx prettier --check "**/*.{json,md,yml,yaml}"
+          npx prettier --check "*.{json,md,yml,yaml}"
+          npx prettier --check "doc/**/*.{md,yml,yaml}"
+          npx prettier --check ".github/**/*.{yml,yaml}"
           echo "✅ Vérification Prettier réussie"
 
       - name: Analyse statique avec ESLint
